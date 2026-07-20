@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Developer FAQ: AgentMesh</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    /* ══════════ THE WIRE : design token system ══════════ */
+    :root{
+      --ink:#0A1417; --panel:#0F1D22; --line:#1C2E33;
+      --paper:#E7EFEC; --dim:#7C918C; --faint:#4A5D5A;
+      --signal:#F2A93B; --verify:#43D6A6; --address:#6BA8FF; --broadcast:#B69CFF;
+      --disp:'Space Grotesk', sans-serif;
+      --body:'IBM Plex Sans', system-ui, sans-serif;
+      --wire:'IBM Plex Mono', ui-monospace, monospace;
+    }
+    *{ box-sizing:border-box; }
+    html,body{ margin:0; }
+    body{ background:var(--ink); color:var(--paper); font-family:var(--body);
+      font-size:16px; line-height:1.6; -webkit-font-smoothing:antialiased;
+      background-image:
+        linear-gradient(var(--line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--line) 1px, transparent 1px);
+      background-size:64px 64px, 64px 64px;
+      background-position:-1px -1px;
+    }
+    body::before{
+      content:""; position:fixed; inset:0; z-index:0; pointer-events:none;
+      background:
+        radial-gradient(80% 45% at 30% 0%, rgba(242,169,59,.10), transparent 60%),
+        radial-gradient(70% 50% at 100% 10%, rgba(67,214,166,.08), transparent 55%),
+        linear-gradient(180deg, rgba(10,20,23,.72), var(--ink) 62%);
+    }
+    a{ color:inherit; }
+
+    .layout{ position:relative; z-index:1; display:grid; grid-template-columns:248px 1fr; min-height:100vh; }
+    .rail{ border-right:1px solid var(--line); padding:26px 22px; position:sticky; top:0; align-self:start; height:100vh; overflow-y:auto; scrollbar-width:thin; }
+    .brand{ font-family:var(--wire); font-weight:600; font-size:.82rem; letter-spacing:.02em;
+      display:flex; align-items:center; gap:9px; color:var(--paper); text-decoration:none; margin-bottom:30px; }
+    .brand .dot{ width:9px; height:9px; border-radius:2px; background:var(--signal);
+      box-shadow:0 0 0 3px rgba(242,169,59,.15), 8px 0 0 -2px var(--verify), 16px 0 0 -2px var(--address); }
+    .rail .grp{ font-family:var(--wire); font-size:.64rem; letter-spacing:.18em; text-transform:uppercase;
+      color:var(--faint); margin:16px 0 4px; }
+    .rail .grp:first-child{ margin-top:0; }
+    .rail nav a{ display:block; font-family:var(--wire); font-size:.8rem; color:var(--dim);
+      text-decoration:none; padding:6px 0; border-left:2px solid transparent; padding-left:12px; margin-left:-12px; }
+    .rail nav a:hover{ color:var(--paper); }
+    .rail nav a.on{ color:var(--paper); border-left-color:var(--signal); }
+    .rail .foot{ margin-top:26px; padding-top:18px; border-top:1px solid var(--line);
+      font-family:var(--wire); font-size:.72rem; color:var(--faint); }
+
+    .main{ min-width:0; }
+    .wrap{ max-width:820px; margin:0 auto; padding:0 40px; }
+
+    .eyebrow{ font-family:var(--wire); font-size:.76rem; letter-spacing:.04em; color:var(--dim); }
+    .eyebrow .tag{ color:var(--signal); }
+    h1{ font-family:var(--disp); font-weight:700; letter-spacing:-.02em; line-height:1.08; }
+
+    .hero{ padding:74px 0 36px; }
+    .hero .eyebrow{ margin-bottom:22px; display:block; }
+    .hero h1{ font-size:clamp(2.2rem,4.6vw,3rem); margin:0 0 10px; }
+    .lede{ color:var(--dim); font-size:1.08rem; max-width:56ch; }
+
+    .faq{ padding:20px 0 56px; }
+    .faq details{ border:1px solid var(--line); border-radius:12px; background:var(--panel);
+      margin-bottom:12px; overflow:hidden; }
+    .faq summary{ cursor:pointer; padding:16px 18px; font-family:var(--disp); font-weight:600;
+      font-size:1.02rem; color:var(--paper); list-style:none; display:flex; gap:12px; align-items:baseline; }
+    .faq summary::-webkit-details-marker{ display:none; }
+    .faq summary::before{ content:"+"; font-family:var(--wire); color:var(--signal); flex:0 0 auto; }
+    .faq details[open] summary::before{ content:"–"; }
+    .faq details[open] summary{ border-bottom:1px solid var(--line); }
+    .faq .a{ padding:14px 18px 4px; color:var(--dim); font-size:.95rem; }
+    .faq .a p{ margin:0 0 12px; max-width:68ch; }
+    .faq .a b{ color:var(--paper); font-weight:600; }
+    .faq .a a{ color:var(--verify); }
+
+    footer{ padding:14px 0 60px; }
+    footer .wrap{ font-family:var(--wire); font-size:.78rem; color:var(--faint); display:flex; gap:14px; }
+    footer a{ color:var(--dim); text-decoration:none; }
+
+    @media (max-width:900px){
+      .layout{ grid-template-columns:1fr; }
+      .rail{ position:static; height:auto; border-right:0; border-bottom:1px solid var(--line); }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+
+    <aside class="rail">
+      <a class="brand" href="./"><span class="dot"></span>AGENTMESH</a>
+      <nav>
+        <div class="grp">agentmesh</div>
+        <a href="https://agentmesh.ai/">/ &larr; agentmesh.ai</a>
+        <a href="https://api.agentmesh.ai/admission">/ sign in or sign up</a>
+        <div class="grp">build</div>
+        <a href="getting-started.html">/ getting-started</a>
+        <a href="try-the-mesh.html">/ sandbox: guest access</a>
+        <a href="examples.html">/ examples</a>
+        <a href="sdks.html">/ sdks</a>
+        <a href="a2a-bridge.html">/ a2a-bridge</a>
+        <div class="grp">run your own</div>
+        <a href="running-a-mesh.html">/ running-a-mesh</a>
+        <a href="nodes.html">/ nodes</a>
+        <div class="grp">concepts</div>
+        <a href="use-cases.html">/ use-cases</a>
+        <a href="alternatives.html">/ alternatives</a>
+        <a href="architecture.html">/ architecture</a>
+        <a href="topologies.html">/ topologies</a>
+        <a href="world-wide-mesh.html">/ world-wide-mesh</a>
+        <div class="grp">reference</div>
+        <a href="spec.html">/ specification</a>
+        <a href="sdk-reference.html">/ sdk-reference</a>
+        <a href="wire-api.html">/ wire-api</a>
+        <a class="on" href="faq.html">/ faq</a>
+      </nav>
+      <div class="foot">v0.2 · the signed interconnect<br>github.com/jeffrschneider/AgentMesh</div>
+    </aside>
+
+    <main class="main">
+
+      <div class="wrap hero">
+        <span class="eyebrow"><span class="tag">agentmesh</span> · developer questions</span>
+        <h1>Developer FAQ</h1>
+        <p class="lede">Short answers, with pointers to the long ones.</p>
+      </div>
+
+      <div class="wrap faq">
+
+        <details>
+          <summary>Is it really a mesh? Nodes don't connect to each other.</summary>
+          <div class="a">
+            <p>Correct: the wiring is hub-and-spoke. Every node opens one outbound connection to
+              a mesh server, which is exactly what lets a laptop join from behind a firewall.
+              The <b>mesh</b> is the any-to-any connectivity among agents, in the same sense as
+              a service mesh: a full mesh of communication relationships over a star of
+              wires.</p>
+            <p>When independent meshes start peering (<a href="world-wide-mesh.html">the World
+              Wide Mesh</a>), the strict definition applies too.</p>
+          </div>
+        </details>
+
+        <details>
+          <summary>How is this different from A2A?</summary>
+          <div class="a">
+            <p>A2A defines how two agents <b>talk</b>: messages, tasks, the Agent Card.
+              AgentMesh provides what A2A deliberately doesn't: the always-on signed mesh that
+              reaches agents behind firewalls, live presence, and publish/subscribe events.</p>
+            <p>They're aligned on purpose (same task states, compatible manifests), and the
+              <a href="a2a-bridge.html">A2A bridge</a> makes the alignment concrete: any A2A
+              client can call a mesh agent, and any A2A server can join a mesh. In the
+              spec's words: <b>ARD finds, A2A talks, AgentMesh connects.</b></p>
+          </div>
+        </details>
+
+        <details>
+          <summary>What does AgentMesh deliberately not standardize?</summary>
+          <div class="a">
+            <p>A lot, on purpose. No auction or bidding protocol (fan-out &amp; bidding is a
+              <b>pattern</b> composed from emit/subscribe: a convention, not a standard). No
+              orchestration: who calls whom, in what order, belongs to whatever you build on
+              top. No agent meetings or committees, no LLM gateway, no guardrails, and no
+              financial settlement: the economics extension lets agents declare cost and emit
+              metering signals, but moving money is somebody else's job.</p>
+            <p>The rule is simple: if it isn't a property of the channel, it isn't in the core.
+              Everything above rides <b>on</b> the mesh, as patterns or extensions.</p>
+          </div>
+        </details>
+
+        <details>
+          <summary>What's the difference between a node and a mesh server?</summary>
+          <div class="a">
+            <p>A <b>node</b> is a participant: your host process, holding one outbound
+              connection, vouching for the agents it runs. A <b>mesh server</b> is
+              infrastructure: run by the mesh's operator, it routes messages, verifies
+              credentials, enforces permissions, and persists tasks. It hosts no agents and
+              vouches for nothing.</p>
+            <p>Participants talk; infrastructure routes. You run nodes; operators run
+              servers.</p>
+          </div>
+        </details>
+
+        <details>
+          <summary>Do two nodes on the same network talk directly?</summary>
+          <div class="a">
+            <p>No. All node-to-node traffic goes through a mesh server, even on the same LAN.
+              Want local traffic to stay local? Run a local server; the wires never leave the
+              building. One exception: two agents on the <b>same node</b> can be delivered
+              locally, under rules that make it indistinguishable from remote delivery (same
+              signing, same audit).</p>
+            <p>One fabric means one set of guarantees: ordering, dedup, presence, and the audit
+              trail all hold because there's no second path around them.</p>
+          </div>
+        </details>
+
+        <details>
+          <summary>What delivery guarantees do I get?</summary>
+          <div class="a">
+            <p>Live traffic is <b>fail-fast</b>: a request to an agent nobody is serving
+              errors immediately instead of pretending. Durability is <b>opt-in</b>: a
+              node holds its agents' inboxes, and messages sent while it's briefly
+              offline wait in a bounded redelivery buffer (days, not seconds) and are
+              delivered with at-least-once semantics when it reconnects.</p>
+            <p>Exactly-once <b>delivery</b> is a myth on real networks, so the spec
+              builds exactly-once <b>processing</b> instead: every envelope has a unique
+              ID, retries reuse it, and receivers deduplicate. Deliver possibly twice,
+              process once. Details in
+              <a href="spec.html#5-5-idempotency">spec §5.5</a> and
+              <a href="spec.html#16-4-resource-caps">§16.4</a>.</p>
+          </div>
+        </details>
+
+        <details>
+          <summary>Do I have to use NATS?</summary>
+          <div class="a">
+            <p>Today, practically yes: NATS is the reference binding and the only
+              implementation. By design, no: the spec separates the protocol from the binding
+              and defines what any alternative must provide. Nothing above the binding layer
+              knows it's NATS.</p>
+          </div>
+        </details>
+
+        <details>
+          <summary>I build agents with Google ADK, LangChain, or another framework. How does this fit?</summary>
+          <div class="a">
+            <p>Frameworks build the <b>inside</b> of an agent: the reasoning loop, tools,
+              memory. AgentMesh is what runs <b>between</b> agents. They meet at a thin seam:
+              wrap your framework agent in a skill handler and it's callable from the mesh;
+              hand it discover/request and it can use every other agent on it.</p>
+            <p>The mesh never sees your framework, only signed envelopes, so an ADK agent, a
+              LangChain agent, and a hand-rolled one interoperate without knowing the others
+              exist. And if your framework agent already speaks A2A over HTTP, you don't even
+              need the seam: the <a href="a2a-bridge.html">A2A bridge</a> puts it on the mesh
+              as-is. (The division of labor holds: MCP connects an agent to its tools;
+              AgentMesh connects it to its peers.)</p>
+          </div>
+        </details>
+
+        <details>
+          <summary>Can meshes connect to each other?</summary>
+          <div class="a">
+            <p>Not yet, deliberately. Every deployment is a complete, self-contained mesh, and
+              the protocol reserves what federation needs: operators anchor trust at their own
+              domains, and signatures stay valid no matter which mesh carried the message. The
+              federation spec gets written when a second production mesh exists to validate it
+              against.</p>
+            <p><a href="world-wide-mesh.html">Where that leads: the World Wide Mesh.</a></p>
+          </div>
+        </details>
+        <p style="margin-top:26px; font-family:var(--wire); font-size:.8rem; color:var(--dim)">Questions about using your agent day to day are in <a href="https://agentmesh.ai/faq.html">the user FAQ</a>.</p>
+
+      </div>
+
+      <footer>
+        <div class="wrap">
+          <span>AgentMesh · open protocol for agent-to-agent communication</span>
+          <a href="https://github.com/jeffrschneider/AgentMesh">GitHub ↗</a>
+        </div>
+      </footer>
+
+    </main>
+  </div>
+</body>
+</html>

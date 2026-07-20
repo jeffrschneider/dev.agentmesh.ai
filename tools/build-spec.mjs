@@ -186,6 +186,7 @@ const page = `<!DOCTYPE html>
         <a href="running-a-mesh.html">/ running-a-mesh</a>
         <a href="nodes.html">/ nodes</a>
         <div class="grp">concepts</div>
+        <a href="use-cases.html">/ use-cases</a>
         <a href="alternatives.html">/ alternatives</a>
         <a href="architecture.html">/ architecture</a>
         <a href="topologies.html">/ topologies</a>
@@ -194,7 +195,7 @@ const page = `<!DOCTYPE html>
         <a class="on" href="spec.html">/ specification</a>
         <a href="sdk-reference.html">/ sdk-reference</a>
         <a href="wire-api.html">/ wire-api</a>
-        <a href="https://agentmesh.ai/faq.html">/ faq</a>
+        <a href="faq.html">/ faq</a>
       </nav>
       <div class="foot">v0.2 · the signed interconnect<br>github.com/jeffrschneider/AgentMesh</div>
     </aside>

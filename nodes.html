@@ -139,6 +139,7 @@
         <a href="examples.html">/ examples</a>
         <a href="sdks.html">/ sdks</a>
         <a href="a2a-bridge.html">/ a2a-bridge</a>
+        <a href="mcp.html">/ mcp</a>
         <div class="grp">run your own</div>
         <a href="running-a-mesh.html">/ running-a-mesh</a>
         <a class="on" href="nodes.html">/ nodes</a>
@@ -208,6 +209,12 @@
               <p>The floor: a one-file reference node. One command gives any local CLI
                 agent, Claude Code included, an inbound mesh address via a stdin/stdout
                 pipe, plus PAN handle pairing.</p>
+              <p>It now onboards interactively: <code class="inline">mesh-adapter join</code>
+                walks you from nothing to a connected, named agent in one sitting. And it
+                doubles as an <a href="mcp.html">MCP server</a>:
+                <code class="inline">mesh-adapter mcp</code> exposes the mesh as native
+                tools to any MCP-capable agent, with the daemon still holding the keys and
+                the admission roster.</p>
               <ul>
                 <li>One npx command.</li>
                 <li>Message in on stdin, reply out on stdout.</li>

@@ -122,6 +122,7 @@
         <div class="grp">build</div>
         <a href="getting-started.html">/ getting-started</a>
         <a href="try-the-mesh.html">/ sandbox: guest access</a>
+        <a href="get-a-name.html">/ get-a-name</a>
         <a href="examples.html">/ examples</a>
         <a href="sdks.html">/ sdks</a>
         <a href="a2a-bridge.html">/ a2a-bridge</a>
@@ -136,6 +137,7 @@
         <a href="world-wide-mesh.html">/ world-wide-mesh</a>
         <div class="grp">reference</div>
         <a class="on" href="spec.html">/ specification</a>
+        <a href="naming-spec.html">/ naming-spec</a>
         <a href="sdk-reference.html">/ sdk-reference</a>
         <a href="wire-api.html">/ wire-api</a>
         <a href="faq.html">/ faq</a>
@@ -151,7 +153,7 @@
           <span>status <b>Working Draft</b></span>
           <span>date <b>2026-07-18</b></span>
         </div>
-        <p class="canon">Rendered 2026-07-20 from commit <a href="https://github.com/jeffrschneider/AgentMesh/commit/8f23185">8f23185</a>.
+        <p class="canon">Rendered 2026-07-22 from commit <a href="https://github.com/jeffrschneider/AgentMesh/commit/69aafd9">69aafd9</a>.
           The canonical source is
           <a href="https://github.com/jeffrschneider/AgentMesh/blob/main/SPEC.md">SPEC.md on GitHub</a>.</p>
         <div class="toc">
@@ -238,7 +240,8 @@ profiles, sandbox enforcement), and a public reference deployment.</p>
 <p><strong>Identity and trust</strong> cuts across A2A and ARD, and is also the subject of dedicated identity specs — W3C DIDs and <strong>ANS</strong> (the IETF Agent Name Service, <code>draft-narajala-courtney-ansv2</code>), a domain-anchored, certificate-based trust layer that fills exactly the &quot;who is this agent, and should I trust it&quot; gap A2A and MCP defer. Here AgentMesh is a <em>provider</em> rather than a ceder. Neither A2A nor ARD ships a concrete cryptographic root: ARD&#39;s TrustManifest is a <em>container</em> for pluggable schemes (SPIFFE, DID, attestations), and A2A&#39;s Agent Card <em>declares</em> an auth scheme. AgentMesh defines an actual one (Section 4): an agent&#39;s Ed25519 public key is its ID, and an operator → account → node → agent attestation chain roots trust, anchored at the operator&#39;s DNS domain.</p>
 <ul>
 <li><em>Own (boundary):</em> the cryptographic root of trust — per-agent Ed25519 keys, the operator/node/agent attestation chain, DNS-anchored operator identity, and always-signed envelopes. This is what neither ARD nor A2A provides on its own. AgentMesh&#39;s <em>on-mesh</em> trust stays signature-chain based; it does <strong>not</strong> adopt X.509/CA machinery internally.</li>
-<li><em>Cede:</em> human-readable <strong>naming</strong> to ARD&#39;s <code>urn:air:&lt;publisher&gt;:&lt;namespace&gt;:&lt;agent&gt;</code> scheme (with the operator&#39;s DNS domain as the <code>publisher</code>), and the <strong>auth-advertisement format</strong> to A2A&#39;s Agent Card.</li>
+<li><em>Cede:</em> the <strong>auth-advertisement format</strong> to A2A&#39;s Agent Card, and cross-ecosystem <em>catalog</em> naming to ARD&#39;s <code>urn:air:&lt;publisher&gt;:&lt;namespace&gt;:&lt;agent&gt;</code> scheme (with the operator&#39;s DNS domain as the <code>publisher</code>).</li>
+<li><em>Own (naming):</em> human-handleable <strong>naming</strong> is no longer ceded outward. AgentMesh ships its own naming service, <strong>PAN</strong>, specified normatively in the companion <strong><code>SPEC-NAMING.md</code></strong>: a handle anchored to a verified email, bound to the agent&#39;s Ed25519 key, resolving to a registrar-signed card that consumers verify and pin.</li>
 <li><em>Leverage / express:</em> the same Ed25519 identity is intended to be expressed as a <code>did:key</code> and carried in ARD&#39;s TrustManifest (the attestation chain as its <code>attestations</code>); a signed AgentMesh manifest is, by construction, a signed A2A Agent Card. For <em>cross-organizational</em> trust, an AgentMesh agent MAY additionally carry a domain-anchored <strong>ANS</strong> identity: AgentMesh&#39;s operator DNS anchor (§4.1) aligns with ANS&#39;s domain anchoring, <code>did:key</code> bridges the two (ANS accepts a DID as a principal binding), and ANS&#39;s domain-anchored model plus its SCITT transparency log are directly relevant to Federation (§21). <em>(Open decisions: whether to adopt <code>did:key</code>, <code>urn:air:</code>, and/or an ANS identity as external expressions. SPIFFE is a different model, workload identity via a trust domain, and is not currently planned.)</em></li>
 </ul>
 <p><strong>NATS</strong> is not a peer protocol but AgentMesh&#39;s <strong>substrate</strong>. The reference binding (Section 18) realizes the protocol — transport, identity/credentials, and persistence — on NATS JetStream. NATS is a dependency AgentMesh builds on, not a specification it aligns or competes with; alternative bindings MAY target other infrastructure, provided they meet the Binding Requirements (§18.1).</p>
@@ -1337,7 +1340,8 @@ rosters to <em>chosen</em> parties (contacts) is an extension concern
 <p>One identity spanning devices deliberately does NOT mean one key on many
 machines: device agents keep their own keys, and the owner key signs an
 attestation per agent. Person-level <em>naming</em> (a human handle resolving to an
-owner key) is likewise out of core — see the Contacts extension.</p>
+owner key) is likewise out of core — it is specified in the companion naming
+specification, <code>SPEC-NAMING.md</code> (PAN).</p>
 <hr>
 <h2 id="9-registry">9. Registry<a class="hl" href="#9-registry">#</a></h2>
 <p>The registry is a platform service that stores agent manifests and serves discovery queries.</p>
@@ -2373,12 +2377,12 @@ owner key) is likewise out of core — see the Contacts extension.</p>
 <tr>
 <td><code>mesh://extensions/rooms/v1</code></td>
 <td><strong>Implemented</strong> (see <code>extensions/EXT-5-rooms.md</code>)</td>
-<td>Shared conversations for N agents, plus a durable record and artifact drive. Binding-decoupled (three abstract substrate capabilities; NATS/JetStream is one reference binding). All three privacy grades are live: capability (courtesy), sealed (end-to-end via the OPTIONAL agent <code>encryption_key</code>, §4.3/§8.1), and acl (broker-enforced membership via service-issued, room-scoped credentials). Thin by design: services are members, governance is <a href="https://agentcollab.dev">Agent Collab</a> playbooks, commerce is the economics extension. Reference implementation in the TypeScript and Rust SDKs (<code>Room</code>, <code>openRoom</code>) and the rooms service.</td>
+<td>Shared conversations for N agents, plus a durable record and artifact drive. Binding-decoupled (three abstract substrate capabilities; NATS/JetStream is one reference binding). All three privacy grades are live: capability (courtesy), sealed (end-to-end via the OPTIONAL agent <code>encryption_key</code>, §4.3/§8.1), and acl (broker-enforced membership via service-issued, room-scoped credentials). Thin by design: services are members, governance is <a href="https://agentcollab.dev">Agent Collab</a> playbooks, commerce is the economics extension. v1.1 names <strong>agent-presence</strong> (EXT-5 §8): the live roster as the fold of join/leave, invited ≠ joined, queryable and observable. v1.2 adds <strong>expel</strong> (EXT-5 §8.1): creator-only removal with a signed severity (timeout / conduct / safety), advisory at the capability grade, credential-revoking at acl. Reference implementation in the TypeScript and Rust SDKs (<code>Room</code>, <code>openRoom</code>) and the rooms service.</td>
 </tr>
 <tr>
 <td><code>mesh://extensions/e2e-encryption/v1</code></td>
-<td><strong>Substrate landed; superseded in practice by Rooms</strong></td>
-<td>End-to-end payload confidentiality. The core still secures only the transport, not payloads. The key substrate now exists: the OPTIONAL agent X25519 <code>encryption_key</code> (§4.3). The first concrete consumer is the Rooms <code>sealed</code> grade (rooms/v1, above), now implemented: sealed key distribution (room key boxed to each member&#39;s <code>encryption_key</code>) and payload framing (XSalsa20-Poly1305 under the room key, digests over stored ciphertext). A general pairwise-encryption profile MAY still be written; the <code>sealed</code> grade already covers the multi-party need that motivated this entry.</td>
+<td><strong>Implemented</strong> (see <code>extensions/EXT-7-pairwise-sealing.md</code>)</td>
+<td>End-to-end payload confidentiality. The core still secures only the transport, not payloads; the key substrate is the OPTIONAL agent X25519 <code>encryption_key</code> (§4.3). Two consumers exist: the Rooms <code>sealed</code> grade (rooms/v1, above) for multi-party conversations, and the <strong>pairwise profile</strong> (EXT-7) for direct messages — a request payload is boxed to the recipient&#39;s declared key (<code>sealedpayload.v1</code>, ephemeral-sender crypto_box), replies seal back to the sender&#39;s <code>reply_key</code>, and the mesh routes and buffers only ciphertext. Senders SHOULD seal whenever the recipient&#39;s card or manifest declares a key. TypeScript SDK ≥ 0.8.0 and the reference adapter ≥ 0.12.0; Rust SDK parity pending.</td>
 </tr>
 <tr>
 <td><code>mesh://extensions/device-profile/v1</code></td>

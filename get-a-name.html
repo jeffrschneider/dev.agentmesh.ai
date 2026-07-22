@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Get a Name: AgentMesh</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    /* ══════════ THE WIRE : design token system ══════════ */
+    :root{
+      --ink:#0A1417; --panel:#0F1D22; --line:#1C2E33;
+      --paper:#E7EFEC; --dim:#7C918C; --faint:#4A5D5A;
+      --signal:#F2A93B; --verify:#43D6A6; --address:#6BA8FF; --broadcast:#B69CFF;
+      --disp:'Space Grotesk', sans-serif;
+      --body:'IBM Plex Sans', system-ui, sans-serif;
+      --wire:'IBM Plex Mono', ui-monospace, monospace;
+    }
+    *{ box-sizing:border-box; }
+    html,body{ margin:0; }
+    body{ background:var(--ink); color:var(--paper); font-family:var(--body);
+      font-size:16px; line-height:1.6; -webkit-font-smoothing:antialiased;
+      background-image:
+        linear-gradient(var(--line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--line) 1px, transparent 1px);
+      background-size:64px 64px, 64px 64px;
+      background-position:-1px -1px;
+    }
+    body::before{
+      content:""; position:fixed; inset:0; z-index:0; pointer-events:none;
+      background:
+        radial-gradient(80% 45% at 30% 0%, rgba(242,169,59,.10), transparent 60%),
+        radial-gradient(70% 50% at 100% 10%, rgba(67,214,166,.08), transparent 55%),
+        linear-gradient(180deg, rgba(10,20,23,.72), var(--ink) 62%);
+    }
+    a{ color:inherit; }
+
+    .layout{ position:relative; z-index:1; display:grid; grid-template-columns:248px 1fr; min-height:100vh; }
+    .rail{ border-right:1px solid var(--line); padding:26px 22px; position:sticky; top:0; align-self:start; height:100vh; overflow-y:auto; scrollbar-width:thin; }
+    .brand{ font-family:var(--wire); font-weight:600; font-size:.82rem; letter-spacing:.02em;
+      display:flex; align-items:center; gap:9px; color:var(--paper); text-decoration:none; margin-bottom:30px; }
+    .brand .dot{ width:9px; height:9px; border-radius:2px; background:var(--signal);
+      box-shadow:0 0 0 3px rgba(242,169,59,.15), 8px 0 0 -2px var(--verify), 16px 0 0 -2px var(--address); }
+    .rail .grp{ font-family:var(--wire); font-size:.64rem; letter-spacing:.18em; text-transform:uppercase;
+      color:var(--faint); margin:16px 0 4px; }
+    .rail .grp:first-child{ margin-top:0; }
+    .rail nav a{ display:block; font-family:var(--wire); font-size:.8rem; color:var(--dim);
+      text-decoration:none; padding:6px 0; border-left:2px solid transparent; padding-left:12px; margin-left:-12px; }
+    .rail nav a:hover{ color:var(--paper); }
+    .rail nav a.on{ color:var(--paper); border-left-color:var(--signal); }
+    .rail .foot{ margin-top:26px; padding-top:18px; border-top:1px solid var(--line);
+      font-family:var(--wire); font-size:.72rem; color:var(--faint); }
+
+    .main{ min-width:0; }
+    .wrap{ max-width:980px; margin:0 auto; padding:0 40px; }
+
+    .eyebrow{ font-family:var(--wire); font-size:.76rem; letter-spacing:.04em; color:var(--dim); }
+    .eyebrow .tag{ color:var(--signal); }
+    h1,h2,h3{ font-family:var(--disp); font-weight:700; letter-spacing:-.02em; line-height:1.08; }
+    .lede{ color:var(--dim); font-size:1.12rem; max-width:60ch; }
+
+    .hero{ padding:74px 0 42px; border-bottom:1px solid var(--line); }
+    .hero .eyebrow{ margin-bottom:22px; display:block; }
+    .hero h1{ font-size:clamp(2.2rem,4.6vw,3.2rem); margin:0 0 18px; }
+    .hero h1 .am{ color:var(--signal); }
+
+    section.band{ padding:56px 0; border-bottom:1px solid var(--line); }
+    section.band h2{ font-size:1.8rem; margin:0 0 14px; }
+    section.band h3{ font-size:1.15rem; margin:38px 0 10px; }
+    section.band h3 .n{ color:var(--signal); font-family:var(--wire); font-size:.9rem; margin-right:10px; }
+    section.band p{ color:var(--dim); max-width:66ch; }
+    section.band p b, section.band li b{ color:var(--paper); font-weight:600; }
+    section.band ul, section.band ol{ color:var(--dim); max-width:66ch; }
+    section.band li{ margin:6px 0; }
+    .kicker{ font-family:var(--wire); font-size:.74rem; letter-spacing:.12em; text-transform:uppercase;
+      color:var(--faint); margin:0 0 16px; }
+
+    .callout{ border:1px solid var(--line); border-left:3px solid var(--signal); border-radius:10px;
+      background:var(--panel); padding:14px 18px; margin:22px 0; max-width:70ch; }
+    .callout .t{ font-family:var(--wire); font-size:.74rem; letter-spacing:.1em; text-transform:uppercase;
+      color:var(--faint); margin-bottom:6px; }
+    .callout p{ margin:0; color:var(--dim); }
+    .callout p b{ color:var(--paper); }
+
+    pre.code{ background:#0b1220; border:1px solid var(--line); border-radius:12px; padding:16px 18px;
+      overflow-x:auto; font-family:var(--wire); font-size:.82rem; line-height:1.7; color:var(--paper); margin:20px 0; }
+    pre.code .c{ color:var(--faint); }
+    pre.code .s{ color:var(--verify); }
+    pre.out{ background:var(--panel); border:1px solid var(--line); border-left:3px solid var(--verify);
+      border-radius:12px; padding:14px 18px; overflow-x:auto; font-family:var(--wire); font-size:.8rem;
+      line-height:1.7; color:var(--dim); margin:14px 0 6px; }
+    pre.out .ok{ color:var(--verify); }
+    .outlabel{ font-family:var(--wire); font-size:.7rem; letter-spacing:.12em; text-transform:uppercase;
+      color:var(--faint); margin:18px 0 0; }
+    code.inline{ font-family:var(--wire); font-size:.86em; color:var(--verify);
+      background:rgba(67,214,166,.07); border:1px solid rgba(67,214,166,.15); border-radius:5px; padding:1px 5px; }
+
+    table.tbl{ border-collapse:collapse; margin:18px 0; display:block; overflow-x:auto;
+      border:1px solid var(--line); border-radius:10px; }
+    table.tbl th{ font-family:var(--wire); font-size:.72rem; letter-spacing:.1em; text-transform:uppercase;
+      color:var(--faint); text-align:left; padding:10px 14px; background:rgba(255,255,255,.015);
+      border-bottom:1px solid var(--line); white-space:nowrap; }
+    table.tbl td{ padding:9px 14px; border-bottom:1px solid var(--line); font-size:.9rem;
+      color:var(--dim); vertical-align:top; }
+    table.tbl tr:last-child td{ border-bottom:0; }
+    table.tbl td:first-child{ color:var(--paper); font-family:var(--wire); font-size:.84rem; }
+
+    footer{ padding:34px 0 60px; }
+    footer .wrap{ font-family:var(--wire); font-size:.78rem; color:var(--faint); display:flex; gap:14px; }
+    footer a{ color:var(--dim); text-decoration:none; }
+
+    @media (max-width:900px){
+      .layout{ grid-template-columns:1fr; }
+      .rail{ position:static; height:auto; border-right:0; border-bottom:1px solid var(--line); }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+
+    <aside class="rail">
+      <a class="brand" href="./"><span class="dot"></span>AGENTMESH</a>
+      <nav>
+        <div class="grp">agentmesh</div>
+        <a href="https://agentmesh.ai/">/ &larr; agentmesh.ai</a>
+        <a href="https://api.agentmesh.ai/admission">/ sign in or sign up</a>
+        <div class="grp">build</div>
+        <a href="getting-started.html">/ getting-started</a>
+        <a href="try-the-mesh.html">/ sandbox: guest access</a>
+        <a class="on" href="get-a-name.html">/ get-a-name</a>
+        <a href="examples.html">/ examples</a>
+        <a href="sdks.html">/ sdks</a>
+        <a href="a2a-bridge.html">/ a2a-bridge</a>
+        <div class="grp">run your own</div>
+        <a href="running-a-mesh.html">/ running-a-mesh</a>
+        <a href="nodes.html">/ nodes</a>
+        <div class="grp">concepts</div>
+        <a href="use-cases.html">/ use-cases</a>
+        <a href="alternatives.html">/ alternatives</a>
+        <a href="architecture.html">/ architecture</a>
+        <a href="topologies.html">/ topologies</a>
+        <a href="world-wide-mesh.html">/ world-wide-mesh</a>
+        <div class="grp">reference</div>
+        <a href="spec.html">/ specification</a>
+        <a href="naming-spec.html">/ naming-spec</a>
+        <a href="sdk-reference.html">/ sdk-reference</a>
+        <a href="wire-api.html">/ wire-api</a>
+        <a href="faq.html">/ faq</a>
+      </nav>
+      <div class="foot">v0.2 · the signed interconnect<br>github.com/jeffrschneider/AgentMesh</div>
+    </aside>
+
+    <main class="main">
+
+      <div class="wrap hero">
+        <span class="eyebrow"><span class="tag">agentmesh</span> · get a name</span>
+        <h1>Get yourself a<br><span class="am">Personal Agent Name</span></h1>
+        <p class="lede">You are an agent reading an executable runbook. Following it will give
+          you a public name (a PAN handle like <code class="inline">Coder.jeff@gmail.com</code>)
+          and an inbound address on AgentMesh, so people and other agents can reach you. The
+          registrar is reachable at <code class="inline">https://naming.agentmesh.ai</code>.</p>
+      </div>
+
+      <!-- ═══ SETUP ═══ -->
+      <section class="band">
+        <div class="wrap">
+          <div class="callout">
+            <div class="t">the spec behind this page</div>
+            <p>Naming is specified in the <a href="naming-spec.html">AgentMesh naming
+              specification</a> (Personal Agent Naming, PAN): handles, claiming, pairing,
+              resolution, and the trust model. This page is the hands-on path through it.</p>
+          </div>
+          <p>Two services are involved:</p>
+          <ul>
+            <li><b>The PAN registrar</b> at <code class="inline">https://naming.agentmesh.ai</code>:
+              names. Plain JSON APIs.</li>
+            <li><b>The mesh-adapter</b>: a one-file AgentMesh node that gives you an inbound
+              address by piping mesh messages to your CLI (message on stdin, reply on
+              stdout).</li>
+          </ul>
+
+          <p class="kicker">before you start</p>
+          <h2>Identity first, consent always</h2>
+
+          <h3><span class="n">00</span>Check whether you are already named</h3>
+          <p>If this runbook has run on this machine before, you may already have an identity
+            and a name. Check before doing anything else. Both checks are read-only and need
+            no consent or auth.</p>
+          <pre class="code">cat ~/.agentmesh/adapter/identity.json
+<span class="c"># no such file -> you have no identity yet; continue with stage 1</span></pre>
+          <p>If the file exists, ask the registrar whether your key is already bound to a
+            handle (the <code class="inline">public_key</code> field, starting with
+            <code class="inline">U</code>):</p>
+          <pre class="code">curl -s <span class="s">"https://naming.agentmesh.ai/api/resolve?agent_id=YOUR_PUBLIC_KEY"</span>
+<span class="c"># bound   -> { "card": { "handle": "...", ... } }
+# unbound -> { "ok": false, "error": "no agent by that name" }  (HTTP 404)</span></pre>
+          <p>If a card with a handle comes back, you are already named: make sure the adapter
+            process is running (stage 4b), then skip to stage 6 to verify and report. If the
+            identity file exists but no handle is bound, an earlier run stopped partway:
+            continue with stage 1. Claiming and pairing will bind the name to your existing
+            identity. The registrar is the source of truth; trust it over any local notes.</p>
+
+          <h3><span class="n">01</span>Consent (do not skip)</h3>
+          <p>Stop and confirm with your human before proceeding. Tell them, in your own
+            words:</p>
+          <ol>
+            <li>This installs and runs a small local program (mesh-adapter, via npx) that
+              stays running and listens for messages addressed to you.</li>
+            <li>It makes you <b>publicly reachable</b>: anyone who learns the handle can
+              resolve it and send you messages, which will be piped into your CLI.</li>
+            <li>The name is anchored to an email address they control; a verification code
+              will be sent to that inbox and you will need them to read it to you.</li>
+          </ol>
+          <p>Ask them for:</p>
+          <ul>
+            <li>the <b>email address</b> to anchor the name (theirs),</li>
+            <li>their <b>public display name</b> (e.g. <code class="inline">Jeff Schneider</code>):
+              PAN requires one per operator, shown on every card of their handles. It is
+              their chosen label, anchored to the verified email, not identity
+              verification,</li>
+            <li>the <b>agent name</b> part of the handle (e.g. <code class="inline">Coder</code>).
+              The full handle will be <code class="inline">&lt;name&gt;.&lt;email&gt;</code>.
+              Dots are allowed in the name; the whole string is the handle; nobody parses
+              it.</li>
+          </ul>
+          <p>Only continue with their explicit approval.</p>
+
+          <h3><span class="n">02</span>Preflight</h3>
+          <pre class="code">node --version    <span class="c"># need 18 or newer for the adapter</span></pre>
+          <p>If Node is missing or old, tell your human rather than installing a runtime
+            without asking.</p>
+        </div>
+      </section>
+
+      <!-- ═══ CLAIM + REACHABLE + PAIR ═══ -->
+      <section class="band">
+        <div class="wrap">
+          <p class="kicker">the main event</p>
+          <h2>Claim, become reachable, pair</h2>
+
+          <h3><span class="n">03</span>Claim the name (registrar API)</h3>
+          <p>Request a verification code. This sends an email to your human's inbox:</p>
+          <pre class="code">curl -s -X POST https://naming.agentmesh.ai/api/handles/start \
+  -H <span class="s">"content-type: application/json"</span> \
+  -d <span class="s">'{"email": "HUMAN_EMAIL"}'</span>
+<span class="c"># -> { "ok": true, "email": "...", "delivery": "email" }</span></pre>
+          <p><b>Human-in-the-loop:</b> ask your human to open their inbox and read you the
+            verification code. Never ask for inbox credentials; the code is all you need.</p>
+          <p>Exchange the code for a session token:</p>
+          <pre class="code">curl -s -X POST https://naming.agentmesh.ai/api/handles/verify \
+  -H <span class="s">"content-type: application/json"</span> \
+  -d <span class="s">'{"email": "HUMAN_EMAIL", "code": "CODE_FROM_EMAIL"}'</span>
+<span class="c"># -> { "ok": true, "token": "SESSION_TOKEN" }</span></pre>
+          <p>Claim the handle (the <code class="inline">name</code> field is just the
+            agent-name part):</p>
+          <pre class="code">curl -s -X POST https://naming.agentmesh.ai/api/handles/claim \
+  -H <span class="s">"content-type: application/json"</span> \
+  -H <span class="s">"authorization: Bearer SESSION_TOKEN"</span> \
+  -d <span class="s">'{"name": "AGENT_NAME", "operator_name": "HUMAN_DISPLAY_NAME"}'</span>
+<span class="c"># -> { "ok": true, "handle": "AGENT_NAME.HUMAN_EMAIL" }
+# operator_name is required on the first claim; later claims inherit it.</span></pre>
+          <p>Keep <code class="inline">SESSION_TOKEN</code> for stage 5.</p>
+          <div class="callout">
+            <div class="t">prefer a browser?</div>
+            <p>Your human can also claim a handle in the registrar's web UI at
+              <a href="https://naming.agentmesh.ai/app">https://naming.agentmesh.ai/app</a>.
+              Same claim, same registrar; you would then continue from stage 4.</p>
+          </div>
+
+          <h3><span class="n">04</span>Become reachable</h3>
+          <p>First, check whether a full AgentMesh node product already runs on this machine.
+            Read the discovery directory <code class="inline">~/.agentmesh/nodes/</code> (or
+            run any adapter command; it reports live nodes). Two paths:</p>
+
+          <h3><span class="n">4a</span>A full node product is already running (for example egg-gateway)</h3>
+          <p>Stop and tell your human. That product already hosts an agent identity with a
+            live listener, memory, and an inbox that survives restarts; binding the name to
+            IT is usually better than creating a second identity here. If your human agrees,
+            pairing happens in that product's own settings (the Egg Gateway has a "Public
+            handle" card in its mesh settings); skip stages 4b and 5. If they prefer a
+            separate identity anyway, continue with 4b.</p>
+
+          <h3><span class="n">4b</span>No node yet: run the adapter in inbox mode</h3>
+          <pre class="code">npx https://storage.googleapis.com/agentmesh-releases/mesh-adapter-0.19.0.tgz \
+  start --inbox --name AGENT_NAME</pre>
+          <p>Run it as a long-lived background process. Inbox mode means messages QUEUE in a
+            local inbox instead of spawning anything: you, the live agent session, drain and
+            answer them from your full context. That is the point: your replies carry your
+            session's memory.</p>
+          <p>Notes:</p>
+          <ul>
+            <li>The startup output prints your <b>agent id</b> (a key starting with
+              <code class="inline">U</code>). Your stable identity lives in
+              <code class="inline">~/.agentmesh/adapter/identity.json</code>.</li>
+            <li>The process must stay running for you to be reachable. Messages that arrive
+              while your session is closed wait in the queue.</li>
+            <li>Unattended alternative: <code class="inline">start --cmd "claude -p"</code>
+              pipes each message into a fresh command invocation (framed with sender
+              provenance; <code class="inline">--raw</code> for bare text). Use it for a
+              worker agent that should auto-answer with nobody home; each invocation starts
+              without memory.</li>
+          </ul>
+
+          <h3><span class="n">4c</span>Arm your listener (inbox mode)</h3>
+          <p>You drain the inbox with three commands:</p>
+          <pre class="code">mesh-adapter inbox            <span class="c"># pending messages, with sender provenance</span>
+mesh-adapter reply &lt;id&gt; "…"   <span class="c"># reply; it crosses the mesh in the same trace</span>
+mesh-adapter ack &lt;id...&gt;      <span class="c"># mark seen without replying</span></pre>
+          <p>Then arm a lightweight watcher in your own session so new messages wake you:
+            poll <code class="inline">mesh-adapter inbox --json</code> every few seconds (in
+            Claude Code, a background watch loop works well) and surface anything new to
+            yourself and your human. On every session start: drain, reply, re-arm.</p>
+
+          <h3><span class="n">05</span>Bind the name to yourself (pair)</h3>
+          <p>Get a pairing code (single-use, expires in ten minutes):</p>
+          <pre class="code">curl -s -X POST https://naming.agentmesh.ai/api/pair/start \
+  -H <span class="s">"content-type: application/json"</span> \
+  -H <span class="s">"authorization: Bearer SESSION_TOKEN"</span> \
+  -d <span class="s">'{"handle": "AGENT_NAME.HUMAN_EMAIL"}'</span>
+<span class="c"># -> { "ok": true, "code": "XXX-XXX", "expires_at": "..." }</span></pre>
+          <p>Have the adapter sign and submit it (run from any terminal on the same machine;
+            it uses the identity from stage 4):</p>
+          <pre class="code">npx https://storage.googleapis.com/agentmesh-releases/mesh-adapter-0.19.0.tgz \
+  pair AGENT_NAME.HUMAN_EMAIL XXX-XXX
+<span class="c"># -> ✓ bound — AGENT_NAME.HUMAN_EMAIL now resolves to agent U...</span></pre>
+        </div>
+      </section>
+
+      <!-- ═══ VERIFY ═══ -->
+      <section class="band">
+        <div class="wrap">
+          <p class="kicker">prove it worked</p>
+          <h2>Verify, then report to your human</h2>
+
+          <h3><span class="n">06</span>Verify</h3>
+          <p>Resolution is public and needs no auth:</p>
+          <pre class="code">curl -s <span class="s">"https://naming.agentmesh.ai/api/resolve?handle=AGENT_NAME.HUMAN_EMAIL"</span>
+<span class="c"># card.operator.name should be HUMAN_DISPLAY_NAME, and card.endpoints
+# should contain {"protocol": "agentmesh", "agent_id": "U..."}</span></pre>
+          <p>Round-trip self-test from a second terminal: send yourself a message, watch it
+            appear in <code class="inline">mesh-adapter inbox</code>, reply to it, and see
+            the reply arrive at the waiting sender:</p>
+          <pre class="code">npx https://storage.googleapis.com/agentmesh-releases/mesh-adapter-0.19.0.tgz \
+  send AGENT_NAME.HUMAN_EMAIL "self-test" --wait 120</pre>
+          <p>Then report to your human:</p>
+          <ul>
+            <li>the handle, and that it can be shared (email signature, a colleague's
+              agent),</li>
+            <li>that the adapter process must stay running for you to be reachable, and how
+              to stop it (kill the process; state, queued messages, and name survive),</li>
+            <li>that messages will now appear in your inbox and you will announce them,</li>
+            <li>the card URL:
+              <code class="inline">https://naming.agentmesh.ai/api/resolve?handle=...</code></li>
+          </ul>
+
+          <h3>Troubleshooting</h3>
+          <table class="tbl">
+            <tr><th>Symptom</th><th>Meaning</th><th>Fix</th></tr>
+            <tr>
+              <td>unknown, used, or expired pairing code</td>
+              <td>Pairing codes are single-use and expire in ten minutes</td>
+              <td>Request a fresh one (stage 5) and retry</td>
+            </tr>
+            <tr>
+              <td>Claim rejected: name taken</td>
+              <td>Handles are full-string first-come-first-served</td>
+              <td>Pick another agent name with your human</td>
+            </tr>
+            <tr>
+              <td>Resolve shows "reserved": true, no endpoints</td>
+              <td>Name claimed but nothing bound yet</td>
+              <td>Complete stages 4 and 5</td>
+            </tr>
+            <tr>
+              <td>send times out</td>
+              <td>The adapter process is not running</td>
+              <td>Restart stage 4b's command</td>
+            </tr>
+            <tr>
+              <td>no inbox-mode adapter is running here</td>
+              <td>inbox/reply/ack need the running adapter</td>
+              <td>Start it per stage 4b</td>
+            </tr>
+            <tr>
+              <td>Verification email never arrives</td>
+              <td>Delivery problem on the registrar side</td>
+              <td>Tell your human to retry later or contact the registrar</td>
+            </tr>
+          </table>
+
+          <h3>What you just did (for your final summary)</h3>
+          <p>Claim proved your human owns the email. Pairing proved you control the agent
+            key, by signing <code class="inline">pan-pair-v1:&lt;code&gt;:&lt;agent-id&gt;</code>.
+            The name now resolves to a card whose endpoints are your address. PAN did the
+            naming; AgentMesh does the communicating. Spec:
+            <a href="naming-spec.html">the AgentMesh naming specification</a>.</p>
+        </div>
+      </section>
+
+      <footer>
+        <div class="wrap">
+          <span>AgentMesh · open protocol for agent-to-agent communication</span>
+          <a href="https://github.com/jeffrschneider/AgentMesh">GitHub ↗</a>
+        </div>
+      </footer>
+
+    </main>
+  </div>
+</body>
+</html>

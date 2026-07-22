@@ -1,7 +1,7 @@
-// build-spec.mjs — generate spec.html (wire-styled) from the canonical SPEC.md.
-// Usage: node tools/build-spec.mjs [path-to-SPEC.md]
-// Default source: ../AgentMesh/SPEC.md (falls back to GitHub raw).
-// Regenerate whenever the spec changes; spec.html is a committed artifact.
+// build-naming-spec.mjs - generate naming-spec.html (wire-styled) from the canonical SPEC-NAMING.md.
+// Usage: node tools/build-naming-spec.mjs [path-to-SPEC-NAMING.md]
+// Default source: ../AgentMesh/SPEC-NAMING.md (falls back to GitHub raw).
+// Regenerate whenever the spec changes; naming-spec.html is a committed artifact.
 import { readFileSync, writeFileSync } from "node:fs";
 import { execSync } from "node:child_process";
 import { dirname, resolve } from "node:path";
@@ -9,8 +9,8 @@ import { fileURLToPath } from "node:url";
 import { marked } from "marked";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const SRC = process.argv[2] ?? resolve(ROOT, "../AgentMesh/SPEC.md");
-const RAW_URL = "https://raw.githubusercontent.com/jeffrschneider/AgentMesh/main/SPEC.md";
+const SRC = process.argv[2] ?? resolve(ROOT, "../AgentMesh/SPEC-NAMING.md");
+const RAW_URL = "https://raw.githubusercontent.com/jeffrschneider/AgentMesh/main/SPEC-NAMING.md";
 
 let md, commit = "";
 try {
@@ -24,16 +24,18 @@ try {
 
 md = md.replace(/\r\n/g, "\n");
 
-// Pull version/status/date from the header block.
+// Pull version/status/date from the one-line header block
+// (**Version:** x · **Date:** y · **Status:** z).
 const meta = {};
 for (const [k, re] of Object.entries({
-  version: /\*\*Version:\*\*\s*(.+)/,
-  status: /\*\*Status:\*\*\s*(.+)/,
-  date: /\*\*Date:\*\*\s*(.+)/,
+  version: /\*\*Version:\*\*\s*([^·\n]+)/,
+  status: /\*\*Status:\*\*\s*([^·\n]+)/,
+  date: /\*\*Date:\*\*\s*([^·\n]+)/,
 })) meta[k] = (md.match(re) ?? [,"?"])[1].trim();
 
-// Drop the md title + version block; the page hero renders them as chips.
-const mdBody = md.replace(/^# .*\n+\*\*Version:\*\*[\s\S]*?\*\*Date:\*\*.*\n/, "");
+// Drop the md title + header block through the Authors line; the page hero
+// renders the metadata as chips.
+const mdBody = md.replace(/^# .*\n[\s\S]*?\*\*Authors:\*\*.*\n/, "");
 marked.setOptions({ gfm: true, breaks: false });
 let body = marked.parse(mdBody);
 
@@ -60,7 +62,7 @@ const page = `<!DOCTYPE html>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Specification: AgentMesh</title>
+  <title>Naming Specification: AgentMesh</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -193,8 +195,8 @@ const page = `<!DOCTYPE html>
         <a href="topologies.html">/ topologies</a>
         <a href="world-wide-mesh.html">/ world-wide-mesh</a>
         <div class="grp">reference</div>
-        <a class="on" href="spec.html">/ specification</a>
-        <a href="naming-spec.html">/ naming-spec</a>
+        <a href="spec.html">/ specification</a>
+        <a class="on" href="naming-spec.html">/ naming-spec</a>
         <a href="sdk-reference.html">/ sdk-reference</a>
         <a href="wire-api.html">/ wire-api</a>
         <a href="faq.html">/ faq</a>
@@ -203,16 +205,18 @@ const page = `<!DOCTYPE html>
     </aside>
     <main class="main">
       <div class="wrap hero">
-        <span class="eyebrow"><span class="tag">agentmesh</span> · protocol specification</span>
-        <h1>AgentMesh Protocol Specification</h1>
+        <span class="eyebrow"><span class="tag">agentmesh</span> · naming specification</span>
+        <h1>Personal Agent Naming (PAN)</h1>
         <div class="metas">
           <span>version <b>${meta.version}</b></span>
           <span>status <b>${meta.status}</b></span>
           <span>date <b>${meta.date}</b></span>
         </div>
-        <p class="canon">Rendered ${generated}${commit ? ` from commit <a href="https://github.com/jeffrschneider/AgentMesh/commit/${commit}">${commit}</a>` : ""}.
+        <p class="canon">AgentMesh's naming service, companion to the
+          <a href="spec.html">protocol specification</a>.
+          Rendered ${generated}${commit ? ` from commit <a href="https://github.com/jeffrschneider/AgentMesh/commit/${commit}">${commit}</a>` : ""}.
           The canonical source is
-          <a href="https://github.com/jeffrschneider/AgentMesh/blob/main/SPEC.md">SPEC.md on GitHub</a>.</p>
+          <a href="https://github.com/jeffrschneider/AgentMesh/blob/main/SPEC-NAMING.md">SPEC-NAMING.md on GitHub</a>.</p>
         <div class="toc">
             ${tocHtml}
         </div>
@@ -232,5 +236,5 @@ ${body}
 </html>
 `;
 
-writeFileSync(resolve(ROOT, "spec.html"), page);
-console.log(`spec.html written: ${(page.length / 1024).toFixed(0)} KB, ${toc.length} sections, ${meta.version} (${meta.date})${commit ? ", commit " + commit : ""}`);
+writeFileSync(resolve(ROOT, "naming-spec.html"), page);
+console.log(`naming-spec.html written: ${(page.length / 1024).toFixed(0)} KB, ${toc.length} sections, ${meta.version} (${meta.date})${commit ? ", commit " + commit : ""}`);

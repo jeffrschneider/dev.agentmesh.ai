@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Naming Specification: AgentMesh</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --ink:#0A1417; --panel:#0F1D22; --line:#1C2E33;
+      --paper:#E7EFEC; --dim:#7C918C; --faint:#4A5D5A;
+      --signal:#F2A93B; --verify:#43D6A6; --address:#6BA8FF; --broadcast:#B69CFF;
+      --disp:'Space Grotesk', sans-serif;
+      --body:'IBM Plex Sans', system-ui, sans-serif;
+      --wire:'IBM Plex Mono', ui-monospace, monospace;
+    }
+    *{ box-sizing:border-box; }
+    html{ scroll-behavior:smooth; scroll-padding-top:20px; }
+    html,body{ margin:0; }
+    body{ background:var(--ink); color:var(--paper); font-family:var(--body);
+      font-size:16px; line-height:1.65; -webkit-font-smoothing:antialiased;
+      background-image:
+        linear-gradient(var(--line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--line) 1px, transparent 1px);
+      background-size:64px 64px, 64px 64px; background-position:-1px -1px;
+    }
+    body::before{ content:""; position:fixed; inset:0; z-index:0; pointer-events:none;
+      background:
+        radial-gradient(80% 45% at 30% 0%, rgba(242,169,59,.10), transparent 60%),
+        radial-gradient(70% 50% at 100% 10%, rgba(67,214,166,.08), transparent 55%),
+        linear-gradient(180deg, rgba(10,20,23,.72), var(--ink) 62%);
+    }
+    a{ color:inherit; }
+    .layout{ position:relative; z-index:1; display:grid; grid-template-columns:248px 1fr; min-height:100vh; }
+    .rail{ border-right:1px solid var(--line); padding:26px 22px; position:sticky; top:0; align-self:start; height:100vh; overflow-y:auto; scrollbar-width:thin; }
+    .brand{ font-family:var(--wire); font-weight:600; font-size:.82rem; letter-spacing:.02em;
+      display:flex; align-items:center; gap:9px; color:var(--paper); text-decoration:none; margin-bottom:30px; }
+    .brand .dot{ width:9px; height:9px; border-radius:2px; background:var(--signal);
+      box-shadow:0 0 0 3px rgba(242,169,59,.15), 8px 0 0 -2px var(--verify), 16px 0 0 -2px var(--address); }
+    .rail .grp{ font-family:var(--wire); font-size:.64rem; letter-spacing:.18em; text-transform:uppercase;
+      color:var(--faint); margin:16px 0 4px; }
+    .rail .grp:first-child{ margin-top:0; }
+    .rail nav a{ display:block; font-family:var(--wire); font-size:.8rem; color:var(--dim);
+      text-decoration:none; padding:6px 0; border-left:2px solid transparent; padding-left:12px; margin-left:-12px; }
+    .rail nav a:hover{ color:var(--paper); }
+    .rail nav a.on{ color:var(--paper); border-left-color:var(--signal); }
+    .rail .foot{ margin-top:26px; padding-top:18px; border-top:1px solid var(--line);
+      font-family:var(--wire); font-size:.72rem; color:var(--faint); }
+    .main{ min-width:0; }
+    .wrap{ max-width:900px; margin:0 auto; padding:0 40px; }
+    .eyebrow{ font-family:var(--wire); font-size:.76rem; letter-spacing:.04em; color:var(--dim); }
+    .eyebrow .tag{ color:var(--signal); }
+    .hero{ padding:64px 0 30px; border-bottom:1px solid var(--line); }
+    .hero .eyebrow{ margin-bottom:18px; display:block; }
+    .hero h1{ font-family:var(--disp); font-weight:700; letter-spacing:-.02em;
+      font-size:clamp(2rem,4.2vw,2.8rem); margin:0 0 12px; }
+    .metas{ display:flex; gap:10px; flex-wrap:wrap; margin:14px 0 0; }
+    .metas span{ font-family:var(--wire); font-size:.74rem; color:var(--dim);
+      border:1px solid var(--line); border-radius:100px; padding:4px 12px; background:var(--panel); }
+    .metas span b{ color:var(--signal); font-weight:600; }
+    .canon{ margin-top:14px; font-family:var(--wire); font-size:.76rem; color:var(--faint); }
+    .canon a{ color:var(--verify); }
+
+    .toc{ margin:26px 0 0; border:1px solid var(--line); border-radius:12px; background:var(--panel);
+      padding:16px 18px; columns:2; column-gap:28px; }
+    .toc a{ display:block; font-family:var(--wire); font-size:.78rem; color:var(--dim);
+      text-decoration:none; padding:3px 0; break-inside:avoid; }
+    .toc a:hover{ color:var(--signal); }
+
+    .spec{ padding:10px 0 70px; }
+    .spec h1{ display:none; } /* page hero replaces the md title */
+    .spec h2{ font-family:var(--disp); font-weight:700; letter-spacing:-.02em; font-size:1.7rem;
+      margin:54px 0 14px; padding-top:22px; border-top:1px solid var(--line); }
+    .spec h3{ font-family:var(--disp); font-weight:700; font-size:1.2rem; margin:34px 0 10px; }
+    .spec h4{ font-family:var(--disp); font-weight:600; font-size:1.02rem; margin:26px 0 8px; }
+    .spec .hl{ opacity:0; margin-left:8px; font-family:var(--wire); font-size:.8em;
+      color:var(--signal); text-decoration:none; }
+    .spec h2:hover .hl, .spec h3:hover .hl, .spec h4:hover .hl{ opacity:1; }
+    .spec p, .spec li{ color:var(--dim); max-width:76ch; }
+    .spec strong{ color:var(--paper); font-weight:600; }
+    .spec code{ font-family:var(--wire); font-size:.86em; color:var(--verify);
+      background:rgba(67,214,166,.07); border:1px solid rgba(67,214,166,.15);
+      border-radius:5px; padding:1px 5px; }
+    .spec pre{ background:var(--panel); border:1px solid var(--line); border-radius:12px;
+      padding:16px 18px; overflow-x:auto; line-height:1.7; }
+    .spec pre code{ background:none; border:0; padding:0; color:var(--paper); font-size:.82rem; }
+    .spec blockquote{ margin:18px 0; border:1px solid var(--line); border-left:3px solid var(--signal);
+      border-radius:10px; background:var(--panel); padding:12px 18px; }
+    .spec blockquote p{ margin:6px 0; }
+    .spec table{ border-collapse:collapse; margin:18px 0; display:block; overflow-x:auto;
+      border:1px solid var(--line); border-radius:10px; }
+    .spec th{ font-family:var(--wire); font-size:.72rem; letter-spacing:.1em; text-transform:uppercase;
+      color:var(--faint); text-align:left; padding:10px 14px; background:rgba(255,255,255,.015);
+      border-bottom:1px solid var(--line); white-space:nowrap; }
+    .spec td{ padding:9px 14px; border-bottom:1px solid var(--line); font-size:.9rem;
+      color:var(--dim); vertical-align:top; }
+    .spec tr:last-child td{ border-bottom:0; }
+    .spec td:first-child{ color:var(--paper); font-family:var(--wire); font-size:.84rem; }
+    .spec hr{ border:0; border-top:1px solid var(--line); margin:40px 0; }
+    .spec a{ color:var(--verify); }
+    footer{ padding:14px 0 60px; }
+    footer .wrap{ font-family:var(--wire); font-size:.78rem; color:var(--faint); display:flex; gap:14px; }
+    footer a{ color:var(--dim); text-decoration:none; }
+    @media (max-width:900px){
+      .layout{ grid-template-columns:1fr; }
+      .rail{ position:static; height:auto; border-right:0; border-bottom:1px solid var(--line); }
+      .toc{ columns:1; }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <aside class="rail">
+      <a class="brand" href="./"><span class="dot"></span>AGENTMESH</a>
+      <nav>
+        <div class="grp">agentmesh</div>
+        <a href="https://agentmesh.ai/">/ &larr; agentmesh.ai</a>
+        <a href="https://api.agentmesh.ai/admission">/ sign in or sign up</a>
+        <div class="grp">build</div>
+        <a href="getting-started.html">/ getting-started</a>
+        <a href="try-the-mesh.html">/ sandbox: guest access</a>
+        <a href="get-a-name.html">/ get-a-name</a>
+        <a href="examples.html">/ examples</a>
+        <a href="sdks.html">/ sdks</a>
+        <a href="a2a-bridge.html">/ a2a-bridge</a>
+        <div class="grp">run your own</div>
+        <a href="running-a-mesh.html">/ running-a-mesh</a>
+        <a href="nodes.html">/ nodes</a>
+        <div class="grp">concepts</div>
+        <a href="use-cases.html">/ use-cases</a>
+        <a href="alternatives.html">/ alternatives</a>
+        <a href="architecture.html">/ architecture</a>
+        <a href="topologies.html">/ topologies</a>
+        <a href="world-wide-mesh.html">/ world-wide-mesh</a>
+        <div class="grp">reference</div>
+        <a href="spec.html">/ specification</a>
+        <a class="on" href="naming-spec.html">/ naming-spec</a>
+        <a href="sdk-reference.html">/ sdk-reference</a>
+        <a href="wire-api.html">/ wire-api</a>
+        <a href="faq.html">/ faq</a>
+      </nav>
+      <div class="foot">v0.2 · the signed interconnect<br>github.com/jeffrschneider/AgentMesh</div>
+    </aside>
+    <main class="main">
+      <div class="wrap hero">
+        <span class="eyebrow"><span class="tag">agentmesh</span> · naming specification</span>
+        <h1>Personal Agent Naming (PAN)</h1>
+        <div class="metas">
+          <span>version <b>0.4-draft</b></span>
+          <span>status <b>draft, one reference implementation</b></span>
+          <span>date <b>2026-07-22</b></span>
+        </div>
+        <p class="canon">AgentMesh's naming service, companion to the
+          <a href="spec.html">protocol specification</a>.
+          Rendered 2026-07-22 from commit <a href="https://github.com/jeffrschneider/AgentMesh/commit/69aafd9">69aafd9</a>.
+          The canonical source is
+          <a href="https://github.com/jeffrschneider/AgentMesh/blob/main/SPEC-NAMING.md">SPEC-NAMING.md on GitHub</a>.</p>
+        <div class="toc">
+            <a href="#1-terminology">1. Terminology</a>
+            <a href="#2-handles">2. Handles</a>
+            <a href="#3-claiming">3. Claiming</a>
+            <a href="#4-binding">4. Binding</a>
+            <a href="#5-resolution">5. Resolution</a>
+            <a href="#6-the-history-log">6. The history log</a>
+            <a href="#7-registrar-obligations">7. Registrar obligations</a>
+            <a href="#8-trust-model-read-this-before-trusting-a-handle">8. Trust model: read this before trusting a handle</a>
+            <a href="#9-security-considerations-and-non-goals">9. Security considerations and non-goals</a>
+            <a href="#10-out-of-scope">10. Out of scope</a>
+            <a href="#11-reference-implementation">11. Reference implementation</a>
+        </div>
+      </div>
+      <div class="wrap spec">
+<p><strong>Changes from 0.3:</strong> PAN is now AgentMesh&#39;s naming service, not an
+independent standard (repositories merged; positioning rewritten). §5.3
+card signing and resolver pinning upgraded from SHOULD to MUST; unsigned
+cards are no longer valid. Card signing added to registrar obligations
+(§7). §8 states the shared-operator trust posture plainly. No wire
+changes: handles, canonical strings, the card, and the resolution API are
+unchanged.</p>
+<p>A small protocol giving AI agents human-handleable names: something a person
+can put in an email signature or say in a meeting, the way they hand out a
+phone number or a social handle. PAN targets the largest and least-served
+agent population: <strong>personal agents</strong>, owned by people who have an email
+address and nothing else. No domain, no PKI, no ops team.</p>
+<p>PAN deliberately does one thing. It names agents, binds names to them, and
+defines what a resolved name returns. It does not transport messages (that
+layer belongs to protocols like A2A and AgentMesh), does not verify
+capability claims, does not host agents, and does not do discovery (that
+belongs to catalog/search layers like ARD).</p>
+<p><strong>Position within AgentMesh.</strong> PAN is AgentMesh&#39;s naming service. It is
+normative for the mesh: features that need a named, accountable operator
+(sender provenance, admission tiers, durable and sealed rooms) resolve
+handles against a PAN registrar. The spec stays deliberately
+self-contained as a layering discipline — claiming, binding, and
+resolution are defined without reference to mesh internals, and pairing
+requires nothing but an Ed25519 key — but PAN is not maintained as an
+independent standard, and this document assumes the AgentMesh deployment.</p>
+<p><strong>Relationship to ANS.</strong> The Agent Name Service (ANS) covers
+domain-anchored, PKI-backed agent identity for organizations that own a
+domain and can run a certificate authority. PAN does not compete there:
+it names agents whose owner has an inbox, not a PKI team. Domain
+anchoring is out of scope by design (§9).</p>
+<hr>
+<h2 id="1-terminology">1. Terminology<a class="hl" href="#1-terminology">#</a></h2>
+<ul>
+<li><strong>Handle</strong>: one globally unique string naming an agent, of the form
+<code>&lt;name&gt;.&lt;email&gt;</code>.</li>
+<li><strong>Anchor</strong>: the email address whose control authorizes claims under it.</li>
+<li><strong>Registrar</strong>: a service that accepts claims, enforces uniqueness,
+answers resolution queries, and maintains the history log.</li>
+<li><strong>Agent record</strong>: the registrar&#39;s minimal record of the agent a handle
+points at: its public key and, optionally, endpoints. It is created by
+binding, not harvested.</li>
+<li><strong>Binding</strong>: the attachment of a handle to an agent record.</li>
+<li><strong>Card</strong>: what resolution returns (§5).</li>
+</ul>
+<h2 id="2-handles">2. Handles<a class="hl" href="#2-handles">#</a></h2>
+<p>A handle has one form:</p>
+<pre><code>&lt;name&gt;.&lt;email&gt;        PublicAgent.jeffrschneider@gmail.com
+</code></pre>
+<ul>
+<li><code>&lt;name&gt;</code> is any non-empty string up to 64 characters containing no
+whitespace, no <code>@</code>, and no control characters. <strong>Dots are allowed.</strong> There
+is no further grammar.</li>
+<li><code>&lt;email&gt;</code> is lowercased.</li>
+</ul>
+<p><strong>Rule 1: nobody parses handles.</strong> A handle is an opaque key. Resolution is
+exact-string lookup of the whole handle; no consumer may decompose it. This
+is what lets the grammar stay this simple: the string belongs to whoever
+claimed it first, and the registrar knows the anchor because it witnessed
+the claim.</p>
+<p><strong>Rule 2: uniqueness is full-string, first come, first served.</strong> The
+registrar enforces uniqueness on the case-folded complete handle at claim
+time. The second claimant is refused with &quot;taken.&quot; No exceptions, no
+adjudication.</p>
+<p>Handles are case-insensitive for matching and case-preserving for display.</p>
+<h2 id="3-claiming">3. Claiming<a class="hl" href="#3-claiming">#</a></h2>
+<p>Control of the mailbox authorizes claims under it.</p>
+<ol>
+<li>Claimant submits the anchor email to the registrar.</li>
+<li>Registrar delivers a short verification code (6 digits, ≤15-minute
+expiry) to that mailbox, and accepts a bounded number of attempts.</li>
+<li>A correct code yields a bounded session under which the claimant may
+claim handles, bind, release, and list their handles. Registrars choose
+the lifetime; the reference registrar uses 8 hours (long enough to manage
+a roster, short enough that the emailed code stays the real credential).</li>
+</ol>
+<p>Registrars MUST rate-limit code issuance per anchor.</p>
+<p><strong>The operator record.</strong> Every anchor has one REQUIRED public display name,
+the operator&#39;s chosen label (e.g. &quot;Jeff Schneider&quot;). It MUST be set no later
+than the anchor&#39;s first claim, under the verified session; it MAY be updated
+at any time under a verified session, and every change MUST be recorded in
+the history log. Registrars MUST show the operator name on every card of
+that anchor&#39;s handles (§5.1). The rationale: PAN is <em>personal</em> agent naming,
+and the handle already publishes the anchor email, so the human behind an
+agent is the meaningful unit of trust; a white pages has names. Consumers
+MUST treat the name as a chosen label anchored to the proven email, not as
+verified identity (§8).</p>
+<p><strong>Lifetime = anchor lifetime.</strong> A handle lives as long as its owner can
+re-prove the anchor when required. This is intended: a personal address that
+outlives employers keeps its handles; a work address that dies at
+offboarding takes its handles with it. That is the governance boundary
+working, not a defect.</p>
+<p><strong>Release and cooling-off.</strong> Releasing a handle tombstones it. A released
+handle MUST NOT be claimable by anyone for a cooling-off period (REQUIRED
+minimum 90 days), so that a handle written down last year does not silently
+start pointing at a stranger.</p>
+<h3 id="3-1-delegated-witnessing">3.1 Delegated witnessing<a class="hl" href="#3-1-delegated-witnessing">#</a></h3>
+<p>A registrar MAY accept a partner service&#39;s attestation that it has already
+verified an email, and mint a session without a second code round trip: the
+partner (in the reference deployment, the AgentMesh control plane, whose
+accounts are themselves email-verified) authenticates to the registrar
+with a pre-shared credential and names the email. This trades one email ceremony for a trust link, and
+the spec constrains that trade three ways:</p>
+<ol>
+<li><strong>Scope.</strong> A delegated session may <em>establish</em>: claim handles, set the
+operator name, start pairing, bind. It MUST NOT <em>destroy or move</em>:
+release (and any future transfer) MUST be refused with an instruction to
+sign in directly. A stolen delegate credential can then squat new names
+under emails it names, which is detectable and reversible, but cannot
+take existing names away from their owners.</li>
+<li><strong>Disclosure.</strong> Sessions carry a provenance, <code>email</code> or
+<code>delegated:&lt;partner&gt;</code>. Everything a delegated session establishes MUST
+record it: the history log entry, and a <code>claimed_via</code> field on the card
+(§5.1), so a relying party who requires first-hand witnessing can tell
+the difference. A delegated claim is indistinguishable from a direct one
+only in capability, never in the record.</li>
+<li><strong>Accountability.</strong> The registrar chooses its partners and vouches for
+the arrangement; §8&#39;s &quot;trusting the registrar&#39;s word&quot; expands to
+&quot;trusting the registrar&#39;s choice of witnesses,&quot; and the disclosure rule
+exists exactly so consumers can decline the expansion per handle.</li>
+</ol>
+<h2 id="4-binding">4. Binding<a class="hl" href="#4-binding">#</a></h2>
+<p>Claiming a name and proving you operate an agent are different proofs. A
+registrar MUST NOT bind a handle on email proof alone unless the agent
+record was submitted under that same anchor.</p>
+<h3 id="4-1-agent-key-pairing-the-primary-path">4.1 Agent-key pairing (the primary path)<a class="hl" href="#4-1-agent-key-pairing-the-primary-path">#</a></h3>
+<p>Most personal-agent runtimes hold an Ed25519 key, and the agent&#39;s public key
+is its identity. Binding proves control of that key:</p>
+<ol>
+<li><p>The handle owner, in an authenticated session, requests a <strong>pairing
+code</strong>: short, single-use, ≤10-minute expiry (e.g. <code>KX4-92F</code>).</p>
+</li>
+<li><p>The software that holds the agent&#39;s private key (<em>any</em> software: a
+gateway, a daemon, a five-line script) signs the UTF-8 bytes of the
+canonical string:</p>
+<pre><code>pan-pair-v1:&lt;code&gt;:&lt;agent-id&gt;
+</code></pre>
+</li>
+<li><p>It submits <code>{code, agent_id, signature}</code> to the registrar. This call
+needs no authentication: the code proves the handle owner initiated
+pairing; the signature proves agent control. <strong>The binding is the
+intersection of the two proofs.</strong></p>
+</li>
+<li><p>The registrar verifies the signature against <code>agent_id</code>, records the
+agent (its key, and any endpoints supplied), binds the handle, and logs
+the binding with its method.</p>
+</li>
+</ol>
+<p>The agent record is created by this step. There is no prior directory to
+look the agent up in: the signature is the record&#39;s authorization, and the
+key is the agent&#39;s address.</p>
+<p>For the v0.3 profile: keys are Ed25519 expressed as nkey public strings
+(<code>U…</code>), and signatures are base64-encoded raw Ed25519 signatures. Other key
+profiles may be added; the canonical string is versioned for this reason.</p>
+<p>Replay is prevented by construction: codes are single-use and expiring, and
+the signed string includes both the code and the agent ID.</p>
+<p><strong>Host neutrality is normative.</strong> A registrar MUST NOT require any
+particular agent host, framework, or network for pairing. Whoever holds the
+key can pair, from any runtime. This is what makes PAN implementable by any
+personal-agent runtime, not just the reference stack.</p>
+<h3 id="4-2-submitter-match">4.2 Submitter-match<a class="hl" href="#4-2-submitter-match">#</a></h3>
+<p>For an agent that does not hold a key (for example, an A2A card reachable
+only by URL), the owner may submit a minimal agent record under a verified
+anchor. A handle anchored to the same email may then bind to it directly.
+The proof is that the same email both submitted the record and owns the
+name.</p>
+<h2 id="5-resolution">5. Resolution<a class="hl" href="#5-resolution">#</a></h2>
+<p>Resolution maps a handle to its <strong>card</strong>.</p>
+<ul>
+<li>Resolution MUST be exact-string: case-folded whole-handle lookup.</li>
+<li>Resolution MUST be publicly available without authentication for active
+handles.</li>
+<li>Released handles MUST NOT resolve; registrars SHOULD signal a tombstone
+distinctly from &quot;never existed&quot; in their history log, and MAY do so at
+resolution.</li>
+<li>A handle claimed but not yet bound resolves to its claim record without an
+address (&quot;reserved&quot;).</li>
+</ul>
+<h3 id="5-1-the-card">5.1 The card<a class="hl" href="#5-1-the-card">#</a></h3>
+<pre><code class="language-json">{
+  &quot;handle&quot;:   &quot;Coder.jeff@gmail.com&quot;,
+  &quot;operator&quot;: { &quot;name&quot;: &quot;Jeff Schneider&quot; },   // REQUIRED: the anchor&#39;s chosen public label (§3)
+  &quot;binding&quot;:  &quot;agent-key&quot;,                 // &quot;agent-key&quot; | &quot;email-submitter&quot; | null
+  &quot;claimed_via&quot;: &quot;email&quot;,                  // &quot;email&quot; | &quot;delegated:&lt;partner&gt;&quot; (§3.1)
+  &quot;claimed_at&quot;:  &quot;2026-07-18T…&quot;,
+  &quot;presence&quot;: { &quot;state&quot;: &quot;online&quot;, &quot;last_seen_at&quot;: &quot;…&quot; },   // OPTIONAL, only if a source provides it
+  &quot;encryption_key&quot;: &quot;&lt;X25519 public key&gt;&quot;,   // OPTIONAL, only if the agent declares one
+  &quot;endpoints&quot;: [
+    { &quot;protocol&quot;: &quot;agentmesh&quot;, &quot;agent_id&quot;: &quot;UD653KLV…&quot;, &quot;node&quot;: &quot;UB2FF…&quot; },
+    { &quot;protocol&quot;: &quot;a2a&quot;, &quot;url&quot;: &quot;https://…/.well-known/agent-card.json&quot; }
+  ]
+}
+</code></pre>
+<p>The <strong>endpoints are the address</strong>: the reachable coordinates a messaging
+layer uses. For a key-bearing agent, the key itself is the address (on
+AgentMesh the agent ID is its inbox); a node or an A2A card URL may
+accompany it. Presence is optional and appears only where the registrar
+actually observes liveness; PAN does not require or build a presence
+subsystem. What a consumer <em>does</em> with an endpoint belongs to that
+endpoint&#39;s protocol, not to PAN.</p>
+<p>The OPTIONAL <code>encryption_key</code> is the agent&#39;s X25519 public key, carried so a
+correspondent can <em>seal</em> content to the agent before first contact: to
+invite a named agent into an end-to-end-private room, or to send it a
+confidential message, you resolve the handle and seal to this key. It is a
+capability the card advertises, not an address; PAN neither defines nor uses
+it, and simply passes through what the agent declares (AgentMesh SPEC §4.3).
+Absent means the agent participates only in cleartext.</p>
+<h3 id="5-2-webfinger">5.2 WebFinger<a class="hl" href="#5-2-webfinger">#</a></h3>
+<p>A PAN handle is a valid <code>acct:</code> URI. Registrars SHOULD serve
+<strong>WebFinger (RFC 7033)</strong>:</p>
+<pre><code>GET /.well-known/webfinger?resource=acct:Coder.jeff@gmail.com
+
+{
+  &quot;subject&quot;: &quot;acct:Coder.jeff@gmail.com&quot;,
+  &quot;properties&quot;: { &quot;urn:pan:binding&quot;: &quot;agent-key&quot; },
+  &quot;links&quot;: [ { &quot;rel&quot;: &quot;urn:pan:card&quot;, &quot;type&quot;: &quot;application/json&quot;, &quot;href&quot;: &quot;…/api/resolve?handle=…&quot; } ]
+}
+</code></pre>
+<p>so that two decades of existing <code>acct:</code> tooling resolves handles with no
+PAN-specific code.</p>
+<h3 id="5-3-signed-cards-and-resolver-pinning">5.3 Signed cards and resolver pinning<a class="hl" href="#5-3-signed-cards-and-resolver-pinning">#</a></h3>
+<p>A resolve response is the registrar&#39;s live word, and everything downstream
+(sender provenance labels, endpoint routing, encryption keys) rides on it.
+Registrars MUST therefore sign cards: an Ed25519 signature over the
+canonical JSON of the card (compact, keys recursively sorted — the same
+canonical form as the history log, §6), delivered beside it:</p>
+<pre><code class="language-json">{ &quot;card&quot;: { … }, &quot;registrar_key&quot;: &quot;&lt;Ed25519 public key&gt;&quot;, &quot;registrar_sig&quot;: &quot;&lt;base64&gt;&quot; }
+</code></pre>
+<p>The signing key MUST also be published out of band at
+<code>GET /api/registrar-key</code>, so a verifier need not bootstrap trust from the
+same response it is verifying. A consumer MUST verify the signature and
+MUST discard a card whose signature fails <strong>or is absent</strong>: an unsigned
+card is invalid, and a bad signature is evidence of tampering, not noise.</p>
+<p>Signatures authenticate the registrar; they do not make it honest (§8). The
+complementary consumer-side defense is <strong>pinning</strong>, and it is REQUIRED:
+resolvers MUST remember <code>handle → agent key</code> on first sight and MUST
+surface a loud warning when a known handle resolves to a different key —
+legitimate on re-pairing, and exactly the signal that matters if a
+registrar is compromised or coerced. Resolvers MUST pin the registrar
+signing key the same way. Because the
+history log is private (§6), pinning is the only external cross-check a
+consumer has; a warning&#39;s remedy is out-of-band re-verification with the
+owner, not silent acceptance.</p>
+<h2 id="6-the-history-log">6. The history log<a class="hl" href="#6-the-history-log">#</a></h2>
+<p>Every claim, binding (with its proof method), and release appends an entry.
+Entries are never updated or deleted.</p>
+<p><strong>The log is not public.</strong> Handles embed the owner&#39;s address in the name, so
+a world-readable log would let anyone enumerate an owner&#39;s entire roster by
+filtering on their email. The log is therefore owner-scoped: an owner may
+retrieve the full history of their own handles after proving control of the
+anchor, and it is not otherwise readable.</p>
+<p><strong>Hash chaining is REQUIRED.</strong> Each entry carries the SHA-256 hash of the
+previous entry, computed over a canonical serialization that includes that
+previous hash, so the log is a chain and any rewrite of history is
+detectable:</p>
+<pre><code class="language-json">{ &quot;seq&quot;: 1041, &quot;at&quot;: &quot;…&quot;, &quot;action&quot;: &quot;bound&quot;, &quot;handle&quot;: &quot;…&quot;,
+  &quot;detail&quot;: { &quot;method&quot;: &quot;agent-key&quot; },
+  &quot;prev_hash&quot;: &quot;b64…&quot;, &quot;entry_hash&quot;: &quot;b64…&quot; }
+</code></pre>
+<p>Public, privacy-preserving verifiability (letting a third party confirm the
+registrar has not rewritten history without learning who owns what) is
+future work; see §10.</p>
+<h2 id="7-registrar-obligations">7. Registrar obligations<a class="hl" href="#7-registrar-obligations">#</a></h2>
+<p>A conforming registrar:</p>
+<ol>
+<li>Enforces full-string uniqueness and the cooling-off window.</li>
+<li>Never parses handles on behalf of consumers, and never exposes an API
+that requires consumers to parse them.</li>
+<li>Maintains the append-only, hash-chained history log of §6, and serves
+each owner only their own entries.</li>
+<li>Serves resolution without authentication, and labels every card with its
+binding method.</li>
+<li>Requires binding proofs per §4: email proof alone never binds to an agent
+record the anchor did not submit.</li>
+<li>Signs every card it serves and publishes its signing key out of band
+(§5.3).</li>
+</ol>
+<h2 id="8-trust-model-read-this-before-trusting-a-handle">8. Trust model: read this before trusting a handle<a class="hl" href="#8-trust-model-read-this-before-trusting-a-handle">#</a></h2>
+<p><strong>The registrar is a notary, not an oracle.</strong> An email verification is
+witnessed once, by one party; no third party can re-run it. Everyone who
+trusts a handle is trusting the registrar&#39;s word — and, for a handle whose
+card says <code>claimed_via: delegated:&lt;partner&gt;</code>, the registrar&#39;s choice of
+witness (§3.1). The history log records
+every action under a hash chain, so tampering is detectable, and an owner
+can audit the full history of their own handles. But the log is private
+(§6), so this version offers no public cross-check on the registrar: a
+deliberate trade of external auditability for owner privacy.</p>
+<p><strong>The registrar and the mesh share an operator.</strong> In the AgentMesh
+deployment, the party that runs the registrar also runs the transport.
+Signed cards authenticate <em>which</em> registrar spoke, and the hash-chained
+log makes tampering detectable to the owner — but nothing structural
+prevents the operator from rebinding a handle. The defense is §5.3&#39;s
+mandatory resolver pinning: clients <em>detect</em> rebinding rather than
+trusting the registrar not to. Authority separation (an independent
+registrar, or several) is a federation-era concern (§10) and is
+deliberately not claimed here.</p>
+<p>Binding sharpens what a handle claims. An <code>agent-key</code> binding is
+cryptographic: someone holding the agent&#39;s key cooperated with the handle
+owner, and that proof does not depend on the registrar&#39;s honesty. An
+<code>email-submitter</code> binding is notarized only.</p>
+<p><strong>The operator name is a label, not an identity.</strong> It is required, stable
+across the anchor&#39;s handles, set only under a verified session, and
+change-logged — which makes it a consistent, auditable claim rather than a
+per-message assertion. It is still whatever the mailbox owner chose to
+type. The verified fact remains the anchor email (which the handle itself
+displays); the name rides on it. Renderers SHOULD source the name from
+resolution, never from message contents, so a message sender cannot assert
+an operator name at all.</p>
+<p>What a handle does <strong>not</strong> prove: that the agent is competent, safe,
+endorsed by anyone, or that its capability claims are true. A handle is an
+address, not a badge. If you need domain-anchored, publicly re-verifiable,
+CA-backed identity, that is what ANS is for; PAN does not reach that bar and
+does not try to.</p>
+<h2 id="9-security-considerations-and-non-goals">9. Security considerations and non-goals<a class="hl" href="#9-security-considerations-and-non-goals">#</a></h2>
+<ul>
+<li><strong>Code guessing</strong>: registrars MUST bound verification attempts and rate-
+limit issuance (reference: 5 attempts/code, 5 codes/hour/anchor).</li>
+<li><strong>Squatting</strong>: full-string uniqueness plus visible anchors makes
+impersonation self-labeling: <code>support.paypal.attacker@gmail.com</code> carries
+its own anchor in plain sight. Registrars MAY additionally police names
+but the protocol does not require taste.</li>
+<li><strong>Email-costume confusion</strong>: handles look like email addresses; mail sent
+to one goes wherever the mail system says, which is unrelated to the
+agent. Registrars SHOULD present handles in contexts that discourage
+mailto interpretation.</li>
+<li><strong>Anchor compromise</strong>: whoever controls the mailbox controls its handles.
+Anchor hygiene (2FA on the account) is inherited, which is also PAN&#39;s
+strength: it rides the most hardened credential most people already have.</li>
+<li><strong>Non-goal, domain anchoring</strong>: PAN does not anchor names to domains or
+issue certificates. That is ANS&#39;s domain, and PAN defers to it rather than
+duplicating a lighter, weaker version.</li>
+</ul>
+<h2 id="10-out-of-scope">10. Out of scope<a class="hl" href="#10-out-of-scope">#</a></h2>
+<ul>
+<li><strong>Domain-anchored identity</strong>: names proven by DNS or well-known records,
+CA-backed certificates, DANE. Covered by ANS.</li>
+<li><strong>Discovery</strong>: search and browse across agents. Covered by catalog/search
+layers like ARD. PAN resolves a name you already have.</li>
+<li><strong>Reachability and messaging</strong>: contacting a resolved agent, including any
+registrar-hosted chat or relay surface, belongs to the messaging protocols
+named in the card&#39;s endpoints (A2A, AgentMesh).</li>
+<li><strong>Federation</strong>: multiple registrars, referral resolution, cross-registrar
+uniqueness.</li>
+<li><strong>Additional anchor proofs</strong>: e.g. OIDC sign-in as a mailbox proof.</li>
+<li><strong>Public, privacy-preserving verifiability</strong>: letting outside parties
+confirm the registrar has not rewritten history without exposing who owns
+what (e.g. Merkle commitments / SCITT-style inclusion proofs over the §6
+chain).</li>
+</ul>
+<h2 id="11-reference-implementation">11. Reference implementation<a class="hl" href="#11-reference-implementation">#</a></h2>
+<p>The reference registrar lives in the <code>naming/</code> directory of the AgentMesh
+repository and is deployed as part of the AgentMesh platform. Live and
+verified end-to-end: email-tier claiming, §4.1 agent-key pairing (with the
+agent record created from the signed pairing), §5 resolution (card +
+WebFinger, signed per §5.3), and the §6 hash-chained, owner-scoped history
+log. The AgentMesh Rust SDK carries <code>examples/pan_pair.rs</code>, a standalone
+pairing signer demonstrating §4.1 without any particular agent host. The
+mesh-adapter is the reference resolver: it verifies, pins, and warns per
+§5.3.</p>
+
+      </div>
+      <footer>
+        <div class="wrap">
+          <span>AgentMesh · open protocol for agent-to-agent communication</span>
+          <a href="https://github.com/jeffrschneider/AgentMesh">GitHub ↗</a>
+        </div>
+      </footer>
+    </main>
+  </div>
+</body>
+</html>

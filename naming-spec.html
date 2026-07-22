@@ -155,7 +155,7 @@
         </div>
         <p class="canon">AgentMesh's naming service, companion to the
           <a href="spec.html">protocol specification</a>.
-          Rendered 2026-07-22 from commit <a href="https://github.com/jeffrschneider/AgentMesh/commit/69aafd9">69aafd9</a>.
+          Rendered 2026-07-22 from commit <a href="https://github.com/jeffrschneider/AgentMesh/commit/8c3c8d9">8c3c8d9</a>.
           The canonical source is
           <a href="https://github.com/jeffrschneider/AgentMesh/blob/main/SPEC-NAMING.md">SPEC-NAMING.md on GitHub</a>.</p>
         <div class="toc">
@@ -179,7 +179,9 @@ card signing and resolver pinning upgraded from SHOULD to MUST; unsigned
 cards are no longer valid. Card signing added to registrar obligations
 (§7). §8 states the shared-operator trust posture plainly. No wire
 changes: handles, canonical strings, the card, and the resolution API are
-unchanged.</p>
+unchanged. §4.3 (delegated binding) added: a §3.1 partner that verified
+agent-key control first-hand may bind without a second pairing ceremony,
+disclosed via <code>binding: agent-key-delegated:&lt;partner&gt;</code>.</p>
 <p>A small protocol giving AI agents human-handleable names: something a person
 can put in an email signature or say in a meeting, the way they hand out a
 phone number or a social handle. PAN targets the largest and least-served
@@ -338,6 +340,29 @@ only by URL), the owner may submit a minimal agent record under a verified
 anchor. A handle anchored to the same email may then bind to it directly.
 The proof is that the same email both submitted the record and owns the
 name.</p>
+<h3 id="4-3-delegated-binding">4.3 Delegated binding<a class="hl" href="#4-3-delegated-binding">#</a></h3>
+<p>When the partner behind a delegated session (§3.1) has itself verified
+control of an agent key first-hand — by an equivalent signed ceremony, a
+single-use code signed by the agent&#39;s key — the registrar MAY accept the
+partner&#39;s attestation and bind without a second pairing ceremony. The
+rationale is the person&#39;s experience: proving key control twice in one
+sitting, once to the partner and once to the registrar, proves nothing
+the first proof did not.</p>
+<p>The trade is disclosed the same way §3.1 discloses claiming:</p>
+<ol>
+<li><strong>Scope.</strong> Only a delegated session may bind this way, and only to
+handles its own email anchors. The §3.1 scope limits apply unchanged:
+a delegated session still cannot release.</li>
+<li><strong>Disclosure.</strong> The binding method is recorded and served as
+<code>agent-key-delegated:&lt;partner&gt;</code> — in the history log entry and on the
+card&#39;s <code>binding</code> field — so a relying party that requires first-hand
+pairing (§4.1) can tell the difference and re-run the §4.1 ceremony if
+it cares.</li>
+<li><strong>Accountability.</strong> The registrar&#39;s word now covers the partner&#39;s
+verification of key control, not only the email. §8&#39;s expansion
+(&quot;trusting the registrar&#39;s choice of witnesses&quot;) covers this, and §9
+notes what a stolen delegate credential can and cannot do.</li>
+</ol>
 <h2 id="5-resolution">5. Resolution<a class="hl" href="#5-resolution">#</a></h2>
 <p>Resolution maps a handle to its <strong>card</strong>.</p>
 <ul>
@@ -354,7 +379,7 @@ address (&quot;reserved&quot;).</li>
 <pre><code class="language-json">{
   &quot;handle&quot;:   &quot;Coder.jeff@gmail.com&quot;,
   &quot;operator&quot;: { &quot;name&quot;: &quot;Jeff Schneider&quot; },   // REQUIRED: the anchor&#39;s chosen public label (§3)
-  &quot;binding&quot;:  &quot;agent-key&quot;,                 // &quot;agent-key&quot; | &quot;email-submitter&quot; | null
+  &quot;binding&quot;:  &quot;agent-key&quot;,                 // &quot;agent-key&quot; | &quot;agent-key-delegated:&lt;partner&gt;&quot; | &quot;email-submitter&quot; | null
   &quot;claimed_via&quot;: &quot;email&quot;,                  // &quot;email&quot; | &quot;delegated:&lt;partner&gt;&quot; (§3.1)
   &quot;claimed_at&quot;:  &quot;2026-07-18T…&quot;,
   &quot;presence&quot;: { &quot;state&quot;: &quot;online&quot;, &quot;last_seen_at&quot;: &quot;…&quot; },   // OPTIONAL, only if a source provides it
@@ -497,6 +522,12 @@ but the protocol does not require taste.</li>
 to one goes wherever the mail system says, which is unrelated to the
 agent. Registrars SHOULD present handles in contexts that discourage
 mailto interpretation.</li>
+<li><strong>Delegate credential compromise</strong>: a stolen §3.1 credential could
+always squat new names under emails it names; with §4.3 it can
+additionally bind those names to attacker keys. Both remain
+establish-only (release still requires the owner signing in directly),
+both are fully disclosed on cards and in the log, and resolver pinning
+(§5.3) alarms on any rebinding of a known handle.</li>
 <li><strong>Anchor compromise</strong>: whoever controls the mailbox controls its handles.
 Anchor hygiene (2FA on the account) is inherited, which is also PAN&#39;s
 strength: it rides the most hardened credential most people already have.</li>

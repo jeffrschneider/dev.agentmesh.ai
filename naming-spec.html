@@ -156,7 +156,7 @@
         </div>
         <p class="canon">AgentMesh's naming service, companion to the
           <a href="spec.html">protocol specification</a>.
-          Rendered 2026-07-22 from commit <a href="https://github.com/jeffrschneider/AgentMesh/commit/d9d9c41">d9d9c41</a>.
+          Rendered 2026-07-22 from commit <a href="https://github.com/jeffrschneider/AgentMesh/commit/cf62982">cf62982</a>.
           The canonical source is
           <a href="https://github.com/jeffrschneider/AgentMesh/blob/main/SPEC-NAMING.md">SPEC-NAMING.md on GitHub</a>.</p>
         <div class="toc">
@@ -182,7 +182,9 @@ cards are no longer valid. Card signing added to registrar obligations
 changes: handles, canonical strings, the card, and the resolution API are
 unchanged. §4.3 (delegated binding) added: a §3.1 partner that verified
 agent-key control first-hand may bind without a second pairing ceremony,
-disclosed via <code>binding: agent-key-delegated:&lt;partner&gt;</code>.</p>
+disclosed via <code>binding: agent-key-delegated:&lt;partner&gt;</code>. §5.4
+(discoverability) added: an anchor is findable by its email only after
+its owner opts in; default stays no-enumeration.</p>
 <p>A small protocol giving AI agents human-handleable names: something a person
 can put in an email signature or say in a meeting, the way they hand out a
 phone number or a social handle. PAN targets the largest and least-served
@@ -441,6 +443,26 @@ signing key the same way. Because the
 history log is private (§6), pinning is the only external cross-check a
 consumer has; a warning&#39;s remedy is out-of-band re-verification with the
 owner, not silent acceptance.</p>
+<h3 id="5-4-discoverability-opt-in">5.4 Discoverability (opt-in)<a class="hl" href="#5-4-discoverability-opt-in">#</a></h3>
+<p>Handles embed their anchor email, so §6 keeps the roster log private and
+no endpoint enumerates an anchor&#39;s handles — someone knowing your email
+must not learn your agents. Friend discovery (&quot;do any of my contacts have
+agents?&quot;) is exactly that lookup, so it exists only as a <strong>consented
+exception</strong>:</p>
+<ul>
+<li>Every anchor carries a <code>discoverable</code> flag, <strong>default off</strong>. It MAY be
+flipped under a verified session (delegated sessions included), and
+every change is logged (§6). Setting it requires an operator record: you
+become findable as someone, not as a blank.</li>
+<li><code>GET /api/discover?email=…</code> is public. For an opted-in anchor it
+returns the operator name and the anchor&#39;s active handles (name and
+bound-or-not; full detail still comes from per-handle resolution). For
+everything else it answers <code>discoverable: false</code> — <strong>a not-opted-in
+anchor and a nonexistent one answer identically</strong>, so the endpoint
+confirms nothing about anyone who hasn&#39;t consented.</li>
+<li>Registrars SHOULD rate-limit discovery like verification-code issuance:
+consent makes the lookup legitimate, not free to farm.</li>
+</ul>
 <h2 id="6-the-history-log">6. The history log<a class="hl" href="#6-the-history-log">#</a></h2>
 <p>Every claim, binding (with its proof method), and release appends an entry.
 Entries are never updated or deleted.</p>

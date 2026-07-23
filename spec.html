@@ -154,7 +154,7 @@
           <span>status <b>Working Draft</b></span>
           <span>date <b>2026-07-18</b></span>
         </div>
-        <p class="canon">Rendered 2026-07-22 from commit <a href="https://github.com/jeffrschneider/AgentMesh/commit/d9d9c41">d9d9c41</a>.
+        <p class="canon">Rendered 2026-07-23 from commit <a href="https://github.com/jeffrschneider/AgentMesh/commit/9d44ea3">9d44ea3</a>.
           The canonical source is
           <a href="https://github.com/jeffrschneider/AgentMesh/blob/main/SPEC.md">SPEC.md on GitHub</a>.</p>
         <div class="toc">
@@ -1696,7 +1696,27 @@ specification, <code>SPEC-NAMING.md</code> (PAN).</p>
 <li>Agent discovers all agents matching criteria.</li>
 <li>Agent emits an event to each discovered agent&#39;s inbox, or to a shared event subject that matching agents subscribe to.</li>
 </ol>
-<h3 id="10-7-cancel">10.7. <code>cancel</code><a class="hl" href="#10-7-cancel">#</a></h3>
+<h3 id="10-7-chat-well-known-skill">10.7. <code>chat</code> <em>(well-known skill)</em><a class="hl" href="#10-7-chat-well-known-skill">#</a></h3>
+<p>A single well-known skill name for open conversation, so that any two
+agents can hold a plain exchange without prior agreement on a skill name.</p>
+<p><strong>Composed from:</strong> <code>request</code> + <code>respond</code></p>
+<ul>
+<li>An agent that can converse in natural language SHOULD register a skill
+with <code>id: &quot;chat&quot;</code>, taking <code>{ &quot;text&quot;: string }</code> and returning
+<code>{ &quot;text&quot;: string }</code>.</li>
+<li>A sender that wants to talk (rather than invoke a specific capability)
+SHOULD <code>request</code> the <code>chat</code> skill. If the target has no <code>chat</code> handler,
+it responds with <code>SKILL_NOT_FOUND</code> (§12) — the sender learns the agent
+is reachable but not conversational, and MAY inspect its manifest for
+the skills it does expose.</li>
+</ul>
+<p>This is a naming convention, not a new capability: <code>chat</code> is to
+conversation what a phone number is to a call. Tool-only agents (those
+that expose task skills but not <code>chat</code>) remain fully reachable by their
+declared skills; they simply decline open conversation. Rooms
+(<code>mesh://extensions/rooms/v1</code>) carry conversation among many agents; <code>chat</code>
+is the pairwise case.</p>
+<h3 id="10-8-cancel">10.8. <code>cancel</code><a class="hl" href="#10-8-cancel">#</a></h3>
 <p>Requests cancellation of an in-progress Task.</p>
 <p><strong>Composed from:</strong> <code>request</code> (to the responder&#39;s inbox)</p>
 <p><strong>Flow:</strong></p>
@@ -1705,7 +1725,7 @@ specification, <code>SPEC-NAMING.md</code> (PAN).</p>
 <li>Responder attempts to cancel the Task and responds with updated Task state.</li>
 <li>Cancellation is best-effort. The Task may have already completed.</li>
 </ol>
-<h3 id="10-8-transfer-parked-0-2-not-core">10.8. <code>transfer</code> <em>(Parked — 0.2; not core)</em><a class="hl" href="#10-8-transfer-parked-0-2-not-core">#</a></h3>
+<h3 id="10-9-transfer-parked-0-2-not-core">10.9. <code>transfer</code> <em>(Parked — 0.2; not core)</em><a class="hl" href="#10-9-transfer-parked-0-2-not-core">#</a></h3>
 <p>Hands off a Task to another agent, including accumulated context.</p>
 <p><strong>Composed from:</strong> <code>request</code> + context payload</p>
 <p><strong>Flow:</strong></p>
@@ -1714,7 +1734,7 @@ specification, <code>SPEC-NAMING.md</code> (PAN).</p>
 <li>Agent B creates a new Task (or adopts the existing <code>task_id</code>) and takes over.</li>
 <li>Agent A responds to the original requester with <code>meta.transferred_to: &quot;&lt;agent-B-nkey&gt;&quot;</code>.</li>
 </ol>
-<h3 id="10-9-heartbeat">10.9. <code>heartbeat</code><a class="hl" href="#10-9-heartbeat">#</a></h3>
+<h3 id="10-10-heartbeat">10.10. <code>heartbeat</code><a class="hl" href="#10-10-heartbeat">#</a></h3>
 <p>Periodic liveness signal. Emitted per <strong>node</strong> (one heartbeat covers all agents the node hosts); a node MAY additionally emit a per-agent heartbeat to override status for a specific agent.</p>
 <p><strong>Composed from:</strong> <code>emit</code> (periodic)</p>
 <p><strong>Subject:</strong> <code>mesh.heartbeat.{node_id}</code> (or <code>mesh.heartbeat.{node_id}.{agent_id}</code> for a per-agent override)</p>
@@ -1733,7 +1753,7 @@ specification, <code>SPEC-NAMING.md</code> (PAN).</p>
   &quot;load&quot;: 0.3
 }
 </code></pre>
-<h3 id="10-10-status">10.10. <code>status</code><a class="hl" href="#10-10-status">#</a></h3>
+<h3 id="10-11-status">10.11. <code>status</code><a class="hl" href="#10-11-status">#</a></h3>
 <p>Queries an agent&#39;s current operational status.</p>
 <p><strong>Composed from:</strong> <code>request</code> (well-known schema)</p>
 <p><strong>Flow:</strong></p>
@@ -1741,7 +1761,7 @@ specification, <code>SPEC-NAMING.md</code> (PAN).</p>
 <li>Requester sends <code>request</code> with <code>payload.skill: &quot;agent.status&quot;</code>.</li>
 <li>Agent responds with current state, active tasks, availability, and any relevant diagnostics.</li>
 </ol>
-<h3 id="10-11-authorize-parked-0-2-not-core">10.11. <code>authorize</code> <em>(Parked — 0.2; not core)</em><a class="hl" href="#10-11-authorize-parked-0-2-not-core">#</a></h3>
+<h3 id="10-12-authorize-parked-0-2-not-core">10.12. <code>authorize</code> <em>(Parked — 0.2; not core)</em><a class="hl" href="#10-12-authorize-parked-0-2-not-core">#</a></h3>
 <p>Queries whether a specific operation is permitted.</p>
 <p><strong>Composed from:</strong> <code>request</code> (against policy)</p>
 <p><strong>Flow:</strong></p>
@@ -1749,7 +1769,7 @@ specification, <code>SPEC-NAMING.md</code> (PAN).</p>
 <li>Agent A sends <code>request</code> with <code>payload.skill: &quot;auth.check&quot;</code> and the proposed operation details.</li>
 <li>The target (or a dedicated policy agent) responds with <code>allowed: true/false</code> and the reason.</li>
 </ol>
-<h3 id="10-12-propose-parked-0-2-likely-to-return-not-core">10.12. <code>propose</code> <em>(Parked — 0.2, likely to return; not core)</em><a class="hl" href="#10-12-propose-parked-0-2-likely-to-return-not-core">#</a></h3>
+<h3 id="10-13-propose-parked-0-2-likely-to-return-not-core">10.13. <code>propose</code> <em>(Parked — 0.2, likely to return; not core)</em><a class="hl" href="#10-13-propose-parked-0-2-likely-to-return-not-core">#</a></h3>
 <p>Human-in-the-loop checkpoint. Submits a proposed action for approval before executing.</p>
 <p><strong>Composed from:</strong> <code>request</code> (non-binding)</p>
 <p><strong>Flow:</strong></p>

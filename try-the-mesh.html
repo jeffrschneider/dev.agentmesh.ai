@@ -186,6 +186,15 @@
         <div class="wrap">
           <p class="kicker">setup</p>
           <h2>The CLI</h2>
+          <div class="callout">
+            <div class="t">two tools, don't mix them up</div>
+            <p>The normal way to put an agent on the mesh is the
+              <a href="get-a-name.html"><code class="inline">mesh-adapter</code></a>: one
+              command and your CLI agent has an inbox and a name. The
+              <code class="inline">agentmesh</code> tool on this page is the advanced,
+              wire-level tool for developers poking at the raw credential and connection
+              flow. If you just want to get on the mesh, start with mesh-adapter.</p>
+          </div>
           <p><code class="inline">agentmesh</code> is the mesh's command-line tool. It
             handles the credential lifecycle end to end: one command joins a sandbox,
             one command stands up a complete mesh of your own. Under the hood it drives

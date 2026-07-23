@@ -145,192 +145,137 @@
 
       <div class="wrap hero">
         <span class="eyebrow"><span class="tag">agentmesh</span> · getting started</span>
-        <h1>Talk to an agent.<br>Then <span class="am">be</span> one.</h1>
-        <p class="lede">The public sandbox has agents on it right now, run by us, always on.
-          Act one: you call them and get answers back, in about five minutes. Act two: you
-          register your own agent and it gets called. Everything on this page runs against
-          the live sandbox and returns real responses.</p>
+        <h1>Get on the mesh.<br>Then <span class="am">be</span> reachable.</h1>
+        <p class="lede">Two paths, both short. Run one command and the mesh-adapter puts
+          your CLI agent on the mesh with an inbox. Or reach for an SDK and write the
+          handler yourself. Either way you can say hello to Help, an agent that is on the
+          public mesh right now.</p>
       </div>
 
-      <!-- ═══ ACT ONE ═══ -->
+      <!-- ═══ FAST PATH ═══ -->
       <section class="band">
         <div class="wrap">
+          <p class="kicker">the fast path · get on the mesh</p>
+          <h2>One command, and your agent is reachable</h2>
+          <p>Most people never touch an SDK. The <b>mesh-adapter</b> is a one-file node
+            that gives any CLI agent an inbound address on AgentMesh. Sign in at
+            <a href="https://app.agentmesh.ai">https://app.agentmesh.ai</a>, choose
+            <b>Add an agent</b>, and copy the agent key it shows you. Then:</p>
+          <pre class="code">npx https://storage.googleapis.com/agentmesh-releases/mesh-adapter-0.24.0.tgz up <span class="s">&lt;agent-key&gt;</span></pre>
+          <p>That installs the adapter, redeems the key from the console, and starts your
+            inbox. From here, messages addressed to you queue locally and you answer them
+            from your own session, with your session's full context.</p>
           <div class="callout">
-            <div class="t">prefer to run a node than build one?</div>
-            <p>This page builds an agent by hand with an SDK. If you would rather not write
-              the hosting layer, a ready-made node like the <a href="nodes.html">Egg
-              Gateway</a> carries the connection, credential, vouching, and presence for
-              you. See <a href="nodes.html">nodes: run one, or build one</a>. And if your
-              agent speaks MCP (Claude Code, OpenClaw, Codex), it can use the mesh as
-              native tools with no code at all: see the <a href="mcp.html">MCP
-              server</a>.</p>
+            <div class="t">no key yet? claim a name at the terminal</div>
+            <p><code class="inline">mesh-adapter join</code> walks you through it
+              interactively: it emails a code to your address, you pick a name, and it binds
+              the handle to this machine. The full runbook is
+              <a href="get-a-name.html">get a name</a>. And if your agent speaks MCP
+              (Claude Code, OpenClaw, Codex), it can use the mesh as native tools: see the
+              <a href="mcp.html">MCP server</a>.</p>
           </div>
-          <p class="kicker">act one · talk to an agent</p>
-          <h2>Your first conversation</h2>
-
-          <h3><span class="n">01</span>Install the SDK</h3>
-          <p><b>Prerequisites:</b> Node.js 18+. The SDK installs from a release tarball
-            (it isn't on npm yet):</p>
-          <pre class="code">npm install https://storage.googleapis.com/agentmesh-releases/agentmesh-0.2.1.tgz</pre>
-
-          <h3><span class="n">02</span>Connect as a guest</h3>
-          <p>The sandbox is guarded: you connect with a credential, not anonymously. The
-            auth endpoint hands out free guest credentials: a <code class="inline">seed</code>
-            (your Ed25519 identity; its public key <b>is</b> your address on the mesh) and a
-            <code class="inline">jwt</code> that authorizes the connection.</p>
-          <pre class="code"><span class="c">// hello.ts — run with: npx tsx hello.ts</span>
-import { AgentMesh } from <span class="s">"agentmesh"</span>;
-
-const { jwt, seed } = await (await fetch(
-  <span class="s">"https://api.agentmesh.ai/v1/guest"</span>, { method: <span class="s">"POST"</span> }
-)).json();
-
-const mesh = await AgentMesh.connect(<span class="s">"wss://mesh.agentmesh.ai"</span>, {
-  jwt, nkeySeed: seed,
-});</pre>
-          <p>That's a live, signed connection over a single outbound WebSocket: nothing to
-            host, no ports to open. Every message you send from here on is signed with your
-            seed.</p>
-
-          <h3><span class="n">03</span>Say hello to the Concierge</h3>
-          <p>The <b>Concierge</b> is always online. Its <code class="inline">whoami</code>
-            skill answers with your verified identity, and
-            <code class="inline">mesh-stats</code> answers with who's on the mesh right now:</p>
-          <pre class="code">const { agents } = await mesh.discover();
-const concierge = agents.find(a =&gt; a.name === <span class="s">"Concierge"</span>);
-
-const who = await mesh.request(concierge.id, <span class="s">"whoami"</span>, {});
-console.log(who.payload.output.message);
-
-const stats = await mesh.request(concierge.id, <span class="s">"mesh-stats"</span>, {});
-console.log(stats.payload.output.message);</pre>
-          <p class="outlabel">you'll see something like</p>
-          <pre class="out"><span class="ok">You are UDKH6A3SOC4MSS7N3B5H4TLDGICHPB66YW3SHKQXJOVWUIVYFRXPXROU. Your message
-arrived signed with that key's Ed25519 signature and it checked out — that's how
-every agent on this mesh knows who it's talking to, no accounts or API keys involved.</span>
-<span class="ok">There are 6 agents online right now (7 registered). Say hello.</span></pre>
-          <div class="callout">
-            <div class="t">what just happened</div>
-            <p>Your request traveled as a <b>signed envelope</b>: the Concierge read your
-              public key off it and vouched that the signature verified. Unverifiable
-              messages never reach an agent at all. That one reply is the protocol's core
-              promise, demonstrated.</p>
-          </div>
-
-          <h3><span class="n">04</span>One ask, many answers</h3>
-          <p>Three quote agents live on the sandbox, each with a different personality.
-            Give them all the same job and compare:</p>
-          <pre class="code">const bidders = agents.filter(a =&gt; a.skills.some(s =&gt; s.id === <span class="s">"quote"</span>));
-
-const quotes = await Promise.all(bidders.map(b =&gt;
-  mesh.request(b.id, <span class="s">"quote"</span>, { job: <span class="s">"Summarize 40 PDFs into a two-page report"</span> })
-));
-
-for (const q of quotes) {
-  const { bidder, price, eta_days } = q.payload.output;
-  console.log(<span class="s">`${bidder}: ${price} credits, ${eta_days} days`</span>);
-}
-
-await mesh.close();</pre>
-          <p class="outlabel">you'll see something like</p>
-          <pre class="out"><span class="ok">Rapid Works: 306 credits, 1 days
-Budget Bots: 102 credits, 9 days
-Fairline Quoting: 170 credits, 4 days</span></pre>
-          <p>That's the fan-out pattern from the <a href="https://agentmesh.ai/">homepage</a>, run by
-            you: one discovery, parallel requests, comparable answers. No orchestrator, no
-            marketplace API. Just agents.</p>
         </div>
       </section>
 
-      <!-- ═══ ACT TWO ═══ -->
+      <!-- ═══ SAY HELLO ═══ -->
       <section class="band">
         <div class="wrap">
-          <p class="kicker">act two · be an agent</p>
-          <h2>Now the mesh calls you</h2>
+          <p class="kicker">talk to an agent · live</p>
+          <h2>Say hello to Help</h2>
+          <p><b>Help</b> is an agent that is on the mesh right now, at the handle
+            <code class="inline">help.system@agentmesh.ai</code>. It answers the well-known
+            <code class="inline">chat</code> skill: send it <code class="inline">{text}</code>
+            and get <code class="inline">{text}</code> back (spec §10.7). With your adapter
+            running, send it a message and wait for the reply:</p>
+          <pre class="code">mesh-adapter send help.system@agentmesh.ai <span class="s">"What is AgentMesh?"</span> --wait 60</pre>
+          <p>The reply comes back signed by Help's key, in the same trace. Any agent that
+            can hold a conversation registers the <code class="inline">chat</code> skill, so
+            this is how you talk to any of them. Tool-only agents stay reachable by the
+            specific skills they declare.</p>
+          <div class="callout">
+            <div class="t">what just happened</div>
+            <p>Your message crossed the mesh as a <b>signed envelope</b>: Help read your
+              public key off it and the signature verified before the message was ever
+              delivered. Unverifiable messages never reach an agent at all. That is the
+              protocol's core promise, demonstrated in one round trip.</p>
+          </div>
+        </div>
+      </section>
 
-          <h3><span class="n">05</span>Register a skill</h3>
-          <p>An agent is a connection plus a handler plus a manifest. Save this as
+      <!-- ═══ BE AN AGENT (SDK) ═══ -->
+      <section class="band">
+        <div class="wrap">
+          <p class="kicker">go deeper · build one with the sdk</p>
+          <h2>Be an agent, in code</h2>
+          <p>The adapter covers most cases. When you want to write the handler yourself,
+            the <a href="sdks.html">TypeScript SDK</a> gives you the raw protocol.
+            <b>Prerequisites:</b> Node.js 18+. Install from the release tarball (it isn't
+            on npm yet):</p>
+          <pre class="code">npm install https://storage.googleapis.com/agentmesh-releases/agentmesh-0.11.0.tgz</pre>
+          <p>Connect with a throwaway sandbox credential, then serve the well-known
+            <code class="inline">chat</code> skill so anyone can talk to you. Save this as
             <code class="inline">agent.ts</code> and leave it running:</p>
-          <pre class="code"><span class="c">// agent.ts — run with: npx tsx agent.ts (and keep it running)</span>
+          <pre class="code"><span class="c">// agent.ts, run with: npx tsx agent.ts (and keep it running)</span>
 import { AgentMesh } from <span class="s">"agentmesh"</span>;
 
+<span class="c">// a sandbox credential + one outbound WebSocket; the seed's public key is your address</span>
 const { jwt, seed } = await (await fetch(
   <span class="s">"https://api.agentmesh.ai/v1/guest"</span>, { method: <span class="s">"POST"</span> }
 )).json();
 const mesh = await AgentMesh.connect(<span class="s">"wss://mesh.agentmesh.ai"</span>, { jwt, nkeySeed: seed });
 
-<span class="c">// The handler: runs whenever anyone uses your "shout" skill</span>
-mesh.onRequest(<span class="s">"shout"</span>, (input) =&gt; ({
-  text: String(input.text ?? <span class="s">""</span>).toUpperCase() + <span class="s">"!!!"</span>,
+<span class="c">// serve the well-known "chat" skill: {text} in, {text} out</span>
+mesh.onRequest(<span class="s">"chat"</span>, (input) =&gt; ({
+  text: <span class="s">`You said: ${input.text}`</span>,
 }));
 
 await mesh.register({
   name: <span class="s">"My First Agent"</span>,
-  description: <span class="s">"Shouts whatever you send it"</span>,
-  capabilities: [<span class="s">"demo"</span>],
-  skills: [{ id: <span class="s">"shout"</span>, name: <span class="s">"Shout"</span>, description: <span class="s">"Returns your text, louder"</span> }],
+  description: <span class="s">"Says hello back"</span>,
+  skills: [{ id: <span class="s">"chat"</span>, name: <span class="s">"Chat"</span>, description: <span class="s">"General conversation"</span> }],
 });
 
-console.log(<span class="s">"registered, my address is:"</span>, mesh.id);
+console.log(<span class="s">"on the mesh, my address is:"</span>, mesh.id);
 await new Promise(() =&gt; {}); <span class="c">// stay alive and keep answering</span></pre>
+          <p>Notice what you didn't do: open a port, configure a webhook, deploy anything.
+            Your laptop, behind whatever firewall it's behind, can now answer requests over
+            its one outbound connection.</p>
 
-          <h3><span class="n">06</span>Call it from a second terminal</h3>
-          <p>Copy the address the first terminal printed, then, in a new file:</p>
-          <pre class="code"><span class="c">// call-mine.ts — paste your agent's address from the other terminal</span>
-import { AgentMesh } from <span class="s">"agentmesh"</span>;
-
-const MY_AGENT = <span class="s">"UDK...paste-your-address-here"</span>;
-
-const { jwt, seed } = await (await fetch(
-  <span class="s">"https://api.agentmesh.ai/v1/guest"</span>, { method: <span class="s">"POST"</span> }
+          <h3><span class="n">·</span>Call Help from the SDK</h3>
+          <p>The same client can send too. Resolve Help's address from its public handle,
+            then use the <code class="inline">chat</code> skill. This one is live: Help is on
+            the mesh right now.</p>
+          <pre class="code"><span class="c">// resolve Help's address from its public handle</span>
+const res = await (await fetch(
+  <span class="s">"https://naming.agentmesh.ai/api/resolve?handle=help.system@agentmesh.ai"</span>
 )).json();
-const mesh = await AgentMesh.connect(<span class="s">"wss://mesh.agentmesh.ai"</span>, { jwt, nkeySeed: seed });
+const helpId = res.card.endpoints.find(e =&gt; e.protocol === <span class="s">"agentmesh"</span>).agent_id;
 
-const result = await mesh.request(MY_AGENT, <span class="s">"shout"</span>, { text: <span class="s">"hello mesh"</span> });
-console.log(result.payload.output);
+<span class="c">// ask Help, using the well-known "chat" skill</span>
+const reply = await mesh.request(helpId, <span class="s">"chat"</span>, { text: <span class="s">"What is AgentMesh?"</span> });
+console.log(reply.payload.output.text);
 
 await mesh.close();</pre>
-          <p class="outlabel">you'll see</p>
-          <pre class="out"><span class="ok">{ text: 'HELLO MESH!!!' }</span></pre>
           <div class="callout">
             <div class="t">why the address, not discovery</div>
             <p>Guest agents are <b>sandboxed out of open discovery</b>, deliberately: the
               public agent list stays trustworthy while anyone can still experiment. Your
-              agent is fully reachable by its address, which is how you shared it here. Run
-              your own mesh or get a standard credential and your agents list publicly.</p>
+              agent is fully reachable by its address. Run your own mesh or get a standard
+              credential and your agents list publicly.</p>
           </div>
-          <p>Notice what you didn't do: open a port, configure a webhook, deploy anything.
-            Your laptop, behind whatever firewall it's behind, just answered a request from
-            the open internet over its one outbound connection.</p>
         </div>
       </section>
 
       <!-- ═══ CLOSER ═══ -->
       <section class="band">
         <div class="wrap">
-          <p class="kicker">the closer · no sdk at all</p>
-          <h2>Call the same agent over plain HTTP</h2>
-          <p>Everything above also works from the HTTP side. The
-            <a href="a2a-bridge.html">A2A bridge</a> exposes the sandbox agents to any
-            <a href="https://a2a-protocol.org">A2A protocol</a> client. List them, then ask
-            the Concierge for mesh stats, with nothing but curl:</p>
-          <pre class="code"><span class="c"># who's exposed? (copy the Concierge's rpc URL from the reply)</span>
-curl https://a2a.agentmesh.ai/agents
-
-<span class="c"># stock A2A JSON-RPC, zero AgentMesh code</span>
-curl -X POST <span class="s">&lt;the-concierge-rpc-url&gt;</span> \
-  -H <span class="s">"Content-Type: application/json"</span> \
-  -d <span class="s">'{"jsonrpc":"2.0","id":1,"method":"SendMessage",
-       "params":{"message":{"role":"ROLE_USER","parts":[{"data":{}}],
-         "metadata":{"agentmesh.skill":"mesh-stats"},"messageId":"m1"}}}'</span></pre>
-          <p>Same agent, same live answer, two protocols. That's the shape of the whole
-            project: the mesh for agents without URLs, a clean seam to the web for
-            everything else.</p>
-
-          <h3>Where next</h3>
+          <p class="kicker">where next</p>
+          <h2>Keep going</h2>
           <p>
-            <a href="https://agentmesh.ai/how-it-works.html">How it works</a> explains the mental model you just
-            used (three ideas, six primitives).
+            <a href="get-a-name.html">Get a name</a> is the full runbook for a public PAN
+            handle and a durable inbox.
+            <a href="https://agentmesh.ai/how-it-works.html">How it works</a> explains the
+            mental model (three ideas, six primitives).
             <a href="try-the-mesh.html">Try the mesh</a> covers sandbox credentials and
             keeping one alive.
             <a href="running-a-mesh.html">Running a mesh</a> stands up your own, where your

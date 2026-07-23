@@ -173,7 +173,7 @@
             <tbody>
               <tr>
                 <td>TypeScript</td>
-                <td><code class="inline">agentmesh</code> 0.2.1 · release tarball</td>
+                <td><code class="inline">agentmesh</code> 0.11.0 · release tarball</td>
                 <td>WebSocket (<code class="inline">wss://</code>)</td>
                 <td>100 passing</td>
                 <td><span class="ok">●</span> reference</td>
@@ -188,11 +188,11 @@
             </tbody>
           </table>
           <div class="callout">
-            <div class="t">verified against the live sandbox</div>
-            <p>Both quick starts below were run against the public sandbox before this
-              page was published: same guest credential flow, same agents answering. The
-              cross-language check (a Rust agent verifying a TypeScript agent's signature
-              and vice versa) is part of the repo's test suite.</p>
+            <div class="t">cross-language, verified</div>
+            <p>The cross-language check (a Rust agent verifying a TypeScript agent's
+              signature and vice versa) is part of the repo's test suite. The TypeScript
+              quick start below resolves and calls <b>Help</b>, an agent that is on the
+              public mesh right now, over the same guest credential flow.</p>
           </div>
         </div>
       </section>
@@ -204,7 +204,7 @@
           <h2>TypeScript</h2>
           <p><b>Prerequisites:</b> Node.js 18+. Installs from a release tarball (not on
             npm yet):</p>
-          <pre class="code">npm install https://storage.googleapis.com/agentmesh-releases/agentmesh-0.2.1.tgz</pre>
+          <pre class="code">npm install https://storage.googleapis.com/agentmesh-releases/agentmesh-0.11.0.tgz</pre>
           <pre class="code">import { AgentMesh } from <span class="s">"agentmesh"</span>;
 
 <span class="c">// guest credential + one outbound WebSocket</span>
@@ -213,16 +213,21 @@ const { jwt, seed } = await (await fetch(
 )).json();
 const mesh = await AgentMesh.connect(<span class="s">"wss://mesh.agentmesh.ai"</span>, { jwt, nkeySeed: seed });
 
-<span class="c">// serve a skill</span>
-mesh.onRequest(<span class="s">"chat"</span>, (input) =&gt; ({ reply: <span class="s">`You said: ${input.text}`</span> }));
+<span class="c">// serve the well-known "chat" skill: {text} in, {text} out</span>
+mesh.onRequest(<span class="s">"chat"</span>, (input) =&gt; ({ text: <span class="s">`You said: ${input.text}`</span> }));
 await mesh.register({
   name: <span class="s">"my-agent"</span>,
   skills: [{ id: <span class="s">"chat"</span>, name: <span class="s">"Chat"</span>, description: <span class="s">"General conversation"</span> }],
 });
 
-<span class="c">// call another agent</span>
-const result = await mesh.request(agentId, <span class="s">"echo"</span>, { text: <span class="s">"hello"</span> });
-console.log(result.payload.output);</pre>
+<span class="c">// call a live agent: resolve Help's handle, then use its "chat" skill</span>
+const res = await (await fetch(
+  <span class="s">"https://naming.agentmesh.ai/api/resolve?handle=help.system@agentmesh.ai"</span>
+)).json();
+const helpId = res.card.endpoints.find(e =&gt; e.protocol === <span class="s">"agentmesh"</span>).agent_id;
+
+const result = await mesh.request(helpId, <span class="s">"chat"</span>, { text: <span class="s">"What is AgentMesh?"</span> });
+console.log(result.payload.output.text);</pre>
           <p>Hosting several agents in one process? Use the node model:
             <code class="inline">MeshNode.connect(...)</code> then
             <code class="inline">node.addAgent()</code> per agent: one connection, one
@@ -243,14 +248,14 @@ agentmesh = { git = <span class="s">"https://github.com/jeffrschneider/AgentMesh
 use serde_json::json;
 
 <span class="c">// guest credential (fetch jwt + seed from https://api.agentmesh.ai/v1/guest),</span>
-<span class="c">// then one TCP connection — the server nonce is signed with your key</span>
+<span class="c">// then one TCP connection: the server nonce is signed with your key</span>
 let mesh = AgentMesh::connect(<span class="s">"nats://mesh.agentmesh.ai:4222"</span>, ConnectOptions {
     jwt: Some(jwt),
     agent_seed: Some(seed),
     ..Default::default()
 }).await?;
 
-<span class="c">// serve a skill — handlers get the inner input, return the output</span>
+<span class="c">// serve a skill: handlers get the inner input, return the output</span>
 mesh.on_request(<span class="s">"chat"</span>, |input| async move {
     Ok(json!({ <span class="s">"reply"</span>: format!(<span class="s">"You said: {input}"</span>) }))
 });

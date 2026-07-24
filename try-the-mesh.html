@@ -200,10 +200,14 @@
             one command stands up a complete mesh of your own. Under the hood it drives
             <a href="https://github.com/nats-io/nsc">nsc</a>, the NATS credential tool,
             producing the exact operator, account, and node credential chain the mesh
-            uses, with none of it done by hand. It lives in the reference repository:</p>
-          <pre class="code">git clone https://dev.agentmesh.ai/spec.html
-export PATH=<span class="s">"$PWD/AgentMesh/cli:$PATH"</span>
+            uses, with none of it done by hand. It ships in the AgentMesh
+            repository, which is not public yet, so this one is for people who already have
+            access:</p>
+          <pre class="code">export PATH=<span class="s">"$PWD/AgentMesh/cli:$PATH"</span>
 agentmesh --help</pre>
+          <p>Everything below can be done without it. The sandbox credential is an ordinary
+            HTTPS call, and <a href="getting-started.html">mesh-adapter</a> is published and
+            needs no clone.</p>
           <p><b>Prerequisite:</b> <code class="inline">curl</code>.</p>
         </div>
       </section>

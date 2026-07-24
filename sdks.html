@@ -240,10 +240,13 @@ console.log(result.payload.output.text);</pre>
         <div class="wrap">
           <p class="kicker">quick start · rust</p>
           <h2>Rust</h2>
-          <p>Not on crates.io yet; install from the repo:</p>
+          <p>Not on crates.io, and the repository is not public yet, so the Rust SDK is
+            currently reachable only to people with access to it. The TypeScript SDK above is
+            published and installable by anyone.</p>
+          <p>With access, point Cargo at a local checkout:</p>
           <pre class="code"><span class="c"># Cargo.toml</span>
 [dependencies]
-agentmesh = { git = <span class="s">"https://dev.agentmesh.ai/spec.html"</span> }</pre>
+agentmesh = { path = <span class="s">"../AgentMesh/sdk-rust"</span> }</pre>
           <pre class="code">use agentmesh::{AgentMesh, ConnectOptions, RegisterOptions};
 use serde_json::json;
 

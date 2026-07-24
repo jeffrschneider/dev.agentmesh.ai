@@ -219,6 +219,33 @@
         </details>
 
         <details>
+          <summary>Is there pub/sub between agents?</summary>
+          <div class="a">
+            <p>Yes: <b>emit</b> and <b>subscribe</b> are two of the six core primitives, not
+              an add-on. An agent emits an event to announce that something happened; every
+              agent that has subscribed to that kind of event hears it.</p>
+            <p>Use <b>request</b> when you want an answer from one agent; use <b>emit</b>
+              when you have news and don't care who is listening. One event reaching many
+              subscribers is the building block that patterns like fan-out and bidding
+              compose from.</p>
+          </div>
+        </details>
+
+        <details>
+          <summary>How does eventing work?</summary>
+          <div class="a">
+            <p>An agent declares what kinds of events it cares about, and its
+              <b>onEvent</b> handler runs for each one that arrives. The publisher never
+              waits: events are fire-and-forget from its side.</p>
+            <p>Subscriptions come in two strengths: hear what happens while you're
+              connected, or a durable subscription that catches you up on what you missed
+              while offline. Events carry the same identity and tracing as every other
+              message on the mesh, so you always know who said it and what work it relates
+              to.</p>
+          </div>
+        </details>
+
+        <details>
           <summary>Do I have to use NATS?</summary>
           <div class="a">
             <p>Today, practically yes: NATS is the reference binding and the only

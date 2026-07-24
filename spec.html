@@ -154,7 +154,7 @@
           <span>status <b>Working Draft</b></span>
           <span>date <b>2026-07-24</b></span>
         </div>
-        <p class="canon">Rendered 2026-07-24 from commit <a href="https://github.com/jeffrschneider/AgentMesh/commit/4346404">4346404</a>.
+        <p class="canon">Rendered 2026-07-24 from commit <a href="https://github.com/jeffrschneider/AgentMesh/commit/e78c277">e78c277</a>.
           The canonical source is
           <a href="https://github.com/jeffrschneider/AgentMesh/blob/main/SPEC.md">SPEC.md on GitHub</a>.</p>
         <div class="toc">
@@ -618,7 +618,7 @@ normative-now. Companion changes in <code>SPEC-NAMING.md</code> 0.5-draft
 <td><code>meta</code></td>
 <td>object</td>
 <td>OPTIONAL</td>
-<td>Extensible key-value metadata. Used for extensions, routing hints, etc.</td>
+<td>Extensible key-value metadata. Used for extensions, routing hints, etc. The key <code>hops</code> is <strong>reserved</strong> for cross-instance relay counting (§21) and MUST NOT be used for anything else.</td>
 </tr>
 <tr>
 <td><code>sig</code></td>
@@ -1846,9 +1846,9 @@ is the pairwise case.</p>
 <li><code>describe</code> MUST NOT create a Task, MUST NOT enqueue anything in the agent&#39;s inbox, and MUST be idempotent and side-effect-free.</li>
 <li>Platforms MUST rate-limit <code>describe</code> per requester and SHOULD serve it from cache; the response changes when the operator edits the manifest, not per request.</li>
 <li>Visibility (§8.6) governs <em>listing</em>, not <em>answering</em>: an <code>unlisted</code> agent MUST still answer <code>describe</code> when addressed directly by agent ID or handle, and MUST NOT appear in any listing. A <code>private</code> agent MAY refuse <code>describe</code> entirely.</li>
-<li>The same document SHOULD also be served over plain HTTPS by the agent&#39;s home mesh, at a stable URL discoverable from the resolved card — so that parties outside the mesh, including ordinary web crawlers, can read the storefront without transport credentials. On-mesh strangers use <code>describe</code>; the rest of the web uses the URL. This is deliberate: a search engine will index a URL, and will never join a message bus.</li>
+<li>The same document SHOULD also be served over plain HTTPS by the agent&#39;s home mesh — so that parties outside the mesh, including ordinary web crawlers, can read the storefront without transport credentials. The RECOMMENDED convention is <code>&lt;home-mesh-URL&gt;/a/&lt;agent-id-or-handle&gt;</code> (the card&#39;s <code>mesh</code> endpoint field, SPEC-NAMING §5.1, plus the same <code>/a/</code> path shape the reference registrar already serves for cards), with <code>Cache-Control</code> reflecting the manifest&#39;s update cadence. On-mesh strangers use <code>describe</code>; the rest of the web uses the URL. This is deliberate: a search engine will index a URL, and will never join a message bus.</li>
 </ul>
-<p><strong>Response:</strong> the agent&#39;s registrar-signed card (SPEC-NAMING §5.3, when the agent holds a handle) together with the manifest <code>public</code> block (§8.7).</p>
+<p><strong>Response:</strong> an object with <code>agent_id</code>, the agent&#39;s registrar-signed card under <code>card</code> (SPEC-NAMING §5.3, present when the agent holds a handle), and the manifest <code>public</code> block verbatim under <code>public</code>. Absent optional parts are omitted, not nulled.</p>
 <hr>
 <h2 id="11-streaming">11. Streaming<a class="hl" href="#11-streaming">#</a></h2>
 <p>Streaming is the delivery of incremental results for a single Task as an ordered sequence of messages.</p>
@@ -2476,6 +2476,11 @@ is the pairwise case.</p>
 <td><code>mesh://extensions/rooms/v1</code></td>
 <td><strong>Implemented</strong> (see <code>extensions/EXT-5-rooms.md</code>)</td>
 <td>Shared conversations for N agents, plus a durable record and artifact drive. Binding-decoupled (three abstract substrate capabilities; NATS/JetStream is one reference binding). All three privacy grades are live: capability (courtesy), sealed (end-to-end via the OPTIONAL agent <code>encryption_key</code>, §4.3/§8.1), and acl (broker-enforced membership via service-issued, room-scoped credentials). Thin by design: services are members, governance is <a href="https://agentcollab.dev">Agent Collab</a> playbooks, commerce is the economics extension. v1.1 names <strong>agent-presence</strong> (EXT-5 §8): the live roster as the fold of join/leave, invited ≠ joined, queryable and observable. v1.2 adds <strong>expel</strong> (EXT-5 §8.1): creator-only removal with a signed severity (timeout / conduct / safety), advisory at the capability grade, credential-revoking at acl. Reference implementation in the TypeScript and Rust SDKs (<code>Room</code>, <code>openRoom</code>) and the rooms service.</td>
+</tr>
+<tr>
+<td><code>mesh://extensions/admission/v1</code></td>
+<td><strong>Implemented</strong> (see <code>extensions/EXT-6-admission.md</code>)</td>
+<td>Unilateral, owner-controlled admission policy for direct inbound messages: a signed, portable admission roster (allow / hold / block per sender), held-sender review, and <code>knock</code> — the content-free admission request that is one of the two pre-admission verbs (§1.5 invariant 4; the other, <code>describe</code> §10.14, is exempt from admission filtering by definition). Live across the reference adapter, the fleet, and the operator console&#39;s Waiting list.</td>
 </tr>
 <tr>
 <td><code>mesh://extensions/e2e-encryption/v1</code></td>

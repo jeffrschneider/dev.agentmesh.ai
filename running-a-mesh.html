@@ -150,7 +150,7 @@
         <a href="wire-api.html">/ wire-api</a>
         <a href="faq.html">/ faq</a>
       </nav>
-      <div class="foot">v0.2 · the signed interconnect<br>github.com/jeffrschneider/AgentMesh</div>
+      <div class="foot">v0.2 · the signed interconnect<br>dev.agentmesh.ai</div>
     </aside>
 
     <main class="main">
@@ -214,7 +214,7 @@
           <p class="kicker">do it now</p>
           <h2>A complete mesh, one command</h2>
           <p>The <code class="inline">agentmesh</code> CLI (from the
-            <a href="https://github.com/jeffrschneider/AgentMesh">reference repository</a>;
+            <a href="https://dev.agentmesh.ai/spec.html">reference repository</a>;
             setup on <a href="try-the-mesh.html">try the mesh</a>) produces a
             self-contained instance: its own operator root key, its own accounts,
             JetStream enabled, and a ready-to-run server config. Nothing leaves your
@@ -256,39 +256,43 @@ nsc -H ./acme-mesh/.nsc generate creds -a agents -n node-2 \
               without TLS, and a memory resolver with accounts baked into the file. For a
               real deployment, terminate TLS (serve <code class="inline">wss://</code>)
               and move to a NATS account resolver if you need to add accounts without
-              restarting. Connecting independent meshes (federation) is planned
-              separately: <a href="spec.html#21-federation-planned">spec §21</a>.</p>
+              restarting. Reaching agents on other meshes needs nothing from this config:
+              they visit you, and you decide who gets in
+              (<a href="spec.html#21-federation-planned">spec §21</a>).</p>
           </div>
         </div>
       </section>
 
       <section class="band">
         <div class="wrap">
-          <p class="kicker">federation</p>
-          <h2>Meshes connecting to meshes</h2>
-          <p>Independent instances will connect the way carriers interconnect: peering at
-            the edges, one protocol in the middle. An agent on your company's mesh will
-            discover and call an agent on a partner's mesh, subject to what each side
-            chooses to expose. The intended mechanics:</p>
+          <p class="kicker">reaching other meshes</p>
+          <h2>Agents visit; meshes do not merge</h2>
+          <p>An agent that needs someone on another mesh looks the name up, sees which mesh
+            that agent lives on, and connects to it. Your mesh does not relay on its behalf,
+            and you do not need an arrangement with the other operator for this to work. The
+            model is settled and specified
+            (<a href="spec.html#21-federation-planned">spec §21</a>); the mechanics:</p>
           <ul class="plain">
-            <li><b>Trust:</b> each operator anchors its root key at a DNS domain it
-              controls; peers verify it there, in the manner of DKIM. No central
-              authority, no directory anyone owns.</li>
-            <li><b>Peering:</b> the transport layer already supports linking clusters;
-              export policy controls exactly which agents and capabilities cross a
-              boundary.</li>
-            <li><b>Discovery:</b> strictly opt-in across boundaries. Personal and private
-              agents are never discoverable by default.</li>
-            <li><b>Economics:</b> metering and settlement between operators, like carrier
-              interconnect billing, layered on the economics extension.</li>
+            <li><b>Lookup is not a mesh operation.</b> Resolving a name is an ordinary web
+              request against the naming layer. It already works from anywhere, for any name,
+              and needs nothing from either mesh.</li>
+            <li><b>Admission is yours alone.</b> A visitor arrives with a signed identity and
+              whatever portable attestations it carries. You decide whether to issue it a
+              credential, on your policy, without consulting its home operator.</li>
+            <li><b>Your state stays yours.</b> Tasks, rooms and your registry live on your
+              mesh. A visitor is a client of your mesh while it is here, so none of that has
+              to be replicated or reconciled anywhere.</li>
+            <li><b>Discovery is separate from resolution.</b> Looking up a name you already
+              know works globally. Being listed in someone else's directory is opt-in, and
+              personal and private agents are never listed by default.</li>
+            <li><b>Linking two meshes is an optimization.</b> Two operators with heavy mutual
+              traffic can connect their transports directly. It is never required, and no
+              agent behaves differently depending on whether such a link exists.</li>
+            <li><b>Economics:</b> metering and settlement between operators is not built,
+              and would layer on the economics extension.</li>
           </ul>
-          <p>Federation will be specified separately once a second production instance
-            exists to validate the design
-            (<a href="spec.html#21-federation-planned">spec §21</a> reserves what it
-            needs: plural operators, DNS anchors, signed envelopes that verify
-            independent of which connection carried them). The
-            <a href="world-wide-mesh.html">world wide mesh</a> page is the long version
-            of where this leads.</p>
+          <p>The <a href="world-wide-mesh.html">world wide mesh</a> page is the long version
+            of why it is shaped this way, including what the alternative would have cost.</p>
         </div>
       </section>
 
@@ -315,7 +319,7 @@ nsc -H ./acme-mesh/.nsc generate creds -a agents -n node-2 \
       <footer>
         <div class="wrap">
           <span>AgentMesh · open protocol for agent-to-agent communication</span>
-          <a href="https://github.com/jeffrschneider/AgentMesh">GitHub ↗</a>
+          <a href="https://dev.agentmesh.ai/spec.html">the spec ↗</a>
         </div>
       </footer>
 

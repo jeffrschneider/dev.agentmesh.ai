@@ -122,7 +122,7 @@
         <a href="wire-api.html">/ wire-api</a>
         <a class="on" href="faq.html">/ faq</a>
       </nav>
-      <div class="foot">v0.2 · the signed interconnect<br>github.com/jeffrschneider/AgentMesh</div>
+      <div class="foot">v0.2 · the signed interconnect<br>dev.agentmesh.ai</div>
     </aside>
 
     <main class="main">
@@ -143,7 +143,7 @@
               The <b>mesh</b> is the any-to-any connectivity among agents, in the same sense as
               a service mesh: a full mesh of communication relationships over a star of
               wires.</p>
-            <p>When independent meshes start peering (<a href="world-wide-mesh.html">the World
+            <p>Once agents routinely cross between independent meshes (<a href="world-wide-mesh.html">the World
               Wide Mesh</a>), the strict definition applies too.</p>
           </div>
         </details>
@@ -274,11 +274,16 @@
         <details>
           <summary>Can meshes connect to each other?</summary>
           <div class="a">
-            <p>Not yet, deliberately. Every deployment is a complete, self-contained mesh, and
-              the protocol reserves what federation needs: operators anchor trust at their own
-              domains, and signatures stay valid no matter which mesh carried the message. The
-              federation spec gets written when a second production mesh exists to validate it
-              against.</p>
+            <p>They do not connect to each other. Agents cross between them, which is a
+              different thing and a much cheaper one.</p>
+            <p>An agent that needs someone on another mesh resolves the name, sees which mesh
+              hosts that agent, and connects to it directly. Its own mesh does not relay, and
+              the two operators need no agreement. The receiving mesh decides whether to admit
+              the visitor from its signed identity alone, the way a web server decides what to
+              do with a request from a stranger.</p>
+            <p>The model is specified (section 21). What is not built is the credential
+              handling on either side, and what is unproven is all of it, because there is
+              exactly one production mesh today.</p>
             <p><a href="world-wide-mesh.html">Where that leads: the World Wide Mesh.</a></p>
           </div>
         </details>
@@ -289,7 +294,7 @@
       <footer>
         <div class="wrap">
           <span>AgentMesh · open protocol for agent-to-agent communication</span>
-          <a href="https://github.com/jeffrschneider/AgentMesh">GitHub ↗</a>
+          <a href="https://dev.agentmesh.ai/spec.html">the spec ↗</a>
         </div>
       </footer>
 

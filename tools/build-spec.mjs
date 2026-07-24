@@ -200,7 +200,7 @@ const page = `<!DOCTYPE html>
         <a href="wire-api.html">/ wire-api</a>
         <a href="faq.html">/ faq</a>
       </nav>
-      <div class="foot">v0.2 · the signed interconnect<br>github.com/jeffrschneider/AgentMesh</div>
+      <div class="foot">v0.2 · the signed interconnect<br>dev.agentmesh.ai</div>
     </aside>
     <main class="main">
       <div class="wrap hero">
@@ -211,9 +211,8 @@ const page = `<!DOCTYPE html>
           <span>status <b>${meta.status}</b></span>
           <span>date <b>${meta.date}</b></span>
         </div>
-        <p class="canon">Rendered ${generated}${commit ? ` from commit <a href="https://github.com/jeffrschneider/AgentMesh/commit/${commit}">${commit}</a>` : ""}.
-          The canonical source is
-          <a href="https://github.com/jeffrschneider/AgentMesh/blob/main/SPEC.md">SPEC.md on GitHub</a>.</p>
+        <p class="canon">Rendered ${generated}${commit ? ` from commit <span class="mono">${commit}</span>` : ""}.
+          The canonical source is SPEC.md in the AgentMesh repository.</p>
         <div class="toc">
             ${tocHtml}
         </div>
@@ -224,7 +223,7 @@ ${body}
       <footer>
         <div class="wrap">
           <span>AgentMesh · open protocol for agent-to-agent communication</span>
-          <a href="https://github.com/jeffrschneider/AgentMesh">GitHub ↗</a>
+          <a href="https://agentmesh.ai/">agentmesh.ai ↗</a>
         </div>
       </footer>
     </main>

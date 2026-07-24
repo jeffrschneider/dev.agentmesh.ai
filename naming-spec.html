@@ -143,22 +143,22 @@
         <a href="wire-api.html">/ wire-api</a>
         <a href="faq.html">/ faq</a>
       </nav>
-      <div class="foot">v0.2 · the signed interconnect<br>github.com/jeffrschneider/AgentMesh</div>
+      <div class="foot">v0.2 · the signed interconnect<br>dev.agentmesh.ai</div>
     </aside>
     <main class="main">
       <div class="wrap hero">
         <span class="eyebrow"><span class="tag">agentmesh</span> · naming specification</span>
         <h1>Personal Agent Naming (PAN)</h1>
         <div class="metas">
-          <span>version <b>0.4-draft</b></span>
+          <span>version <b>0.5-draft</b></span>
           <span>status <b>draft, one reference implementation</b></span>
-          <span>date <b>2026-07-22</b></span>
+          <span>date <b>2026-07-24</b></span>
         </div>
         <p class="canon">AgentMesh's naming service, companion to the
           <a href="spec.html">protocol specification</a>.
-          Rendered 2026-07-22 from commit <a href="https://github.com/jeffrschneider/AgentMesh/commit/cf62982">cf62982</a>.
+          Rendered 2026-07-24 from commit <span class="mono">094ee60</span>.
           The canonical source is
-          <a href="https://github.com/jeffrschneider/AgentMesh/blob/main/SPEC-NAMING.md">SPEC-NAMING.md on GitHub</a>.</p>
+          SPEC-NAMING.md in the AgentMesh repository.</p>
         <div class="toc">
             <a href="#1-terminology">1. Terminology</a>
             <a href="#2-handles">2. Handles</a>
@@ -174,6 +174,21 @@
         </div>
       </div>
       <div class="wrap spec">
+<p><strong>Changes from 0.4:</strong> Federation-readiness (companion to <code>SPEC.md</code> §1.5&#39;s
+layering invariants). §5.2 WebFinger upgraded SHOULD → MUST and now
+defines domain sovereignty: the anchor domain, where it speaks, outranks
+every registrar. §5.1 splits the card into identity fields and
+attachment fields (different lifetimes, different TTLs) and adds the
+serving mesh to the agentmesh endpoint. New §5.5 (resolution authority:
+where authority flows from, and how a registrar of record is found) and
+§5.6 (re-homing: moving attachment or custodian with no identity event —
+pins deliberately do not alarm). §7 gains two obligations: WebFinger
+(MUST) and migration-out (MUST — a registrar executes a key-signed
+departure; a registrar that won&#39;t let a name leave is not conforming).
+§8 extends the trust model to multiple registrars (per-registrar
+pinning, conflict precedence, surfaced-never-merged). §10&#39;s federation
+exclusion narrowed accordingly. No changes to handles, claiming, or
+binding; no wire changes to existing fields.</p>
 <p><strong>Changes from 0.3:</strong> PAN is now AgentMesh&#39;s naming service, not an
 independent standard (repositories merged; positioning rewritten). §5.3
 card signing and resolver pinning upgraded from SHOULD to MUST; unsigned
@@ -383,16 +398,32 @@ address (&quot;reserved&quot;).</li>
   &quot;handle&quot;:   &quot;Coder.jeff@gmail.com&quot;,
   &quot;operator&quot;: { &quot;name&quot;: &quot;Jeff Schneider&quot; },   // REQUIRED: the anchor&#39;s chosen public label (§3)
   &quot;binding&quot;:  &quot;agent-key&quot;,                 // &quot;agent-key&quot; | &quot;agent-key-delegated:&lt;partner&gt;&quot; | &quot;email-submitter&quot; | null
-  &quot;claimed_via&quot;: &quot;email&quot;,                  // &quot;email&quot; | &quot;delegated:&lt;partner&gt;&quot; (§3.1)
+  &quot;claimed_via&quot;: &quot;email&quot;,                  // &quot;email&quot; | &quot;delegated:&lt;partner&gt;&quot; (§3.1) | &quot;rehomed:&lt;registrar&gt;&quot; (§5.6)
   &quot;claimed_at&quot;:  &quot;2026-07-18T…&quot;,
   &quot;presence&quot;: { &quot;state&quot;: &quot;online&quot;, &quot;last_seen_at&quot;: &quot;…&quot; },   // OPTIONAL, only if a source provides it
   &quot;encryption_key&quot;: &quot;&lt;X25519 public key&gt;&quot;,   // OPTIONAL, only if the agent declares one
   &quot;endpoints&quot;: [
-    { &quot;protocol&quot;: &quot;agentmesh&quot;, &quot;agent_id&quot;: &quot;UD653KLV…&quot;, &quot;node&quot;: &quot;UB2FF…&quot; },
+    { &quot;protocol&quot;: &quot;agentmesh&quot;, &quot;agent_id&quot;: &quot;UD653KLV…&quot;, &quot;node&quot;: &quot;UB2FF…&quot;, &quot;mesh&quot;: &quot;https://api.agentmesh.ai&quot; },
     { &quot;protocol&quot;: &quot;a2a&quot;, &quot;url&quot;: &quot;https://…/.well-known/agent-card.json&quot; }
   ]
 }
 </code></pre>
+<p><strong>Identity fields and attachment fields.</strong> The card carries two kinds of
+fact with different lifetimes. <em>Identity fields</em> — <code>handle</code>, <code>operator</code>,
+<code>binding</code>, <code>claimed_via</code>, <code>claimed_at</code>, <code>encryption_key</code> — say who the
+agent is; they change rarely, and only a key change alarms (§5.3).
+<em>Attachment fields</em> — <code>endpoints</code>, <code>presence</code> — say where the agent is
+served right now; they are expected to change, and consumers MUST NOT
+cache them beyond the registrar&#39;s stated TTL. Registrars SHOULD serve
+attachment data with a TTL an order of magnitude shorter than identity
+data. This split is what makes the serving mesh an implementation
+detail: <em>where</em> may move freely because <em>who</em> never rides on it
+(SPEC.md §1.5, invariants 1 and 2).</p>
+<p>The OPTIONAL <code>mesh</code> field on an agentmesh endpoint names the control
+plane of the instance currently serving the agent — its <strong>home mesh</strong>.
+It is how a resolver learns <em>where</em> alongside <em>who</em>, and it is an
+attachment field: re-pointing it is routine (§5.6), never an identity
+event.</p>
 <p>The <strong>endpoints are the address</strong>: the reachable coordinates a messaging
 layer uses. For a key-bearing agent, the key itself is the address (on
 AgentMesh the agent ID is its inbox); a node or an A2A card URL may
@@ -407,8 +438,8 @@ confidential message, you resolve the handle and seal to this key. It is a
 capability the card advertises, not an address; PAN neither defines nor uses
 it, and simply passes through what the agent declares (AgentMesh SPEC §4.3).
 Absent means the agent participates only in cleartext.</p>
-<h3 id="5-2-webfinger">5.2 WebFinger<a class="hl" href="#5-2-webfinger">#</a></h3>
-<p>A PAN handle is a valid <code>acct:</code> URI. Registrars SHOULD serve
+<h3 id="5-2-webfinger-and-domain-sovereignty">5.2 WebFinger and domain sovereignty<a class="hl" href="#5-2-webfinger-and-domain-sovereignty">#</a></h3>
+<p>A PAN handle is a valid <code>acct:</code> URI. Registrars MUST serve
 <strong>WebFinger (RFC 7033)</strong>:</p>
 <pre><code>GET /.well-known/webfinger?resource=acct:Coder.jeff@gmail.com
 
@@ -420,6 +451,14 @@ Absent means the agent participates only in cleartext.</p>
 </code></pre>
 <p>so that two decades of existing <code>acct:</code> tooling resolves handles with no
 PAN-specific code.</p>
+<p>WebFinger is also the sovereignty mechanism. The anchor&#39;s <strong>domain</strong> may
+serve <code>/.well-known/webfinger</code> for its own accounts, and where it does,
+its answer is final: a domain speaking for its own addresses outranks
+every registrar (§5.5). An organization that serves its own WebFinger
+needs no registrar at all for its agents&#39; handles. The registrar is the
+path for anchors whose mail provider will never serve PAN records — a
+Gmail address cannot make google.com answer for it — not a toll booth on
+the namespace.</p>
 <h3 id="5-3-signed-cards-and-resolver-pinning">5.3 Signed cards and resolver pinning<a class="hl" href="#5-3-signed-cards-and-resolver-pinning">#</a></h3>
 <p>A resolve response is the registrar&#39;s live word, and everything downstream
 (sender provenance labels, endpoint routing, encryption keys) rides on it.
@@ -463,6 +502,108 @@ confirms nothing about anyone who hasn&#39;t consented.</li>
 <li>Registrars SHOULD rate-limit discovery like verification-code issuance:
 consent makes the lookup legitimate, not free to farm.</li>
 </ul>
+<h3 id="5-5-resolution-authority">5.5 Resolution authority<a class="hl" href="#5-5-resolution-authority">#</a></h3>
+<p>Until now this document has said &quot;the registrar&quot; as though there were
+exactly one. There need not be. Authority over a handle&#39;s resolution
+flows from the name&#39;s owner outward, in this order:</p>
+<ol>
+<li><strong>The anchor domain.</strong> If the handle&#39;s anchor domain serves WebFinger
+for the anchor (§5.2), its answer is authoritative and final. No
+registrar&#39;s record overrides a domain speaking for its own accounts.</li>
+<li><strong>The registrar of record.</strong> Otherwise, the handle resolves at its
+registrar of record: the registrar that witnessed the claim, or the
+one the owner has since re-homed to (§5.6). A resolver finds the
+registrar of record two ways: a DNS <code>TXT</code> record at
+<code>_pan.&lt;anchor-domain&gt;</code> with the content <code>pan-registrar=&lt;https-URL&gt;</code>
+(one record; if several are published, resolvers use the
+lexicographically first — deterministic, if inelegant), where the
+domain owner has published one; failing that, the resolver&#39;s
+configured registrar list. (The reference resolver ships with the reference registrar the
+way browsers ship trust stores — the list is the resolver operator&#39;s
+policy, and adding to it requires no one&#39;s permission.)</li>
+</ol>
+<p><strong>Conflicts are surfaced, never merged.</strong> If two registrars both answer
+for a handle, precedence is: the anchor domain&#39;s word, if any; else the
+registrar whose history log (§6) carries the earliest claim. A resolver
+that detects a conflict MUST surface it to its consumer as a warning —
+like a pin mismatch (§5.3), the remedy is out-of-band verification with
+the owner, never silent selection.</p>
+<p>A registrar is a <strong>custodian, never an owner</strong>. Nothing in this section
+gives any registrar — including the reference registrar — standing to
+retain a handle whose owner has moved on (§5.6, §7).</p>
+<p><strong>The anchor probe is visible to the anchor domain.</strong> Consulting the
+domain first means the domain learns that somebody is resolving a handle
+under it, and roughly when. For a handle anchored at a large mail
+provider this tells that provider a little about who is being looked up.
+This is inherent in making the domain authoritative — the owner&#39;s chosen
+authority has to be asked to answer — and it is the same exposure
+WebFinger has always carried. Implementations MUST NOT try to hide it by
+skipping the probe; they SHOULD keep it cheap and infrequent (a short
+timeout and a negative cache, so a provider that serves no PAN WebFinger
+is asked rarely rather than once per resolution), and a resolver SHOULD
+document that the probe happens.</p>
+<h3 id="5-6-re-homing">5.6 Re-homing<a class="hl" href="#5-6-re-homing">#</a></h3>
+<p>The agent&#39;s identity is its key, and a key change is the only identity
+event (SPEC.md §1.5, invariant 2). Both of a handle&#39;s pointers can
+therefore move without anything happening, identity-wise:</p>
+<ul>
+<li><p><strong>Moving the attachment</strong> (a new home mesh): the owner updates the
+card&#39;s endpoints under a verified session, or the agent re-binds from
+its new node (§4.1). Routine; logged (§6); no ceremony.</p>
+</li>
+<li><p><strong>Moving the custodian</strong> (a new registrar of record): the software
+holding the agent&#39;s key signs the UTF-8 bytes of the canonical string</p>
+<pre><code>pan-rehome-v1:&lt;handle&gt;:&lt;new-registrar-url&gt;:&lt;ISO-8601 timestamp&gt;
+</code></pre>
+<p>and either party submits <code>{handle, new_registrar, timestamp, signature}</code> to both registrars. On receipt of a valid re-home
+statement the old registrar MUST append a redirect entry to its
+history log, MUST answer subsequent resolutions of that handle with a
+signed referral to the new registrar for at least the cooling-off
+period (§3), and MUST NOT re-issue the handle. The new registrar
+records the claim with provenance <code>rehomed:&lt;old-registrar&gt;</code> and
+continues the handle&#39;s history from there.</p>
+</li>
+</ul>
+<p><strong>A statement is not custody.</strong> The paragraph above describes a bearer
+authorization: it is self-signed by whoever holds a key, it names its own
+destination, and it is presented by an unauthenticated caller. Taken at
+face value it authorizes far more than a move — it lets anyone assert any
+name at any registrar. A registrar accepting a migration IN therefore
+MUST make all five of these checks, and a registrar that makes fewer is
+not conforming:</p>
+<ol>
+<li><strong>It must be addressed here.</strong> The signed <code>&lt;new-registrar-url&gt;</code> MUST
+equal this registrar&#39;s own URL. Otherwise a statement written for one
+registrar is replayable at every other.</li>
+<li><strong>It must be fresh.</strong> The signed timestamp MUST be within a short
+window (RECOMMENDED: 15 minutes). Otherwise a captured statement is
+good forever.</li>
+<li><strong>It must be unspent.</strong> A registrar MUST record statements it has
+acted on and refuse a repeat. Freshness alone leaves a live window in
+which a replay still works.</li>
+<li><strong>It must not take a name already held here by another key.</strong> A
+signature proves control of the key in the statement and nothing else;
+it says nothing about a handle already bound to a different key. The
+same reasoning bars a name inside its cooling-off period here (§3) —
+a move MUST NOT be a way around the wait.</li>
+<li><strong>The losing registrar must agree.</strong> Before taking custody, the new
+registrar MUST confirm with the named old registrar that the handle
+has been released <em>to it</em> — resolving the handle there and requiring
+the referral to name this registrar is sufficient, and requires
+nothing of the old registrar beyond the referral it already owes.
+Without this the statement is uncorroborated: the handle need never
+have existed at the old registrar, or anywhere.</li>
+</ol>
+<p>Check 5 fixes the order: <strong>out first, then in.</strong> A registrar MAY reject a
+migration IN that arrives before the corresponding migration OUT, and the
+owner retries after the departure is recorded.</p>
+<p><strong>Pinning is unaffected — by design.</strong> Pins are <code>handle → agent key</code>
+(§5.3), and re-homing moves custodians, not keys: a consumer&#39;s existing
+pin verifies identically against the new registrar&#39;s card. A resolver
+MUST NOT alarm on a change of registrar alone; it MUST alarm on a change
+of key, exactly as before. (Registrar <em>signing keys</em> are pinned per
+registrar, so the new custodian&#39;s key is pinned on first sight like any
+other registrar&#39;s.)</p>
 <h2 id="6-the-history-log">6. The history log<a class="hl" href="#6-the-history-log">#</a></h2>
 <p>Every claim, binding (with its proof method), and release appends an entry.
 Entries are never updated or deleted.</p>
@@ -496,6 +637,13 @@ binding method.</li>
 record the anchor did not submit.</li>
 <li>Signs every card it serves and publishes its signing key out of band
 (§5.3).</li>
+<li>Serves WebFinger for every active handle (§5.2).</li>
+<li>Executes migration out: on a valid <code>pan-rehome-v1</code> statement (§5.6),
+it publishes the redirect, serves the signed referral, and releases
+custody. A registrar that will not let a name leave is not a
+conforming registrar. This obligation is worded so that the reference
+registrar binds itself first — the credibility of the whole namespace
+rests on custodians being fireable.</li>
 </ol>
 <h2 id="8-trust-model-read-this-before-trusting-a-handle">8. Trust model: read this before trusting a handle<a class="hl" href="#8-trust-model-read-this-before-trusting-a-handle">#</a></h2>
 <p><strong>The registrar is a notary, not an oracle.</strong> An email verification is
@@ -513,9 +661,22 @@ Signed cards authenticate <em>which</em> registrar spoke, and the hash-chained
 log makes tampering detectable to the owner — but nothing structural
 prevents the operator from rebinding a handle. The defense is §5.3&#39;s
 mandatory resolver pinning: clients <em>detect</em> rebinding rather than
-trusting the registrar not to. Authority separation (an independent
-registrar, or several) is a federation-era concern (§10) and is
-deliberately not claimed here.</p>
+trusting the registrar not to. Authority separation is now <em>specified</em> —
+an anchor domain may answer for itself (§5.2), authority has a defined
+order (§5.5), and owners can move custodians (§5.6) — but until
+independent registrars exist in practice, pinning remains the operative
+defense, and this document does not pretend otherwise.</p>
+<p><strong>Many registrars, one namespace.</strong> Nothing above requires a single
+registrar, and §5.5 defines where authority lies when there are several.
+The consumer-side rules generalize cleanly: pin each registrar&#39;s signing
+key on first sight, scoped to that registrar (§5.3); treat the anchor
+domain&#39;s WebFinger, where it exists, as outranking any registrar (§5.2);
+and treat a two-registrar conflict like a pin mismatch — a loud warning
+whose remedy is out-of-band, never silent preference (§5.5). Trusting a
+handle still means trusting a registrar&#39;s word; with §5.5 the consumer
+at least chooses <em>whose</em> word, and the owner can fire a custodian who
+loses their confidence (§5.6). Authority separation stops being a
+federation-era aspiration and becomes a property the owner exercises.</p>
 <p>Binding sharpens what a handle claims. An <code>agent-key</code> binding is
 cryptographic: someone holding the agent&#39;s key cooperated with the handle
 owner, and that proof does not depend on the registrar&#39;s honesty. An
@@ -556,7 +717,11 @@ Anchor hygiene (2FA on the account) is inherited, which is also PAN&#39;s
 strength: it rides the most hardened credential most people already have.</li>
 <li><strong>Non-goal, domain anchoring</strong>: PAN does not anchor names to domains or
 issue certificates. That is ANS&#39;s domain, and PAN defers to it rather than
-duplicating a lighter, weaker version.</li>
+duplicating a lighter, weaker version. (Distinguish this from §5.2/§5.5
+domain <em>sovereignty over resolution</em>: a domain serving WebFinger decides
+where its anchors&#39; handles resolve — routing authority — but the names
+stay email-anchored and the proofs stay §3/§4&#39;s; no certificate or
+DNS-proven identity is introduced.)</li>
 </ul>
 <h2 id="10-out-of-scope">10. Out of scope<a class="hl" href="#10-out-of-scope">#</a></h2>
 <ul>
@@ -567,8 +732,11 @@ layers like ARD. PAN resolves a name you already have.</li>
 <li><strong>Reachability and messaging</strong>: contacting a resolved agent, including any
 registrar-hosted chat or relay surface, belongs to the messaging protocols
 named in the card&#39;s endpoints (A2A, AgentMesh).</li>
-<li><strong>Federation</strong>: multiple registrars, referral resolution, cross-registrar
-uniqueness.</li>
+<li><strong>A registrar network</strong>: §5.5 defines resolution authority and §5.6
+defines migration between registrars, but a live mesh of referring
+registrars — shared uniqueness enforcement, referral chains, gossip —
+is not specified. One namespace with well-defined precedence is
+claimed; registrar-to-registrar protocol is not, yet.</li>
 <li><strong>Additional anchor proofs</strong>: e.g. OIDC sign-in as a mailbox proof.</li>
 <li><strong>Public, privacy-preserving verifiability</strong>: letting outside parties
 confirm the registrar has not rewritten history without exposing who owns
@@ -585,12 +753,17 @@ log. The AgentMesh Rust SDK carries <code>examples/pan_pair.rs</code>, a standal
 pairing signer demonstrating §4.1 without any particular agent host. The
 mesh-adapter is the reference resolver: it verifies, pins, and warns per
 §5.3.</p>
+<p>Not yet implemented (0.5 additions, specified ahead of code): the §5.5
+resolution-authority chain (the reference resolver still consults the
+reference registrar only), §5.6 re-homing, and the §5.1 home-mesh
+endpoint field. Implementation status will be updated here as each
+lands.</p>
 
       </div>
       <footer>
         <div class="wrap">
           <span>AgentMesh · open protocol for agent-to-agent communication</span>
-          <a href="https://github.com/jeffrschneider/AgentMesh">GitHub ↗</a>
+          <a href="https://agentmesh.ai/">agentmesh.ai ↗</a>
         </div>
       </footer>
     </main>

@@ -154,7 +154,7 @@
           <span>status <b>Working Draft</b></span>
           <span>date <b>2026-07-24</b></span>
         </div>
-        <p class="canon">Rendered 2026-07-24 from commit <a href="https://github.com/jeffrschneider/AgentMesh/commit/3782178">3782178</a>.
+        <p class="canon">Rendered 2026-07-24 from commit <a href="https://github.com/jeffrschneider/AgentMesh/commit/f65a1da">f65a1da</a>.
           The canonical source is
           <a href="https://github.com/jeffrschneider/AgentMesh/blob/main/SPEC.md">SPEC.md on GitHub</a>.</p>
         <div class="toc">
@@ -1605,7 +1605,14 @@ storefront says — the same division the web settled on, made explicit here.</p
 </tbody></table>
 <p>Attested attributes are signed by the node&#39;s account or operator (e.g. as claims in the node credential, §4.2). Declared attributes are published in the node&#39;s descriptor at connection time and MAY be updated. Both are node-keyed and resolved via the agent&#39;s current vouching node at discovery time.</p>
 <p>A requester combines the three sources: the <strong>manifest</strong> (what the agent is), the <strong>node profile</strong> (the durable conditions it runs under), and <strong>presence</strong> (whether it is reachable now, and its live load). Typical uses: exclude <code>trust_tier: sandbox</code> for sensitive work; prefer <code>availability_class: always_on</code> for latency-sensitive or long-running tasks; require <code>reachability: direct</code> across organizational boundaries; and weigh declared <code>capacity</code> against live load before routing.</p>
-<p><strong>Attestations are portable objects.</strong> An attested claim (<code>trust_tier</code>, <code>role</code>) is a self-contained signed statement: issuing operator key, subject node, claims, expiry, signature. Any party — including one on a different mesh instance — MAY verify it against the issuing operator&#39;s published root (§4.1) without consulting the issuing mesh. What weight a foreign operator&#39;s attestation deserves is the <em>receiving</em> side&#39;s policy decision: the signature travels, the trust decision stays local (the DKIM pattern). This is deliberate groundwork for federation (§21) — reputation must survive crossing a boundary that trust policy does not.</p>
+<p><strong>Attestations are portable objects.</strong> An attested claim (<code>trust_tier</code>, <code>role</code>) is a self-contained signed statement: a type tag, issuing operator key, subject node, claims, expiry, signature. Any party — including one on a different mesh instance — MAY verify it against the issuing operator&#39;s published root (§4.1) without consulting the issuing mesh. What weight a foreign operator&#39;s attestation deserves is the <em>receiving</em> side&#39;s policy decision: the signature travels, the trust decision stays local (the DKIM pattern). This is deliberate groundwork for federation (§21) — reputation must survive crossing a boundary that trust policy does not.</p>
+<p>The signed bytes MUST carry a <code>type</code> tag (<code>agentmesh-trust-attestation-v1</code>), and a verifier MUST reject a tag it does not recognize. Every other signature in this system is domain-separated by a versioned prefix string; a bare signature over an object is the one shape that cannot say what it is, cannot be versioned without invalidating every claim already issued, and can be replayed as a different kind of statement if two field sets ever converge.</p>
+<p><strong>There is no revocation, and expiry is the only control.</strong> A portable claim is verified by parties the issuer cannot enumerate and does not hear from, so there is nowhere to publish a withdrawal that reliably reaches them — the same reason DKIM rotates keys rather than revoking signatures. It follows that:</p>
+<ul>
+<li>A verifier MUST reject an attestation whose <code>expires_at</code> has passed. Expiry is not advisory: the party checking a travelled claim is by definition the one least able to know it went stale.</li>
+<li>An issuer SHOULD set the shortest expiry its re-issuance cadence can sustain, and MUST NOT treat a long expiry as harmless — an attestation is valid for exactly as long as it says, including after the subject has been compromised, decommissioned, or disowned.</li>
+<li>An operator that needs a claim withdrawn faster than its expiry MUST rotate the issuing key (§4.1), which invalidates every claim that key signed. This is deliberately blunt; it is the only mechanism that reaches every holder.</li>
+</ul>
 <p>Profile attributes are subject to tenancy visibility (§15): an operator MAY withhold declared attributes (e.g. <code>capacity</code>, <code>reachability</code>) from discovery across an account boundary.</p>
 <hr>
 <h2 id="10-composed-operations">10. Composed Operations<a class="hl" href="#10-composed-operations">#</a></h2>
@@ -2815,29 +2822,150 @@ instance the domain part is implicit and MAY be omitted.</p>
 <hr>
 <h2 id="21-federation-planned">21. Federation (Planned)<a class="hl" href="#21-federation-planned">#</a></h2>
 <p>This spec defines a single mesh <strong>instance</strong>: one operator, one transport, one
-registry. Many independent instances are expected (public, corporate, personal),
-and connecting them — so an agent on one instance can discover and reach an
-agent on another — is <strong>federation</strong>. Federation will be specified separately
-(a future <code>SPEC-FEDERATION.md</code> or an extension per §17) once a second
-production instance exists to validate the design. Its expected scope:</p>
+registry. Many independent instances are expected (public, corporate,
+personal), and connecting them — so an agent on one instance can reach an agent
+on another — is <strong>federation</strong>. The mechanism is not yet implemented. The
+<em>model</em> is settled, and it is written down here rather than deferred, because
+the choice constrains what this specification may do elsewhere.</p>
+<h3 id="the-model-agents-visit-traffic-does-not-tunnel">The model: agents visit, traffic does not tunnel<a class="hl" href="#the-model-agents-visit-traffic-does-not-tunnel">#</a></h3>
+<p><strong>An agent that needs to reach an agent on another instance connects to that
+instance and talks to it there.</strong> It does not relay through its home instance,
+and the two instances need no bilateral arrangement for it to work.</p>
+<p>The sequence is the web&#39;s:</p>
+<ol>
+<li><strong>Resolve.</strong> Handle → signed card, over HTTPS (SPEC-NAMING §5). This is
+already global and involves no messaging infrastructure at all.</li>
+<li><strong>Read where.</strong> The card&#39;s agentmesh endpoint names the agent&#39;s <strong>home
+mesh</strong> (the <code>mesh</code> field, SPEC-NAMING §5.1) alongside its key.</li>
+<li><strong>Visit.</strong> The requester connects to that mesh as a visitor, presenting its
+own key, and addresses the agent&#39;s inbox there normally.</li>
+</ol>
+<p>The recipient never leaves home. <strong>The sender travels.</strong> An agent&#39;s inbox,
+tasks, and rooms live on its own instance, and a stranger reaches them by
+becoming — briefly, and on that instance&#39;s terms — a client of it.</p>
+<p>What follows from this, and is normative:</p>
 <ul>
-<li><strong>Operator-to-operator trust:</strong> verifying a peer instance&#39;s operator root key
-via its DNS domain anchor (§4.1), in the manner of DKIM.</li>
-<li><strong>Peering:</strong> how two instances connect (the NATS transport already provides
-gateway/leaf-node topologies; account import/export governs which subjects
-cross the boundary).</li>
-<li><strong>Cross-instance discovery:</strong> strictly opt-in visibility; nothing is
-discoverable across a boundary unless its operator exports it. Personal and
-private agents remain non-discoverable by default.</li>
-<li><strong>Cross-operator metering/settlement:</strong> economics between instances, layered
-on the Economics extension (§19).</li>
+<li><strong>An instance MUST be able to admit a key it has never seen</strong>, on its own
+policy alone, using only what travels: the requester&#39;s signed identity (§4)
+and whatever portable attestations it presents (§9.7). Sandbox/guest
+credentials (§4.9) are the existing mechanism; a visitor is a guest with a
+verified key. No instance may require pre-arrangement with the visitor&#39;s home
+operator as a condition of basic reachability.</li>
+<li><strong>Instance-scoped state stays instance-scoped.</strong> The registry, task streams,
+and rooms belong to the instance whose storage holds them. Under this model
+that is not a limitation to be engineered around: a visitor is a real client
+of the instance holding the state, so tasks and rooms work normally without
+any cross-instance state protocol. Nothing here needs distributed streams.</li>
+<li><strong>Peering is an optimization, never a precondition.</strong> Two instances with
+heavy mutual traffic MAY establish a transport-level link (the NATS gateway
+topology, with account import/export deciding which subjects cross). Basic
+reachability MUST NOT depend on one, and no agent&#39;s behavior may differ by
+whether a link exists. The relay guard (below) and the reserved
+<code>mesh.peer.{instance}.&gt;</code> namespace (§14.1) exist for that path.</li>
+<li><strong>Discovery does not cross by default.</strong> Cross-instance discovery is strictly
+opt-in per operator; personal and private agents remain non-discoverable
+(§8.6, SPEC-NAMING §5.4). Note that <em>resolution</em> and <em>discovery</em> are
+different: resolving a name you already know is global today; enumerating
+what an instance holds is not, and should not become so.</li>
+<li><strong>Cross-operator metering/settlement</strong>, when it exists, layers on the
+Economics extension (§19).</li>
 </ul>
+<h3 id="why-this-shape-design-context">Why this shape (design context)<a class="hl" href="#why-this-shape-design-context">#</a></h3>
+<p>This subsection is rationale, not requirements. It is here because the failure
+modes it describes are easy to re-introduce by someone implementing in good
+faith, and each rejected alternative looks locally reasonable.</p>
+<p><strong>Keep the directory and the messaging layer apart.</strong> Naming is HTTPS and
+signed documents; messaging is a message bus. They are different systems with
+different trust models, and they federate by different mechanisms — the
+directory already does, over ordinary HTTPS, with no peering anywhere. Welding
+them together is the root error from which most of the rest follow: it is what
+makes people reach for &quot;the instances must peer so that names work&quot;, which is
+false, and then for &quot;so tasks and rooms must span instances too&quot;, which is
+expensive and unnecessary. Federation closes a <em>reachability</em> gap. It adds
+nothing to naming.</p>
+<p><strong>The Mastodon lesson: portability is right; the instance in the handle is
+not.</strong> Account portability was the correct goal, and putting the instance name
+inside the handle defeated it — moving instances rewrote every user&#39;s
+identity. The deeper error was that one instance was simultaneously the
+identity, the storage, and the address. AgentMesh separates these into three
+independent pointers, and this separation MUST be preserved:</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>what it is</th>
+<th>may it move?</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Key</strong></td>
+<td>identity (§4)</td>
+<td>no — a key change <em>is</em> an identity event (§1.5)</td>
+</tr>
+<tr>
+<td><strong>Handle</strong></td>
+<td>a name anchored to an email domain (SPEC-NAMING §2)</td>
+<td>custodian may change; the name does not (§5.6)</td>
+</tr>
+<tr>
+<td><strong>Home mesh</strong></td>
+<td>an attachment field on the card</td>
+<td>freely, and routinely</td>
+</tr>
+</tbody></table>
+<p>No instance name appears in a handle, and none ever should. An agent may
+re-home its name and move its serving mesh without either being an identity
+event, because who it is never rode on where it lives.</p>
+<p><strong>The DNS lesson: resolve, then connect.</strong> DNS scales because those are two
+steps. A resolver returns an address; your traffic then goes to that address —
+it is not tunnelled back through the resolver, and resolvers need no
+relationship with each other for a name to work globally. The visiting model is
+that shape. It also explains what AgentMesh copies from DNS deliberately:
+delegation with referrals (SPEC-NAMING §5.6), caching with bounded lifetimes,
+and <strong>no enumeration</strong> — DNS lets you look up a name you know and does not let
+you list a zone, which is why the handle log is owner-scoped and discovery is
+opt-in. Resolution is global; enumeration is not, and conflating them is a
+privacy failure, not a feature.</p>
+<p><strong>The certificate lesson: take the delegation, leave the trust monopoly.</strong> The
+root → intermediate → leaf chain is a genuinely good idea: it delegates
+authority without sharing the root key, and it lets a leaf be verified by a
+party that has never met its issuer. AgentMesh uses that shape (operator →
+account → node → agent, §4). Two failure modes of the CA world are excluded
+deliberately:</p>
+<ul>
+<li><strong>Any root can vouch for any name.</strong> In the certificate world a hundred roots
+can each sign the same domain, and name constraints are rarely used, so the
+system&#39;s security is its weakest issuer. The registrar analogue is a
+registrar asserting a handle it was never given, which is why taking custody
+of a name requires corroboration from the registrar releasing it
+(SPEC-NAMING §5.6) and why the anchor domain outranks every registrar
+(§5.5). Registrars are therefore <strong>DNS registrars, not CAs</strong>: custodians of a
+delegation, not issuers of trust. The trust root is the key and the domain.</li>
+<li><strong>Revocation does not work at scale.</strong> CRLs and OCSP largely failed in
+practice; the honest mitigations are short lifetimes and rotation. AgentMesh
+therefore has no revocation for portable attestations, and says so (§9.7):
+expiry is enforced by the verifier, issuers keep it short, and an operator
+needing faster withdrawal rotates the issuing key.</li>
+</ul>
+<p><strong>Why not relay through the home instance?</strong> It is the intuitive design — your
+mesh talks to their mesh on your behalf — and it is what &quot;peering&quot; suggests.
+It requires a bilateral export/import contract per pair of instances (which
+does not scale, and makes reachability a business relationship rather than a
+protocol property), it puts a relay in the path of every cross-instance message
+with the loops and state that implies, and because durable streams do not span
+a transport link, it forces either a cross-instance state protocol or a fleet
+of subtly degraded features. Visiting has none of these costs. Its own cost is
+real and accepted: an agent that talks to many instances holds many
+connections, and each visit is subject to the visited instance&#39;s admission
+policy — which is the correct place for that decision to live.</p>
 <p>Nothing in this spec may be implemented in a way that precludes the above; in
 particular, operator identity is plural (§4.1) and envelopes remain valid and
 verifiable independent of which connection or instance carried them (§4.5).</p>
-<p>Federation is planned, but its <strong>preconditions are normative now</strong>. The
-following constraints bind this version of the specification, so that a
-second instance can be connected without amending it:</p>
+<h3 id="preconditions-normative-now">Preconditions (normative now)<a class="hl" href="#preconditions-normative-now">#</a></h3>
+<p>The mechanism is unbuilt, but its <strong>preconditions bind this version of the
+specification</strong>, so that a second instance can be connected without amending
+it. These are the constraints conformance tests t01–t04 exercise, and they are
+cited elsewhere as §21.1 through §21.6 by number:</p>
 <ol>
 <li><strong>Carrier independence.</strong> An envelope MUST verify — signature, identity,
 trace — independent of which connection, node, or instance carried it
@@ -2858,11 +2986,19 @@ verified exactly as an operator is: root key anchored at its DNS domain
 (SPEC-NAMING §5.5): an agent on another instance is <em>resolvable</em> before it
 is <em>reachable</em>. Federation closes the reachability gap only; it adds
 nothing to naming, per invariant 1 (§1.5).</li>
+<li><strong>Where travels with who.</strong> A resolver MUST NOT assume a resolved agent
+lives on the instance it is currently connected to. An agent&#39;s card carries
+its home mesh (the <code>mesh</code> field on the agentmesh endpoint, SPEC-NAMING
+§5.1), and any implementation that turns a name into a connection MUST read
+it rather than defaulting to the local instance. An implementation that
+silently assumes &quot;resolved here means reachable here&quot; works perfectly on one
+instance and cannot be corrected later without breaking every consumer of
+its resolution path.</li>
 </ol>
-<p>The test of these constraints is concrete: <strong>a second production instance
-must be connectable without amending this specification.</strong> If connecting one
-requires a change beyond <code>SPEC-FEDERATION.md</code> itself, one of the five
-constraints above was violated — file it as a defect against this section.</p>
+<p>The test of these constraints is concrete: <strong>a second production instance must
+be connectable without amending this specification.</strong> If connecting one
+requires a change to anything above, one of the six constraints was violated —
+file it as a defect against this section.</p>
 <hr>
 <h2 id="appendix-a-example-complete-request-respond-flow">Appendix A: Example — Complete Request-Respond Flow<a class="hl" href="#appendix-a-example-complete-request-respond-flow">#</a></h2>
 <pre><code>Agent A (requester)                     Agent B (responder)

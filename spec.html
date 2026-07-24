@@ -152,9 +152,9 @@
         <div class="metas">
           <span>version <b>0.2.0-draft</b></span>
           <span>status <b>Working Draft</b></span>
-          <span>date <b>2026-07-18</b></span>
+          <span>date <b>2026-07-24</b></span>
         </div>
-        <p class="canon">Rendered 2026-07-23 from commit <a href="https://github.com/jeffrschneider/AgentMesh/commit/9d44ea3">9d44ea3</a>.
+        <p class="canon">Rendered 2026-07-24 from commit <a href="https://github.com/jeffrschneider/AgentMesh/commit/4346404">4346404</a>.
           The canonical source is
           <a href="https://github.com/jeffrschneider/AgentMesh/blob/main/SPEC.md">SPEC.md on GitHub</a>.</p>
         <div class="toc">
@@ -199,6 +199,14 @@ always-sign</strong>, with stream chunks authenticated at the stream level rathe
 than per chunk (§4.5, §11.6). Implemented: TypeScript and Rust SDKs (node model,
 streaming, chunk verification), platform services (registry, presence, node
 profiles, sandbox enforcement), and a public reference deployment.</p>
+<p><strong>2026-07-24: federation-readiness revision.</strong> New §1.5 states the five
+layering invariants this spec and <code>SPEC-NAMING.md</code> are subordinate to.
+New <code>describe</code> composed operation (§10.14): the pre-admission read.
+Manifest gains the <code>public</code> block (§8.7). Registry scoped as
+attachment-only (§9). Node attestations defined as portable objects
+(§9.7). <code>mesh.peer.</code> reserved (§14.1). §21 federation constraints made
+normative-now. Companion changes in <code>SPEC-NAMING.md</code> 0.5-draft
+(resolution authority, re-homing, registrar obligations).</p>
 </blockquote>
 <hr>
 <h2 id="1-introduction">1. Introduction<a class="hl" href="#1-introduction">#</a></h2>
@@ -252,6 +260,20 @@ profiles, sandbox enforcement), and a public reference deployment.</p>
 <p>Throughout this document, <strong>&quot;A2A&quot; refers to the named Agent2Agent Protocol</strong>, never to &quot;agent-to-agent&quot; used generically; the generic concept is always written out in full.</p>
 <h3 id="1-4-requirements-language">1.4. Requirements Language<a class="hl" href="#1-4-requirements-language">#</a></h3>
 <p>The keywords &quot;MUST&quot;, &quot;MUST NOT&quot;, &quot;REQUIRED&quot;, &quot;SHALL&quot;, &quot;SHALL NOT&quot;, &quot;SHOULD&quot;, &quot;SHOULD NOT&quot;, &quot;RECOMMENDED&quot;, &quot;MAY&quot;, and &quot;OPTIONAL&quot; in this document are to be interpreted as described in <a href="https://tools.ietf.org/html/rfc2119">RFC 2119</a>.</p>
+<h3 id="1-5-layering-invariants">1.5. Layering Invariants<a class="hl" href="#1-5-layering-invariants">#</a></h3>
+<p>AgentMesh and its companion naming specification (<code>SPEC-NAMING.md</code>, PAN) divide one question — <em>how do I reach an agent I can trust?</em> — into layers: <strong>PAN answers who (identity), the mesh answers where and how (attachment and delivery), and the resolved card is the bridge between them.</strong> Five invariants keep the layers from absorbing each other. Every section of both specifications is subordinate to these; a change that violates one is a regression, not an evolution.</p>
+<ol>
+<li><p><strong>A name never encodes a server.</strong> No handle, anywhere, embeds the mesh instance that serves its agent. Which mesh an agent attaches to is a detail of reachability, never part of its name. The moment a name carries an instance, portability is forfeit — the federated-platform trap this design exists to avoid.</p>
+</li>
+<li><p><strong>The keypair is the identity; everything else is a pointer.</strong> The registrar of record, the home mesh, endpoints, even the handle are re-pointable references to the agent&#39;s Ed25519 key. Exactly one event is an identity event — a key change — and only that event trips pinning alarms (SPEC-NAMING §5.3).</p>
+</li>
+<li><p><strong>Resolution authority flows from the name&#39;s owner.</strong> A handle&#39;s anchor domain outranks any registrar; a registrar is a custodian, never an owner; and a custodian can be replaced by a statement signed with the agent&#39;s own key (SPEC-NAMING §5.5, §5.6).</p>
+</li>
+<li><p><strong>Strangers may read, never run.</strong> The entire pre-admission surface is two verbs: <code>describe</code> (read an operator-declared document, §10.14) and <code>knock</code> (a content-free admission request, EXT-6). Neither invokes the agent&#39;s model, tools, or memory.</p>
+</li>
+<li><p><strong>Nothing trusts the wire.</strong> Every object that crosses a boundary — envelope, card, attestation — verifies on its own signature, independent of which connection, node, or instance carried it (§4.5). Federation (§21) is possible precisely because transit was never trusted.</p>
+</li>
+</ol>
 <hr>
 <h2 id="2-terminology">2. Terminology<a class="hl" href="#2-terminology">#</a></h2>
 <ul>
@@ -1083,6 +1105,13 @@ profiles, sandbox enforcement), and a public reference deployment.</p>
 
   &quot;encryption_key&quot;: &quot;&lt;X25519 public key, OPTIONAL&gt;&quot;,
 
+  &quot;public&quot;: {
+    &quot;description&quot;: &quot;&lt;one-paragraph storefront: what this agent does, in the operator&#39;s words&gt;&quot;,
+    &quot;skills&quot;: [&quot;&lt;skill-ids the operator advertises to strangers&gt;&quot;],
+    &quot;admission&quot;: &quot;&lt;what admission takes: terms, expectations, or a URL&gt;&quot;,
+    &quot;links&quot;: [ { &quot;handle&quot;: &quot;&lt;related-agent-handle&gt;&quot;, &quot;rel&quot;: &quot;&lt;relationship&gt;&quot; } ]
+  },
+
   &quot;node&quot;: {
     &quot;id&quot;: &quot;&lt;node-nkey-public&gt;&quot;,
     &quot;attestation&quot;: {
@@ -1343,9 +1372,32 @@ machines: device agents keep their own keys, and the owner key signs an
 attestation per agent. Person-level <em>naming</em> (a human handle resolving to an
 owner key) is likewise out of core — it is specified in the companion naming
 specification, <code>SPEC-NAMING.md</code> (PAN).</p>
+<h3 id="8-7-the-public-block-the-storefront">8.7. The Public Block (the storefront)<a class="hl" href="#8-7-the-public-block-the-storefront">#</a></h3>
+<p>The OPTIONAL <code>public</code> block is the only manifest content served
+<strong>pre-admission</strong> — it is what <code>describe</code> (§10.14) returns. It is the agent&#39;s
+homepage: written by the operator, served verbatim, and safe to hand to
+strangers precisely because nothing generates it at request time.</p>
+<ul>
+<li><code>description</code> and <code>admission</code> are free text: what the agent does, and what
+getting admitted takes.</li>
+<li><code>skills</code> lists the skill IDs the operator chooses to advertise to
+strangers. It MAY be any subset of the full <code>skills</code> array (§8.5) —
+advertising less than you can do is a choice this spec protects.</li>
+<li><code>links</code> names related agents <strong>by handle</strong> — collaborators, siblings in a
+fleet, the operator&#39;s other agents. Links are the mesh&#39;s hyperlinks: they
+are what makes the public graph crawlable, and directories and search are
+expected to emerge from them — built by anyone, outside the protocol —
+rather than from any protocol-level index.</li>
+</ul>
+<p>Everything outside the <code>public</code> block is served only per the visibility
+tiers of §8.6, and interaction beyond <code>describe</code> only after admission.</p>
+<p>Claims in a public block are the operator&#39;s own words. The signed card and
+the attestation chain prove <em>who is speaking</em>; they do not verify what the
+storefront says — the same division the web settled on, made explicit here.</p>
 <hr>
 <h2 id="9-registry">9. Registry<a class="hl" href="#9-registry">#</a></h2>
 <p>The registry is a platform service that stores agent manifests and serves discovery queries.</p>
+<p>The registry is <strong>attachment-scoped</strong>: it records which agents are on <em>this</em> mesh instance and what they offer here. It is not an identity authority — who an agent is, and which key a name resolves to, is the naming layer&#39;s question (<code>SPEC-NAMING.md</code>), and the registry defers to it (§1.5). Two consequences are normative for crawlers and directories: listings expose only <code>public</code>-visibility agents (§8.6), pageable and cacheable; and the per-agent read is <code>describe</code> (§10.14), which <code>unlisted</code> agents answer when addressed directly even though they never appear in a listing.</p>
 <h3 id="9-1-implementation">9.1. Implementation<a class="hl" href="#9-1-implementation">#</a></h3>
 <p>The registry is implemented as a service agent within the mesh, backed by:</p>
 <ul>
@@ -1550,6 +1602,7 @@ specification, <code>SPEC-NAMING.md</code> (PAN).</p>
 </tbody></table>
 <p>Attested attributes are signed by the node&#39;s account or operator (e.g. as claims in the node credential, §4.2). Declared attributes are published in the node&#39;s descriptor at connection time and MAY be updated. Both are node-keyed and resolved via the agent&#39;s current vouching node at discovery time.</p>
 <p>A requester combines the three sources: the <strong>manifest</strong> (what the agent is), the <strong>node profile</strong> (the durable conditions it runs under), and <strong>presence</strong> (whether it is reachable now, and its live load). Typical uses: exclude <code>trust_tier: sandbox</code> for sensitive work; prefer <code>availability_class: always_on</code> for latency-sensitive or long-running tasks; require <code>reachability: direct</code> across organizational boundaries; and weigh declared <code>capacity</code> against live load before routing.</p>
+<p><strong>Attestations are portable objects.</strong> An attested claim (<code>trust_tier</code>, <code>role</code>) is a self-contained signed statement: issuing operator key, subject node, claims, expiry, signature. Any party — including one on a different mesh instance — MAY verify it against the issuing operator&#39;s published root (§4.1) without consulting the issuing mesh. What weight a foreign operator&#39;s attestation deserves is the <em>receiving</em> side&#39;s policy decision: the signature travels, the trust decision stays local (the DKIM pattern). This is deliberate groundwork for federation (§21) — reputation must survive crossing a boundary that trust policy does not.</p>
 <p>Profile attributes are subject to tenancy visibility (§15): an operator MAY withhold declared attributes (e.g. <code>capacity</code>, <code>reachability</code>) from discovery across an account boundary.</p>
 <hr>
 <h2 id="10-composed-operations">10. Composed Operations<a class="hl" href="#10-composed-operations">#</a></h2>
@@ -1592,6 +1645,11 @@ specification, <code>SPEC-NAMING.md</code> (PAN).</p>
 <td><code>broadcast</code></td>
 <td><strong>Core</strong> (guidance)</td>
 <td>discover + emit</td>
+</tr>
+<tr>
+<td><code>describe</code></td>
+<td><strong>Core</strong></td>
+<td>The pre-admission read (§10.14)</td>
 </tr>
 <tr>
 <td><code>negotiate</code></td>
@@ -1778,6 +1836,19 @@ is the pairwise case.</p>
 <li>The recipient (human or orchestrator) reviews and responds with <code>approved: true/false</code>.</li>
 <li>The agent proceeds only if approved.</li>
 </ol>
+<h3 id="10-14-describe">10.14. <code>describe</code><a class="hl" href="#10-14-describe">#</a></h3>
+<p>The pre-admission read: the one substantive request any agent may make of any other <strong>before</strong> admission — the mesh equivalent of an unauthenticated HTTP GET. It exists so that first contact between strangers can be informed rather than blind; without it, every introduction is a cold knock on a closed door, and no third party can ever build a map of what exists.</p>
+<p><strong>Composed from:</strong> <code>request</code> with the reserved skill <code>describe</code>.</p>
+<p><strong>Rules (all normative):</strong></p>
+<ul>
+<li>An agent&#39;s node or platform MUST answer <code>describe</code> regardless of the requester&#39;s admission stance; admission filtering (EXT-6) MUST NOT apply to it. Pre-admission, exactly two verbs exist: <code>describe</code> reads, <code>knock</code> asks (§1.5, invariant 4).</li>
+<li>The response MUST be served from operator-declared content — the manifest&#39;s <code>public</code> block (§8.7) — by the node or the platform on the agent&#39;s behalf. It MUST NOT invoke the agent&#39;s model, tools, or memory. <strong>It is a document, not a conversation</strong> — that sentence is the security argument, and implementations are expected to preserve it literally: nothing a stranger sends can make the agent <em>think</em>.</li>
+<li><code>describe</code> MUST NOT create a Task, MUST NOT enqueue anything in the agent&#39;s inbox, and MUST be idempotent and side-effect-free.</li>
+<li>Platforms MUST rate-limit <code>describe</code> per requester and SHOULD serve it from cache; the response changes when the operator edits the manifest, not per request.</li>
+<li>Visibility (§8.6) governs <em>listing</em>, not <em>answering</em>: an <code>unlisted</code> agent MUST still answer <code>describe</code> when addressed directly by agent ID or handle, and MUST NOT appear in any listing. A <code>private</code> agent MAY refuse <code>describe</code> entirely.</li>
+<li>The same document SHOULD also be served over plain HTTPS by the agent&#39;s home mesh, at a stable URL discoverable from the resolved card — so that parties outside the mesh, including ordinary web crawlers, can read the storefront without transport credentials. On-mesh strangers use <code>describe</code>; the rest of the web uses the URL. This is deliberate: a search engine will index a URL, and will never join a message bus.</li>
+</ul>
+<p><strong>Response:</strong> the agent&#39;s registrar-signed card (SPEC-NAMING §5.3, when the agent holds a handle) together with the manifest <code>public</code> block (§8.7).</p>
 <hr>
 <h2 id="11-streaming">11. Streaming<a class="hl" href="#11-streaming">#</a></h2>
 <p>Streaming is the delivery of incremental results for a single Task as an ordered sequence of messages.</p>
@@ -2195,7 +2266,13 @@ is the pairwise case.</p>
 <td>Agent logs</td>
 <td>JetStream (short TTL) — <em>optional</em></td>
 </tr>
+<tr>
+<td><code>mesh.peer.{instance}.&gt;</code></td>
+<td><strong>Reserved</strong> — cross-instance relay (federation, §21)</td>
+<td>—</td>
+</tr>
 </tbody></table>
+<p>The <code>mesh.peer.</code> prefix is reserved: no agent, node, or service may publish or subscribe under it until Federation (§21) specifies its use. Reserving it now is what lets a second instance connect later without renumbering anyone&#39;s permissions.</p>
 <h3 id="14-2-wildcard-usage">14.2. Wildcard Usage<a class="hl" href="#14-2-wildcard-usage">#</a></h3>
 <p>NATS supports two wildcards:</p>
 <ul>
@@ -2750,6 +2827,34 @@ on the Economics extension (§19).</li>
 <p>Nothing in this spec may be implemented in a way that precludes the above; in
 particular, operator identity is plural (§4.1) and envelopes remain valid and
 verifiable independent of which connection or instance carried them (§4.5).</p>
+<p>Federation is planned, but its <strong>preconditions are normative now</strong>. The
+following constraints bind this version of the specification, so that a
+second instance can be connected without amending it:</p>
+<ol>
+<li><strong>Carrier independence.</strong> An envelope MUST verify — signature, identity,
+trace — independent of which connection, node, or instance carried it
+(§4.5, restated here as a federation precondition). No implementation may
+treat &quot;arrived on my transport&quot; as evidence of authenticity.</li>
+<li><strong>Relay guard.</strong> The envelope <code>meta</code> field reserves <code>hops</code>: an integer
+incremented by each relaying instance. Instances MUST drop envelopes whose
+<code>hops</code> exceeds a small bound (RECOMMENDED: 3). This is the loop-prevention
+primitive peering will rely on; single-instance deployments simply never
+set it.</li>
+<li><strong>Subject mappability.</strong> All protocol subjects live under prefixes an
+importing instance can rewrite mechanically (§14), and
+<code>mesh.peer.{instance}.&gt;</code> is reserved for the relay path (§14.1).</li>
+<li><strong>Peer identity is operator identity.</strong> A peer instance is identified and
+verified exactly as an operator is: root key anchored at its DNS domain
+(§4.1), in the manner of DKIM. Federation adds no new identity type.</li>
+<li><strong>Names precede peering.</strong> Handle resolution is already global
+(SPEC-NAMING §5.5): an agent on another instance is <em>resolvable</em> before it
+is <em>reachable</em>. Federation closes the reachability gap only; it adds
+nothing to naming, per invariant 1 (§1.5).</li>
+</ol>
+<p>The test of these constraints is concrete: <strong>a second production instance
+must be connectable without amending this specification.</strong> If connecting one
+requires a change beyond <code>SPEC-FEDERATION.md</code> itself, one of the five
+constraints above was violated — file it as a defect against this section.</p>
 <hr>
 <h2 id="appendix-a-example-complete-request-respond-flow">Appendix A: Example — Complete Request-Respond Flow<a class="hl" href="#appendix-a-example-complete-request-respond-flow">#</a></h2>
 <pre><code>Agent A (requester)                     Agent B (responder)

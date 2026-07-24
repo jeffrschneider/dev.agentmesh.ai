@@ -154,7 +154,7 @@
           <span>status <b>Working Draft</b></span>
           <span>date <b>2026-07-24</b></span>
         </div>
-        <p class="canon">Rendered 2026-07-24 from commit <a href="https://github.com/jeffrschneider/AgentMesh/commit/e78c277">e78c277</a>.
+        <p class="canon">Rendered 2026-07-24 from commit <a href="https://github.com/jeffrschneider/AgentMesh/commit/3782178">3782178</a>.
           The canonical source is
           <a href="https://github.com/jeffrschneider/AgentMesh/blob/main/SPEC.md">SPEC.md on GitHub</a>.</p>
         <div class="toc">
@@ -284,6 +284,9 @@ normative-now. Companion changes in <code>SPEC-NAMING.md</code> 0.5-draft
 <li><strong>Presence:</strong> The ephemeral liveness state of a node or agent (<code>online</code>, <code>busy</code>, <code>degraded</code>, <code>offline</code>) plus load signals. Presence is separate from the manifest and expires on missed heartbeats; it never mutates or deletes a manifest (see Section 9).</li>
 <li><strong>Node Profile:</strong> Durable, node-keyed metadata describing the <em>conditions</em> a host runs under — trust tier, expected uptime, reachability, capacity. Joined into discovery like presence; see Section 9.7.</li>
 <li><strong>Mesh:</strong> The interconnected network of nodes, agents, registries, and infrastructure services communicating via AgentMesh.</li>
+<li><strong>Standalone mesh:</strong> An instance with no peers — a legitimate end state (a corporate mesh behind a firewall), not a failure to federate. Also called a <em>private</em> instance when unreachable from outside its boundary.</li>
+<li><strong>Peered mesh:</strong> An instance connected to one or more peer instances under §21, so that agents on each can resolve and reach agents on the other. &quot;Peered&quot;, not &quot;federated&quot;: the name-and-identity layer never changes with peering (§1.5, invariant 1) — only reachability does.</li>
+<li><strong>World Wide Mesh:</strong> The connected whole — every peered instance, one namespace, one protocol. The ladder reads: instance → peered mesh → World Wide Mesh.</li>
 <li><strong>Primitive:</strong> An irreducible protocol operation. All agent interactions compose from primitives.</li>
 <li><strong>Composed Operation:</strong> A higher-level interaction pattern built from multiple primitives. Standardized for interoperability but not fundamental.</li>
 <li><strong>Manifest:</strong> A durable self-description document published by an agent, declaring its identity, hosting node, capabilities, and skills. (Liveness is <em>not</em> in the manifest — see Presence; cost is an extension field — see Section 17.)</li>

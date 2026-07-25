@@ -151,14 +151,14 @@
         <h1>Seven things a <span class="am">mesh</span><br>makes easy</h1>
         <p class="lede">AgentMesh is a substrate, not an app. These sketches show how the
           six primitives compose into real systems, each leaning on a different strength:
-          discovery, node identity, presence, events, signed messages. They're starting
+          discovery, node identity, agent presence, events, signed messages. They're starting
           points to think with, not finished products.</p>
       </div>
 
       <!-- 1 fan-out -->
       <section class="band" id="fan-out">
         <div class="wrap">
-          <p class="kicker">01 · emit · subscribe · respond · presence</p>
+          <p class="kicker">01 · emit · subscribe · respond · agent presence</p>
           <h2>Fan-out &amp; bidding</h2>
           <div class="pair">
             <div class="cell">
@@ -171,7 +171,7 @@
             <div class="cell">
               <div class="h">why the mesh</div>
               <p>This is pub/sub at its purest: no vendor list, no N point-to-point
-                integrations. <b>Presence</b> means only online agents bid, and every
+                integrations. <b>Agent presence</b> means only online agents bid, and every
                 offer is <b>signed</b>, so the winning bid is accountable.</p>
             </div>
           </div>
@@ -208,7 +208,7 @@
       <!-- 3 spot market -->
       <section class="band" id="spot-market">
         <div class="wrap">
-          <p class="kicker">03 · discover · request · presence · economics</p>
+          <p class="kicker">03 · discover · request · agent presence · economics</p>
           <h2>Capability spot-market</h2>
           <div class="pair">
             <div class="cell">
@@ -220,7 +220,7 @@
             </div>
             <div class="cell">
               <div class="h">why the mesh</div>
-              <p>Presence means you never route to a provider that's asleep, and the
+              <p>Agent presence means you never route to a provider that's asleep, and the
                 signed response is a non-repudiable receipt you can bill against.
                 Pricing, metering, and negotiation come from the economics extension
                 (<a href="spec.html#17-extensions">spec §17</a>).</p>
@@ -282,19 +282,19 @@
       <!-- 6 on-call -->
       <section class="band" id="on-call">
         <div class="wrap">
-          <p class="kicker">06 · emit · subscribe · presence · request</p>
+          <p class="kicker">06 · emit · subscribe · agent presence · request</p>
           <h2>Incident-response mesh</h2>
           <div class="pair">
             <div class="cell">
               <div class="h">the scenario</div>
               <p>Monitoring agents emit alerts on domain topics. Responder agents
                 subscribe by capability, so only the relevant ones wake up. An
-                orchestrator escalates via request and watches presence to see who's
+                orchestrator escalates via request and watches agent presence to see who's
                 actually reachable.</p>
             </div>
             <div class="cell">
               <div class="h">why the mesh</div>
-              <p>This is where the <b>registry/presence split</b> earns its keep: an
+              <p>This is where the <b>registry/agent-presence split</b> earns its keep: an
                 on-call responder that's asleep stays <b>registered</b> but reads
                 <b>offline</b>, so escalation walks automatically to the next online
                 agent. And every alert is a signed, tamper-evident record.</p>
@@ -337,7 +337,7 @@
           <div class="callout">
             <div class="t">the common thread</div>
             <p>None of these needs special protocol support. They're all conventions over
-              the same six primitives: discovery finds the right agent, presence tells you
+              the same six primitives: discovery finds the right agent, agent presence tells you
               if it's reachable, nodes and signatures make identity trustworthy, tasks and
               streams carry the long work. Pick a strength, compose the primitives, and
               you have an app.</p>

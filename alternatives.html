@@ -220,7 +220,7 @@
             <dl>
               <dt>solves</dt><dd>A dead-drop: a message waits in a file until the other agent polls. You get durability, a history, and versioning for free.</dd>
               <dt>breaks</dt><dd>Polling latency, and no presence, so you cannot tell a slow agent from a dead one. A message format you invent and maintain. Everyone with access reads everything, with no per-message authorization. It does not survive past a few known peers.</dd>
-              <dt class="mesh">mesh</dt><dd class="mesh">A node-held <b>durable inbox</b> does the wait-until-awake for you, with real delivery, live presence, and a signature on every message instead of a folder the whole team can read.</dd>
+              <dt class="mesh">mesh</dt><dd class="mesh">A node-held <b>durable inbox</b> does the wait-until-awake for you, with real delivery, live agent presence, and a signature on every message instead of a folder the whole team can read.</dd>
             </dl>
           </div>
 
@@ -229,7 +229,7 @@
             <dl>
               <dt>solves</dt><dd>Who is online, a sender on every message, notifications, and the thing people quietly love: you can watch your agents talk.</dd>
               <dt>breaks</dt><dd>These are <b>human-to-agent</b> channels stretched to agent-to-agent, and they push back. Telegram bots cannot even message each other; you need a shared group or a relay. Identity is a bot token or a phone number, not the agent's own key, so nothing proves the <b>agent</b> sent a message. The vendor is your trust boundary and your outage. Freeform text, no task semantics, rate limits, one workspace.</dd>
-              <dt class="mesh">mesh</dt><dd class="mesh">Keeps the good parts, live presence and a conversation the owner can watch, but every message is <b>signed by the agent's own key</b>, structured as request / respond / emit, built for machines, and owned by no chat vendor.</dd>
+              <dt class="mesh">mesh</dt><dd class="mesh">Keeps the good parts, live agent presence and a conversation the owner can watch, but every message is <b>signed by the agent's own key</b>, structured as request / respond / emit, built for machines, and owned by no chat vendor.</dd>
             </dl>
           </div>
         </div>
@@ -251,7 +251,7 @@
             <dl>
               <dt>solves</dt><dd>Fetch the agent card, call <code class="inline">message/send</code> over HTTPS, get a structured task back. Real request, respond, and task semantics, the thing none of the tier-1 hacks have.</dd>
               <dt>breaks</dt><dd>It assumes both ends are reachable. Behind NAT, on a sleeping laptop, or across a firewall, there is nothing to call. No presence, no delivery while the peer is down, and a connection per pair.</dd>
-              <dt class="mesh">mesh</dt><dd class="mesh">AgentMesh <b>carries A2A</b>. Its task model is wire-compatible with A2A, and it runs those same semantics across firewalls, with an outbound connection, a durable inbox, and presence. A2A when the peer is reachable, the mesh when it is not, same messages either way. See the <a href="a2a-bridge.html">A2A bridge</a>.</dd>
+              <dt class="mesh">mesh</dt><dd class="mesh">AgentMesh <b>carries A2A semantics</b>. Its task lifecycle mirrors A2A's, and it runs those same semantics across firewalls, with an outbound connection, a durable inbox, and agent presence. A2A when the peer is reachable, the mesh when it is not, and the <a href="a2a-bridge.html">A2A bridge</a> translates between the two wire formats in both directions.</dd>
             </dl>
           </div>
 
@@ -260,7 +260,7 @@
             <dl>
               <dt>solves</dt><dd>The simplest thing that works: one agent POSTs to another's URL.</dd>
               <dt>breaks</dt><dd>Same reachability wall as A2A, minus the structure. You invent the payload, the retry logic, the auth, and the delivery guarantees yourself.</dd>
-              <dt class="mesh">mesh</dt><dd class="mesh">The mesh gives you delivery, retries, identity, and presence as the substrate, so you are not rebuilding HTTP plumbing per integration.</dd>
+              <dt class="mesh">mesh</dt><dd class="mesh">The mesh gives you delivery, retries, identity, and agent presence as the substrate, so you are not rebuilding HTTP plumbing per integration.</dd>
             </dl>
           </div>
         </div>
@@ -281,7 +281,7 @@
             <dl>
               <dt>solves</dt><dd>Durable, async, high-throughput delivery, with agents connecting outbound, which clears the NAT wall. Used directly, it moves bytes reliably at scale.</dd>
               <dt>on its own</dt><dd>Transport, not an agent fabric: no agent identity, no presence, no naming, and no trust chain the moment a message crosses into another organization. And you stand it up, secure it, and operate it.</dd>
-              <dt class="mesh">mesh</dt><dd class="mesh">AgentMesh runs <b>on</b> this layer, not instead of it. Today it binds to <b>NATS</b> (JetStream for the durable inbox) and adds signed agent identity, presence, discovery, and a cross-organization trust chain on top. The binding surface is designed to extend to other substrates over time. Inquiries and reference implementations for new bindings are welcome.</dd>
+              <dt class="mesh">mesh</dt><dd class="mesh">AgentMesh runs <b>on</b> this layer, not instead of it. Today it binds to <b>NATS</b> (JetStream for the durable inbox) and adds signed agent identity, agent presence, discovery, and a cross-organization trust chain on top. The binding surface is designed to extend to other substrates over time. Inquiries and reference implementations for new bindings are welcome.</dd>
             </dl>
           </div>
         </div>
@@ -300,7 +300,7 @@
             general-purpose tool. The one tier that is not broker-shaped is A2A, and the mesh
             does not replace it either: it carries it.</p>
           <p class="pull">The mesh is that broker, built for agents: outbound connections, a
-            node-held inbox, live presence, a signed envelope on every message, and A2A
+            node-held inbox, live agent presence, a signed envelope on every message, and A2A
             semantics on the wire.</p>
         </div>
       </section>

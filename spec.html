@@ -154,7 +154,7 @@
           <span>status <b>Working Draft</b></span>
           <span>date <b>2026-07-24</b></span>
         </div>
-        <p class="canon">Rendered 2026-07-24 from commit <span class="mono">094ee60</span>.
+        <p class="canon">Rendered 2026-07-25 from commit <span class="mono">aa60f68</span>.
           The canonical source is SPEC.md in the AgentMesh repository.</p>
         <div class="toc">
             <a href="#1-introduction">1. Introduction</a>
@@ -800,9 +800,21 @@ normative-now. Companion changes in <code>SPEC-NAMING.md</code> 0.5-draft
 <li>If <code>config.timeout_ms</code> is specified, the requester SHOULD cancel the request if no response is received within the timeout.</li>
 <li>If <code>payload.skill</code> is specified, the agent SHOULD dispatch to the named skill. If the skill is not found, the agent MUST respond with a <code>SKILL_NOT_FOUND</code> error.</li>
 </ul>
+<p><strong>Offline targets (the queued outcome).</strong> A request to an agent that is not
+currently connected is not necessarily lost: if the target has a redelivery
+buffer (Section 16.4), the transport captures the request and the target
+processes it when it returns. Because the original reply channel does not
+survive the wait, the late <code>respond</code> is delivered as a normal message to the
+<strong>sender&#39;s own inbox</strong>, correlated by <code>in_reply_to</code> — buffered in turn if the
+sender has meanwhile gone offline. Senders SHOULD therefore treat silence from
+a registered agent as <em>possibly queued</em> rather than failed, and surface it
+that way. <code>AGENT_UNAVAILABLE</code> means the request was undeliverable <strong>and
+unbuffered</strong> (e.g., sandbox agents, which have no buffer). A responder MAY
+still create a Task (Section 7) for buffered work; nothing requires it —
+<code>in_reply_to</code> correlation suffices.</p>
 <p><strong>Errors:</strong></p>
 <ul>
-<li><code>AGENT_UNAVAILABLE</code>: The agent is not accepting requests (offline or at capacity).</li>
+<li><code>AGENT_UNAVAILABLE</code>: The agent is not accepting requests and has no redelivery buffer (offline sandbox agent, unregistered id, or at capacity).</li>
 <li><code>SKILL_NOT_FOUND</code>: The requested skill is not supported by the agent.</li>
 <li><code>INPUT_INVALID</code>: The input payload does not conform to the skill&#39;s expected schema.</li>
 <li><code>UNAUTHORIZED</code>: The requesting agent does not have permission to invoke this skill.</li>
@@ -2410,7 +2422,9 @@ is the pairwise case.</p>
 <p>Durable delivery is the responsibility of the <strong>hosting node</strong>, not a server-side per-user queue. A node holds its agents&#39; inboxes locally and is the durable endpoint; the transport retains only a short redelivery buffer for messages sent while a node is briefly offline (a JetStream stream with a bounded age/size, delivered on reconnect and acked by the node). This is the inverse of v0.1&#39;s server-side mailbox: the always-on node owns the mailbox, the mesh server is a thin buffer.</p>
 <ul>
 <li>The node MUST ack messages it has durably accepted; unacked messages remain in the redelivery buffer until TTL.</li>
-<li>Redelivery buffer bounds are a transport deployment concern (default: cap by age, e.g. 7 days, and by size per node), not a per-user application queue.</li>
+<li>Redelivery buffer bounds are a transport deployment concern, not a per-user application queue. Buffers are bounded by age AND size; when full, the <strong>oldest</strong> messages are discarded first (&quot;held up to&quot; semantics).</li>
+<li>The buffer follows the registration it serves: created when an agent registers, deleted when the registration is deregistered or reaped (§9.2).</li>
+<li><strong>Sandbox agents get no buffer.</strong> Their delivery contract is live-only; an unauthenticated, no-signup credential must not be able to park storage on the broker.</li>
 </ul>
 <table>
 <thead>
@@ -2420,8 +2434,12 @@ is the pairwise case.</p>
 </tr>
 </thead>
 <tbody><tr>
-<td>Redelivery buffer max age (per node)</td>
+<td>Redelivery buffer max age (per agent)</td>
 <td>7 days</td>
+</tr>
+<tr>
+<td>Redelivery buffer max size (per agent)</td>
+<td>25 MB</td>
 </tr>
 </tbody></table>
 <h4 id="client-side-task-pruning">Client-Side Task Pruning<a class="hl" href="#client-side-task-pruning">#</a></h4>
@@ -2604,6 +2622,14 @@ primitive layer, not the wire layer.</p>
 <td>1</td>
 <td>Node heartbeats (presence)</td>
 </tr>
+<tr>
+<td><code>MESH_INBOX_{agent_id}</code></td>
+<td><code>mesh.agent.{agent_id}.inbox</code></td>
+<td>Limits</td>
+<td>7d / 25 MB, discard old</td>
+<td>1</td>
+<td>Per-agent offline redelivery buffer (§16.4). Created by the registry at registration (non-sandbox only), deleted at deregistration/reaping. Capture works even when core NATS reports no-responders, so the live fast path is untouched.</td>
+</tr>
 </tbody></table>
 <p><strong>Optional</strong> (create only if the deployment wants them; the protocol does not require them):</p>
 <table>
@@ -2697,6 +2723,19 @@ Ack Wait: 30s
 Max Deliver: 3
 Durable: mesh_task_{task_id}_{requester_id}
 </code></pre>
+<p><strong>Inbox Buffer Consumer (per agent, §16.4):</strong></p>
+<pre><code>Stream: MESH_INBOX_{agent_id}
+Durable: inbox_{agent_id}
+Deliver Policy: All
+Ack Policy: Explicit
+Ack Wait: 30s
+Max Deliver: 5
+</code></pre>
+<p>The agent (its node) binds this consumer on connect and acks each message only
+after durably accepting it — the ack is the §16.4 handoff. Because the live
+core subscription and this consumer can deliver the same envelope, receivers
+MUST dedup by envelope <code>id</code> (§5.5). Responses to drained messages are
+published to the sender&#39;s inbox (there is no live reply subject).</p>
 <p><strong>Event Consumer (per subscriber):</strong></p>
 <pre><code>Stream: MESH_EVENTS
 Filter: mesh.event.{subscribed_pattern}
@@ -2715,6 +2754,10 @@ Durable: mesh_event_{agent_id}_{subscription_hash}
 <li>Default timeout: 30 seconds (configurable per request via <code>config.timeout_ms</code>).</li>
 </ol>
 <p>For long-running requests, the responder publishes an immediate acknowledgment response (Task in <code>submitted</code> state) to the reply subject, then delivers subsequent updates via JetStream on <code>mesh.task.{task_id}.update</code>.</p>
+<p>With inbox buffers (§16.4) in place, a no-responders or timeout outcome on an
+agent inbox no longer implies the request was lost — only that the agent was
+not live; the buffered copy survives and the queued-outcome semantics of §6.4
+apply.</p>
 <p><em>Informative:</em> core NATS answers a request on a subject with no subscribers with an immediate <strong>no-responders</strong> error rather than a timeout. In this binding that signal doubles as a definitive agent-liveness probe: an agent&#39;s inbox has a subscriber exactly while the agent is connected and serving, so a registry implementing the retention policy (§9.2) can distinguish a dead agent on a live node (no responders) from a slow one (any reply, including an error, proves liveness). This is a binding technique, not core protocol — other bindings supply their own liveness signal or rely on node-level presence alone.</p>
 <h3 id="18-8-exactly-once-delivery">18.8. Exactly-Once Delivery<a class="hl" href="#18-8-exactly-once-delivery">#</a></h3>
 <p>For critical operations (task state transitions, artifact delivery):</p>

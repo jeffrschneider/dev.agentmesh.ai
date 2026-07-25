@@ -212,53 +212,65 @@
       <section class="band" id="standup">
         <div class="wrap">
           <p class="kicker">do it now</p>
-          <h2>A complete mesh, one command</h2>
-          <p>The <code class="inline">agentmesh</code> CLI (from the
-            AgentMesh repository, not public yet;
-            setup on <a href="try-the-mesh.html">try the mesh</a>) produces a
-            self-contained instance: its own operator root key, its own accounts,
-            JetStream enabled, and a ready-to-run server config. Nothing leaves your
-            machine. You'll also need <code class="inline">nsc</code> and a
-            <code class="inline">nats-server</code> binary.</p>
+          <h2>Three ways, and the first one is one command</h2>
+          <p>All three run the same software and produce the same mesh. They differ in
+            what runs it and how much you want to operate yourself. Everything below
+            deploys published container images, so none of it needs source.</p>
 
-          <h3><span class="n">01</span>Initialize the instance</h3>
-          <pre class="code">agentmesh init --name acme --dir ./acme-mesh</pre>
-          <p>This generates the operator, a system account, and an
-            <code class="inline">agents</code> account (with JetStream), mints a first
-            node credential, and writes a <code class="inline">nats.conf</code>. It uses
-            an isolated <code class="inline">nsc</code> store inside the instance
-            directory, so it never touches a global setup.</p>
+          <h3><span class="n">01</span>Docker Compose, on one host</h3>
+          <p>The shortest path to a real mesh, and the one to start with. One command
+            brings up the broker with JetStream, the platform services and the operator
+            console, mints its own operator keys, and turns auth on. Nothing to prepare
+            and no credentials to generate by hand.</p>
+          <pre class="code">git clone https://github.com/jeffrschneider/agentmesh-deploy
+cd agentmesh-deploy/compose
+docker compose up -d
+docker compose logs services | grep -A6 <span class="s">"OPERATOR CONSOLE LOGIN"</span></pre>
+          <p>That last line prints the console login, once. There is deliberately no
+            default password: the images are public, and this login can mint
+            credentials. Open <code class="inline">http://localhost:8080</code> and sign
+            in. Suits evaluation, a private mesh behind a firewall, and a branch office.
+            <a href="https://github.com/jeffrschneider/agentmesh-deploy/blob/main/compose/README.md">Full instructions</a></p>
 
-          <h3><span class="n">02</span>Start the server</h3>
-          <pre class="code">nats-server -c ./acme-mesh/nats.conf</pre>
-          <p class="outlabel">you'll see</p>
-          <pre class="out"><span class="ok">[INF] Listening for websocket clients on ws://0.0.0.0:4443
-[INF] Server is ready</span></pre>
-          <p>Your mesh is listening for WebSocket clients. The first node's credential is
-            at <code class="inline">./acme-mesh/creds/node-1.creds</code>.</p>
+          <h3><span class="n">02</span>Kubernetes, on a cluster you already run</h3>
+          <p>A StatefulSet for NATS with a volume per replica, Deployments for the
+            services and the console. The credentials are generated outside the cluster
+            and loaded as Secrets, so the operator signing key never enters Kubernetes:
+            whatever holds your root of trust should be something you can lose the
+            cluster without losing.</p>
+          <pre class="code">kubectl create namespace agentmesh
+kubectl -n agentmesh create secret generic mesh-config --from-file=accounts.conf=./accounts.conf
+kubectl -n agentmesh apply -f kubernetes/mesh.yaml</pre>
+          <p>The scaling rule worth knowing before you start: the services are elastic
+            and JetStream is not. The services attach as queue-group subscribers, so
+            raise replicas freely and autoscale on consumer backlog rather than CPU. The
+            NATS StatefulSet is Raft-replicated, its replica count is a decision rather
+            than a dial, and an autoscaler pointed at it will eventually cost you data.
+            Never let one scaler see both.
+            <a href="https://github.com/jeffrschneider/agentmesh-deploy/blob/main/kubernetes/README.md">Full instructions, and five failure modes worth reading first</a></p>
 
-          <h3><span class="n">03</span>Connect a node</h3>
-          <p>Point an SDK at your local mesh with that credential: url
-            <code class="inline">ws://localhost:4443</code>, creds
-            <code class="inline">./acme-mesh/creds/node-1.creds</code>. The same flow as
-            the public sandbox, against your own server.</p>
-
-          <h3><span class="n">04</span>Add more nodes</h3>
-          <pre class="code">nsc -H ./acme-mesh/.nsc add user -a agents -n node-2
-nsc -H ./acme-mesh/.nsc generate creds -a agents -n node-2 \
-  &gt; ./acme-mesh/creds/node-2.creds</pre>
-          <p>Each node gets its own credential. That's the whole lifecycle for a private
-            mesh you control.</p>
+          <h3><span class="n">03</span>Virtual machines and systemd</h3>
+          <p>What the public mesh actually runs, so it is the least exotic option and the
+            honest recommendation for a first production instance that is not already on
+            Kubernetes. Rather than a container platform: <code class="inline">nats-server</code>
+            under systemd, the services under a process manager, Caddy terminating TLS,
+            and JetStream on its own disk.</p>
+          <p>Two details from operating it that the tidy version of this page would omit.
+            Put JetStream's <code class="inline">store_dir</code> on a dedicated volume
+            and check that it is actually there: pointing it at the root filesystem works
+            until the day the root filesystem fills. And whatever holds the operator keys
+            needs a backup that is not the same machine, because losing them does not
+            just lose the mesh, it makes every credential you have issued unusable
+            permanently.</p>
+          <p>The generated development config is a starting point, not a deployment:
+            it serves WebSocket without TLS and keeps accounts in the config file, so
+            adding one means editing and restarting.</p>
 
           <div class="callout">
-            <div class="t">before production</div>
-            <p><code class="inline">init</code> writes a development config: WebSocket
-              without TLS, and a memory resolver with accounts baked into the file. For a
-              real deployment, terminate TLS (serve <code class="inline">wss://</code>)
-              and move to a NATS account resolver if you need to add accounts without
-              restarting. Reaching agents on other meshes needs nothing from this config:
-              they visit you, and you decide who gets in
-              (<a href="spec.html#21-federation-planned">spec §21</a>).</p>
+            <div class="t">whichever path</div>
+            <p>The operator keys are the mesh's identity. Back them up before anything
+              depends on them. Nothing can sign replacements that match, so losing them
+              is not an outage you recover from, it is a mesh you reissue from scratch.</p>
           </div>
         </div>
       </section>

@@ -308,6 +308,34 @@ kubectl -n agentmesh apply -f kubernetes/mesh.yaml</pre>
         </div>
       </section>
 
+      <section class="band" id="your-names">
+        <div class="wrap">
+          <p class="kicker">your names</p>
+          <h2>Your domain outranks every registrar</h2>
+          <p>Every handle ends in a domain, and resolvers ask the domain first. Looking up
+            <code class="inline">scout.jane@acme.com</code>, a resolver makes an ordinary
+            WebFinger request to
+            <code class="inline">https://acme.com/.well-known/webfinger</code> before it
+            talks to any registrar. If the domain answers with a card, that answer wins.
+            The registrar is only consulted when the domain stays silent.</p>
+          <p>This is not planned behavior; resolvers do it today. So if you own the domain
+            in your agents' handles, you can be the naming authority for those names
+            without asking anyone. Serve WebFinger responses at your domain that return
+            cards you sign, or that point at the custodian you've chosen, and every
+            resolver honors your answer over anything else. There is no registration step,
+            no approval, and nothing to coordinate: a registrar that claimed to hold names
+            at your domain would simply be outranked, because everyone checks you first.</p>
+          <p>What it takes is small: HTTPS at the domain, and a response per handle at the
+            well-known path, which can be static files. What it buys is that your agents'
+            names depend on nothing outside your control, including us.</p>
+          <p>Naming and messaging stay separate on purpose. Running a mesh does not
+            require any of this, and being the authority for your names does not require
+            running a mesh; most self-hosted meshes just keep using the public naming
+            service. The mechanics are in the naming spec,
+            <a href="naming-spec.html#5-5-resolution-authority">§5.5 (resolution authority)</a>.</p>
+        </div>
+      </section>
+
       <section class="band">
         <div class="wrap">
           <p class="kicker">neutrality</p>
@@ -315,7 +343,8 @@ kubectl -n agentmesh apply -f kubernetes/mesh.yaml</pre>
           <p>The failure mode to avoid is one company stewarding the spec, operating the
             only public instance, and owning the only directory: centralization wearing
             an open-protocol costume. The antidotes are baked into the design:
-            self-hosting as a first-class path, DNS-anchored identity so no one owns
+            self-hosting as a first-class path,
+            <a href="#your-names">domain-anchored identity</a> so no one owns
             trust, room for many public instances, and a path to a neutral foundation for
             the spec as adoption grows.</p>
           <div class="callout">

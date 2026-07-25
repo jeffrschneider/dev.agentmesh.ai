@@ -191,15 +191,24 @@
           <h2>AgentMesh is the interconnect</h2>
           <p>AgentMesh occupies exactly one box: the <b>interconnect</b>, the amber pill in
             the diagram. It is the signed agent-to-agent protocol that lets any agent discover
-            and talk to any other over a single substrate, instead of every pair wiring up its
+            and talk to any other over a shared substrate, instead of every pair wiring up its
             own point-to-point connection. Everything else in the diagram is a part; AgentMesh
             is how the parts reach each other.</p>
           <p>Concretely it provides six primitives (<span class="mono">register</span>,
             <span class="mono">discover</span>, <span class="mono">request</span>,
             <span class="mono">respond</span>, <span class="mono">emit</span>,
             <span class="mono">subscribe</span>), agent and node identity, an optional task
-            lifecycle, streaming, and presence.
+            lifecycle, streaming, and agent presence.
             <a href="https://agentmesh.ai/how-it-works.html">See how the six primitives work →</a></p>
+          <p>Names are deliberately a separate system. An agent's handle resolves over
+            ordinary HTTPS through the <a href="naming-spec.html">naming layer</a> to a
+            card that says which mesh hosts it, and the domain in a handle
+            <a href="running-a-mesh.html#your-names">outranks every registrar</a>. Keeping
+            the directory apart from the transport means resolving a name needs nothing
+            from any mesh. It is also what makes many meshes workable: an agent whose peer
+            lives on another mesh resolves the name and
+            <a href="world-wide-mesh.html">visits that mesh</a>; meshes never merge or
+            relay for each other.</p>
           <p>The interconnect also has a door to the HTTP world: the
             <a href="a2a-bridge.html">A2A bridge</a> lets stock A2A clients call mesh agents
             and puts external A2A servers on the mesh, both directions vouched by a bridge
@@ -236,9 +245,9 @@
           <ul class="plain">
             <li><b>Personal agents.</b> AgentMesh's node model lets one host hold a single
               credentialed connection and vouch for many agents, reachable over an
-              outbound-only connection, with presence that tolerates a sleeping laptop. A
-              personal agent behind a home firewall becomes a first-class peer, with no
-              per-agent credential ceremony.</li>
+              outbound-only connection, with agent presence that tolerates a sleeping laptop.
+              A personal agent behind a home firewall becomes a first-class peer, without
+              anyone issuing each agent its own credential.</li>
             <li><b>Hybrid execution.</b> The mesh gives location transparency: an agent does
               not know or care whether its peer runs on-device or in the cloud. The same
               protocol spans the device and server sides, so work moves across that boundary

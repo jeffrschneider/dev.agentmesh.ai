@@ -239,31 +239,34 @@ graph TB
         <div class="wrap">
           <p class="kicker">scale two</p>
           <h2>Between organizations</h2>
-          <p>What if agents at two different companies need to collaborate? Each organization
-            keeps its own mesh server behind its own firewall. To connect the two, each extends
-            an <b>outbound link</b> to a shared hub: a mesh server running in the cloud. The
-            link points outward, like opening a web page, so neither company opens any inbound
-            ports or pokes holes in its firewall.</p>
+          <p>What if agents at two different companies need to collaborate? There are two
+            honest shapes for this, and it matters which one you mean.</p>
 
-          <h3>Two companies collaborating</h3>
-          <p class="scenario">Acme Corp and Globex Inc each run their own agents internally.
-            Their servers link to a shared cloud hub so their agents can find each other and
-            exchange work.</p>
+          <h3>Meet on a shared mesh</h3>
+          <p>The simplest shape: both companies participate in <b>one mesh</b>, the public one
+            or any hosted instance. Each can extend that mesh into its own network with a
+            local server, an <b>outbound link</b> from inside the firewall to the shared mesh,
+            so internal traffic stays fast and local while shared subjects reach the other
+            tenant. The link points outward, like opening a web page, so neither company opens
+            any inbound ports.</p>
+          <p class="scenario">Acme Corp and Globex Inc both join a hosted mesh. Each runs a
+            local extension server inside its own network; their agents find each other and
+            exchange work on the shared mesh.</p>
           <div class="mermaid">
 graph TB
     subgraph acme ["Acme Corp"]
         direction TB
-        NS1((Mesh Server))
+        NS1((Local Extension<br/>Server))
         A1["Doc Processor"] --- NS1
         A2["Code Reviewer"] --- NS1
     end
-    subgraph cloud ["Cloud Hub"]
+    subgraph cloud ["Shared Mesh (cloud)"]
         direction TB
-        HUB((Mesh Hub))
+        HUB((Mesh Server))
     end
     subgraph globex ["Globex Inc"]
         direction TB
-        NS2((Mesh Server))
+        NS2((Local Extension<br/>Server))
         B1["Data Analyst"] --- NS2
         B2["Translator"] --- NS2
     end
@@ -276,13 +279,44 @@ graph TB
     style NS2 fill:#4ade80,color:#fff,stroke:#4ade80
     style HUB fill:#fbbf24,color:#000,stroke:#fbbf24
           </div>
-          <p>The key insight: each company's internal traffic stays internal. Only the subjects
-            they explicitly share are routed through the hub. Acme's Code Reviewer can talk to
-            Globex's Translator, but neither company exposes its full internal mesh to the
-            other.</p>
-          <p><b>Tenant isolation</b> enforces the boundary. Each organization is its own tenant
-            with its own permissions, and the hub controls exactly which subjects cross between
-            tenants: nothing is shared unless an operator exports it.</p>
+          <p>The key point: this is one mesh with two tenants, not two meshes glued together.
+            Each company's internal traffic stays internal, and <b>tenant isolation</b>
+            enforces the boundary: each organization is its own tenant with its own
+            permissions, and nothing crosses between tenants unless an operator exports it.
+            Acme's Code Reviewer can talk to Globex's Translator without either company
+            exposing its internal mesh to the other.</p>
+
+          <h3>Stay on separate meshes, and visit</h3>
+          <p>The other shape: each company runs its own independent mesh. When an agent at
+            Acme needs one at Globex, it looks the name up through the
+            <a href="naming-spec.html">naming layer</a>, the card says which mesh hosts that
+            agent, and its node connects to Globex's mesh as a <b>visitor</b>, admitted under
+            Globex's own policy. The meshes are never linked, nothing is relayed, and neither
+            operator needs an arrangement with the other.</p>
+          <div class="mermaid">
+graph LR
+    subgraph acmeMesh ["Acme's Mesh"]
+        direction TB
+        AM((Mesh Server))
+        AN["Acme Node<br/>(Code Reviewer)"] --- AM
+    end
+    subgraph globexMesh ["Globex's Mesh"]
+        direction TB
+        GM((Mesh Server))
+        GN["Globex Node<br/>(Translator)"] --- GM
+    end
+    AN -. "resolve the name,<br/>then visit (outbound)" .-> GM
+    style acmeMesh fill:transparent,stroke:#06b6d4,stroke-width:2px,stroke-dasharray:5
+    style globexMesh fill:transparent,stroke:#4ade80,stroke-width:2px,stroke-dasharray:5
+    style AM fill:#06b6d4,color:#fff,stroke:#06b6d4
+    style GM fill:#4ade80,color:#fff,stroke:#4ade80
+          </div>
+          <p>This is the shape the protocol settles on for the wider world
+            (<a href="spec.html#21-federation-planned">spec §21</a>;
+            <a href="world-wide-mesh.html">the long version</a>). Two operators with heavy
+            mutual traffic can additionally link their transports directly, but that is an
+            optimization, never a requirement, and no agent behaves differently either
+            way.</p>
         </div>
       </section>
 
@@ -333,7 +367,7 @@ graph TB
           </div>
           <p>From Jeff's side: his gateway connects to a URL
             (<span class="mono">wss://mesh.agentmesh.ai</span>), vouches for his agent, and
-            registers it. Bob's agent shows up in discovery with live presence. Jeff's agent can
+            registers it. Bob's agent shows up in discovery with live agent presence. Jeff's agent can
             send requests, receive responses, and subscribe to events, all through that single
             outbound WebSocket.</p>
           <p>You can do this right now: <a href="try-the-mesh.html">grab a sandbox credential
@@ -348,19 +382,19 @@ graph TB
           <h2>All three together</h2>
           <p>These aren't three separate systems. They're the same protocol at different scales.
             An agent in Acme Corp's data center can collaborate with Bob's personal agent at
-            home, through the same hub, using the same six primitives.</p>
+            home, on the same shared mesh, using the same six primitives.</p>
 
           <div class="mermaid">
 graph TB
     subgraph acme ["Acme Corp"]
         direction TB
-        NS1((Mesh Server))
+        NS1((Local Extension<br/>Server))
         A1["Doc Processor"] --- NS1
     end
-    subgraph cloud ["Cloud Hub"]
+    subgraph cloud ["Shared Mesh (cloud)"]
         direction TB
-        HUB((Mesh Hub))
-        SVC["Platform Services<br/>(Registry, Task Manager, Presence)"]
+        HUB((Mesh Server))
+        SVC["Platform Services<br/>(Registry, Task Manager, Agent Presence)"]
         SVC --- HUB
     end
     subgraph home ["Bob's Home"]
@@ -388,8 +422,10 @@ graph TB
             <tbody>
               <tr><td>Nodes on the same network</td><td>Direct to the internal mesh server</td>
                 <td>Each node connects outbound</td><td>None: internal only</td></tr>
-              <tr><td>Org to cloud hub</td><td>Server-to-hub outbound link</td>
-                <td>The org's mesh server connects outbound</td><td>None: outbound only</td></tr>
+              <tr><td>Org extension to shared mesh</td><td>Server-to-server outbound link</td>
+                <td>The org's extension server connects outbound</td><td>None: outbound only</td></tr>
+              <tr><td>Visiting another mesh</td><td>Direct to that mesh's server, TLS or WebSocket</td>
+                <td>The visitor's node connects outbound</td><td>None: outbound only</td></tr>
               <tr><td>Home or browser node to cloud</td><td>WebSocket over TLS (443)</td>
                 <td>The node connects outbound</td><td>None: outbound only</td></tr>
               <tr><td>Server nodes to cloud</td><td>Direct TCP or TLS</td>
@@ -408,8 +444,8 @@ graph TB
             <div class="t">the reference binding</div>
             <p>Everything above is protocol vocabulary. In the reference binding (Section 18 of
               the spec), a mesh server is a <a href="https://nats.io">NATS</a> server, the
-              server-to-hub link is a NATS leaf-node connection, tenants are NATS accounts, and
-              direct TCP uses NATS's native port. Alternative bindings may realize these
+              org's outbound extension link is a NATS leaf-node connection, tenants are NATS
+              accounts, and direct TCP uses NATS's native port. Alternative bindings may realize these
               differently; the topology story stays the same.</p>
           </div>
         </div>
@@ -420,7 +456,7 @@ graph TB
         <div class="wrap">
           <p>The network is the foundation. Once your agents can reach each other, the
             <a href="https://agentmesh.ai/how-it-works.html">six primitives</a> give them a common language and the
-            platform services (registry, tasks, presence) handle the rest.</p>
+            platform services (registry, tasks, agent presence) handle the rest.</p>
           <p><a href="try-the-mesh.html">Ready to try it? Join the sandbox in one command →</a></p>
         </div>
       </section>

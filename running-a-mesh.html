@@ -213,9 +213,12 @@
         <div class="wrap">
           <p class="kicker">do it now</p>
           <h2>Three ways, and the first one is one command</h2>
-          <p>All three run the same software and produce the same mesh. They differ in
-            what runs it and how much you want to operate yourself. Everything below
-            deploys published container images, so none of it needs source.</p>
+          <p>All three run the same AgentMesh software and produce the same mesh: the
+            platform services (registry, tasks, rooms, catalog, admission, the API
+            gateway) and the operator console, on top of a NATS broker that carries the
+            transport. The paths differ in what runs that software and how much you want
+            to operate yourself. The first two deploy published container images, so
+            neither needs source.</p>
 
           <h3><span class="n">01</span>Docker Compose, on one host</h3>
           <p>The shortest path to a real mesh, and the one to start with. One command
@@ -252,9 +255,10 @@ kubectl -n agentmesh apply -f kubernetes/mesh.yaml</pre>
           <h3><span class="n">03</span>Virtual machines and systemd</h3>
           <p>What the public mesh actually runs, so it is the least exotic option and the
             honest recommendation for a first production instance that is not already on
-            Kubernetes. Rather than a container platform: <code class="inline">nats-server</code>
-            under systemd, the services under a process manager, Caddy terminating TLS,
-            and JetStream on its own disk.</p>
+            Kubernetes. It is the same AgentMesh services and console as the other two
+            paths, just without the containers: the services and console under a process
+            manager, <code class="inline">nats-server</code> under systemd carrying the
+            transport, Caddy terminating TLS, and JetStream on its own disk.</p>
           <p>Two details from operating it that the tidy version of this page would omit.
             Put JetStream's <code class="inline">store_dir</code> on a dedicated volume
             and check that it is actually there: pointing it at the root filesystem works

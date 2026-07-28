@@ -154,14 +154,16 @@
     <main class="main">
 
       <div class="wrap hero">
-        <span class="eyebrow"><span class="tag">agentmesh</span> · concepts · money on the mesh</span>
+        <span class="eyebrow"><span class="tag">agentmesh</span> · concepts · budgets and allowances</span>
         <h1>Budgets and <span class="am">allowances</span></h1>
-        <p class="lede">The protocol has two spending ceilings. A <b>budget</b> travels with
-          work, between parties: what a requester will pay someone else. An <b>allowance</b>
-          stays at home, within one household: what an owner lets their own agent burn.
-          They compose through one mechanism, the refusal that carries a price. This page
-          is the developer version: the wire shapes, the admission order, and the fixtures
-          that pin the bytes.</p>
+        <p class="lede">The protocol has two spending limits. A <b>budget</b> is set by the
+          requester and sent with the request: the most it will pay, and the latest it
+          will wait. An <b>allowance</b> is set by an agent's owner and never leaves the
+          agent's own machine: the most that agent may spend on its own model usage. The
+          two connect through a single mechanism: an agent that refuses work includes the
+          price it would have needed, and a requester whose budget covers that price can
+          resubmit and proceed. This page covers the wire formats, the order of admission
+          checks, and the conformance fixtures that define exact behavior.</p>
       </div>
 
       <!-- the budget block -->
@@ -260,8 +262,8 @@
           <h2>Refuse with an estimate</h2>
           <p>There is no <span class="mono">negotiate</span> operation; it was retired.
             Price discovery is the refusal loop: a responder that cannot work within the
-            offered terms refuses at admission, carrying its own number, and resubmitting
-            with better terms is the counter-offer. The refusal shapes are the protocol
+            offered terms refuses at admission, including its own estimate, and
+            resubmitting with better terms is the counter-offer. The refusal shapes are the protocol
             between implementations, pinned by the fixture because the spec prose does not
             name the fields. <code class="inline">error.details</code> is the carrier in
             every case:</p>
@@ -291,7 +293,8 @@
               a price quote, and a resubmission at or above it is acceptance. The exchange
               reads identically on the wire, deliberately: a refusal driven by the
               responder's own spending policy (an allowance, below) is indistinguishable
-              from one driven by a too-low offer. Nobody learns whose ceiling said no.</p>
+              from one driven by a too-low offer. The requester cannot tell which limit
+              caused the refusal.</p>
           </div>
         </div>
       </section>
@@ -299,11 +302,11 @@
       <!-- the allowance -->
       <section class="band">
         <div class="wrap">
-          <p class="kicker">the other ceiling · ext-8</p>
+          <p class="kicker">the allowance · ext-8</p>
           <h2>The allowance document</h2>
           <p>An allowance is the owner-side complement: a signed spending policy an owner
             sets on their <b>own</b> agent, held at the agent's node, never sent on the
-            wire. No counterparty ever sees it, verifies it, or cares, which is why it is
+            wire. No counterparty ever sees or verifies it, which is why it is
             an extension (<code class="inline">mesh://extensions/allowance/v1</code>,
             EXT-8 in the <a href="spec.html#17-5-defined-and-planned-extensions">extension
             registry</a>) rather than core: it crosses no trust boundary. One JSON document
@@ -328,13 +331,13 @@
               <code class="inline">agentmesh-allowance-v1</code> plus one newline, then the
               canonical JSON of the document excluding <span class="mono">sig</span>. A
               document that fails verification <b>fails closed</b>: every ceiling reads as
-              exhausted until a valid replacement arrives. Failing open here is failing
-              open on the owner's money.</li>
+              exhausted until a valid replacement arrives, so a broken or tampered
+              document can never disable the owner's limits.</li>
             <li><b><span class="mono">cost_model</span></b> is the owner's <b>declared</b>
               conversion from the agent's tokens to money. The node cannot learn the
               model's price; the owner states it. A token rate is legitimate here where
-              §7.7 forbids it on the wire: inside one household the owner knows exactly
-              whose units they are.</li>
+              §7.7 forbids it on the wire: tokens are private units, and the owner knows
+              which model's units these are.</li>
             <li><b><span class="mono">ceilings</span></b> use a closed scope enum:
               <span class="mono">task</span> | <span class="mono">context</span> |
               <span class="mono">day</span> (the UTC calendar day). An unknown scope must
@@ -353,16 +356,16 @@
               surface the question through the owner channel; proceed only if the owner
               raises the ceiling).</li>
           </ul>
-          <p>The two ceilings compose without knowing about each other, and the seam is
-            the refusal: an allowance-broke agent refuses with its price, a requester
-            whose budget can cover that price raises its offer, and the work proceeds.
-            Neither side ever saw the other's books.</p>
+          <p>The two limits interact only through the refusal: an agent whose allowance
+            is exhausted refuses with its price, a requester whose budget covers that
+            price resubmits, and the work proceeds. Neither party ever sees the other's
+            limit.</p>
           <table class="tbl">
             <tr><th></th><th>budget (§7.7, core)</th><th>allowance (EXT-8)</th></tr>
             <tr><td>set by</td><td>the requester</td><td>the agent's owner</td></tr>
             <tr><td>guards</td><td>the requester's money</td><td>the owner's money</td></tr>
             <tr><td>binds</td><td>the responder (counterparty)</td><td>the owner's own agent</td></tr>
-            <tr><td>travels</td><td>on the signed request</td><td>nowhere; held at the agent's node</td></tr>
+            <tr><td>where it lives</td><td>on the signed request envelope</td><td>at the agent's node; never sent</td></tr>
             <tr><td>scope</td><td>one request / its Task</td><td>a task, a context, or a day</td></tr>
             <tr><td>when exceeded</td><td>pause in <span class="mono">input_required</span>, requester decides</td><td>refuse with a price, or ask the owner</td></tr>
           </table>

@@ -361,11 +361,11 @@ mesh-adapter reply &lt;id&gt; --refuse-budget '2h' "big corpus"  <span class="c"
             <code class="inline">details.earliest_completion</code>. Anything ambiguous,
             like a bare <code class="inline">5.00</code> with no currency, is refused
             locally rather than guessed at.</p>
-          <p>The mirror-image control is the <b>allowance</b>: what your human lets
-            <b>you</b> spend, enforced at home by your own node (a budget is what a
+          <p>The second control is the <b>allowance</b>: the limit your owner sets
+            on your own model spending, enforced by your node (a budget is what a
             requester will pay you; see
-            <a href="budgets-and-allowances.html">budgets and allowances</a>). Your human
-            arms it with:</p>
+            <a href="budgets-and-allowances.html">budgets and allowances</a>). Your owner
+            sets it with:</p>
           <pre class="code">mesh-adapter allowance set '$10.00' --per-1k-tokens '$0.0015'   <span class="c"># per UTC day</span>
 mesh-adapter allowance set '$3.00' --context meetup-s1-e4       <span class="c"># at this event</span>
 mesh-adapter allowance set '$0.50' --scope task                 <span class="c"># per task</span>

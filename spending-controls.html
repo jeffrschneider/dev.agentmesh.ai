@@ -149,11 +149,11 @@
       <div class="wrap hero">
         <span class="eyebrow"><span class="tag">agentmesh</span> · build · budgets and allowances</span>
         <h1>Add spending controls<br>to your <span class="am">agent</span></h1>
-        <p class="lede">Five moves, in both SDKs: attach a budget to a request, refuse work
-          that does not fit with a counter-offer, revise a budget mid-task, arm an owner
-          allowance and report usage against it, and read the spend ledger. Every snippet
-          names the conformance fixture case that pins its behaviour. Background first?
-          Read <a href="budgets-and-allowances.html">budgets and allowances</a>.</p>
+        <p class="lede">Five tasks, in both SDKs: attach a budget to a request, refuse work
+          that does not fit and include an estimate, revise a budget mid-task, arm an
+          owner allowance and report usage against it, and read the spend ledger. Every
+          snippet names the conformance fixture case that pins its behaviour. Background
+          first? Read <a href="budgets-and-allowances.html">budgets and allowances</a>.</p>
       </div>
 
       <!-- 01 attach -->
@@ -224,8 +224,8 @@ let result = mesh.request_with_options(&amp;agent_id, <span class="s">"caselaw-s
           <p>Admission decisions belong <b>before</b> the accept signal, never in the
             handler body: a refusal thrown from the handler would arrive after the accept,
             which <a href="spec.html#6-4a-the-accept-signal">§6.4a</a> forbids. Both SDKs
-            give admission its own hook. Always carry your number: a refusal without an
-            estimate gives the requester nothing to counter with.</p>
+            give admission its own hook. Always include an estimate: a refusal without
+            one gives the requester nothing to resubmit against.</p>
 
           <h3>TypeScript · <span class="mono">HandlerOptions.admit</span> + <span class="mono">budgetInsufficient</span></h3>
           <pre class="code">import { budgetInsufficient, deadlineUnmeetable } from <span class="s">"agentmesh"</span>;
@@ -331,7 +331,8 @@ mesh.revise_budget(&amp;task_id, Some(responder_id.as_str()), raised).await?;
           <p class="kicker">04 · the owner's side</p>
           <h2>Arm an allowance, report usage</h2>
           <p>The allowance (<a href="budgets-and-allowances.html">EXT-8</a>) is the signed,
-            node-held policy that caps what your <b>own</b> agent may burn. Once armed,
+            node-held policy that caps what your <b>own</b> agent may spend on model
+            usage. Once armed,
             enforcement is SDK-automatic: every inbound request is priced and judged
             against the ceilings before the accept, and an exhausted allowance refuses
             with the same <code class="inline">BUDGET_INSUFFICIENT</code> shape as a
@@ -391,7 +392,7 @@ mesh.on_request_ctx(<span class="s">"caselaw-summary"</span>, move |input, _ctx|
             three-scope reference vector), <span class="mono">metering.cases</span>
             (<span class="mono">floor(tokens × per_1k_tokens_micro / 1000)</span>, to the
             micro-unit), <span class="mono">refusal.budget_insufficient</span>
-            (byte-identical to the budget-broke shape), and
+            (byte-identical to the budget refusal shape), and
             <span class="mono">exhaustion.refuse</span> /
             <span class="mono">exhaustion.ask_owner</span>.</p>
         </div>
@@ -400,7 +401,7 @@ mesh.on_request_ctx(<span class="s">"caselaw-summary"</span>, move |input, _ctx|
       <!-- 05 ledger -->
       <section class="band">
         <div class="wrap">
-          <p class="kicker">05 · the books</p>
+          <p class="kicker">05 · the spend ledger</p>
           <h2>Read the ledger</h2>
           <p>Everything metered is queryable: every entry plus the per-task, per-context,
             and per-UTC-day rollups the ceilings are enforced against. This is the
@@ -412,8 +413,8 @@ mesh.on_request_ctx(<span class="s">"caselaw-summary"</span>, move |input, _ctx|
           <h3>TypeScript · <span class="mono">allowanceLedger</span></h3>
           <pre class="code">const ledger = mesh.allowanceLedger();
 console.log(ledger.currency, ledger.total_micro);
-console.log(ledger.by_task[taskId]);              <span class="c">// what one task burned</span>
-console.log(ledger.by_context[<span class="s">"meetup-s1-e4"</span>]);  <span class="c">// what this event burned</span>
+console.log(ledger.by_task[taskId]);              <span class="c">// what one task spent</span>
+console.log(ledger.by_context[<span class="s">"meetup-s1-e4"</span>]);  <span class="c">// what one context spent</span>
 console.log(ledger.by_day[<span class="s">"2026-07-28"</span>]);        <span class="c">// the UTC day's rollup</span>
 <span class="c">// mesh.allowanceStatus() has the armed document, or the fail-closed error</span></pre>
 

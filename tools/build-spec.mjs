@@ -199,6 +199,7 @@ const page = `<!DOCTYPE html>
         <a class="on" href="spec.html">/ specification</a>
         <a href="naming-spec.html">/ naming-spec</a>
         <a href="sdk-reference.html">/ sdk-reference</a>
+        <a href="implementation-status.html">/ implementation-status</a>
         <a href="wire-api.html">/ wire-api</a>
         <a href="faq.html">/ faq</a>
       </nav>

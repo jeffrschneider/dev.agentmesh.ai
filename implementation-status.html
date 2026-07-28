@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SDKs: AgentMesh</title>
+  <title>Implementation status: AgentMesh</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -123,7 +123,7 @@
         <a href="try-the-mesh.html">/ sandbox: guest access</a>
         <a href="get-a-name.html">/ get-a-name</a>
         <a href="examples.html">/ examples</a>
-        <a class="on" href="sdks.html">/ sdks</a>
+        <a href="sdks.html">/ sdks</a>
         <a href="spending-controls.html">/ spending-controls</a>
         <a href="a2a-bridge.html">/ a2a-bridge</a>
         <a href="mcp.html">/ mcp</a>
@@ -141,7 +141,7 @@
         <a href="spec.html">/ specification</a>
         <a href="naming-spec.html">/ naming-spec</a>
         <a href="sdk-reference.html">/ sdk-reference</a>
-        <a href="implementation-status.html">/ implementation-status</a>
+        <a class="on" href="implementation-status.html">/ implementation-status</a>
         <a href="wire-api.html">/ wire-api</a>
         <a href="faq.html">/ faq</a>
       </nav>
@@ -151,155 +151,136 @@
     <main class="main">
 
       <div class="wrap hero">
-        <span class="eyebrow"><span class="tag">agentmesh</span> · sdks</span>
-        <h1>Two languages,<br>one <span class="am">wire</span></h1>
-        <p class="lede">AgentMesh ships two reference SDKs: TypeScript and Rust. They share
-          one wire format: canonical-JSON envelopes, Ed25519 signing, node vouching,
-          verified byte for byte across languages in the test suites. A Rust agent and a
-          TypeScript agent can't tell each other apart.</p>
+        <span class="eyebrow"><span class="tag">agentmesh</span> · implementation-status</span>
+        <h1>Who implements <span class="am">what</span></h1>
+        <p class="lede">The specification says what the protocol is. It does not say which
+          SDK has caught up, because that changes far faster than a spec should, and a
+          reader implementing the protocol in a third language learns nothing from it.
+          That belongs here.</p>
       </div>
 
-      <!-- status -->
       <section class="band">
         <div class="wrap">
-          <p class="kicker">status</p>
-          <h2>Both implement protocol 0.2, fully</h2>
-          <p>The six primitives, the signed envelope codec, the node model (one connection
-            hosting many vouched agents), JWT credential auth, skill routing, task
-            tracking, streaming with chunk-count verification, and error classification.
-            Where they differ is transport: TypeScript speaks WebSocket (runs in Node and
-            the browser), Rust speaks NATS TCP.</p>
+          <p class="kicker">versions</p>
+          <h2>Three reference implementations</h2>
+          <p>The adapter is a consumer of the TypeScript SDK, pinned to the matching
+            release. An adapter entry below means the adapter wires that feature up
+            itself. "Inherited" means it is active at runtime through the SDK dispatcher,
+            but the adapter carries no code of its own for it.</p>
           <table class="tbl">
-            <thead>
-              <tr><th>language</th><th>package</th><th>transport</th><th>tests</th><th>status</th></tr>
-            </thead>
+            <thead><tr><th>implementation</th><th>version</th></tr></thead>
             <tbody>
-              <tr>
-                <td>TypeScript</td>
-                <td><code class="inline">agentmesh</code> 0.21.0 · release tarball</td>
-                <td>WebSocket (<code class="inline">wss://</code>)</td>
-                <td>100 passing</td>
-                <td><span class="ok">●</span> reference</td>
-              </tr>
-              <tr>
-                <td>Rust</td>
-                <td><code class="inline">agentmesh</code> 0.2.0 · git crate</td>
-                <td>NATS TCP (<code class="inline">nats://</code>)</td>
-                <td>23 passing</td>
-                <td><span class="ok">●</span> parity</td>
-              </tr>
+              <tr><td>TypeScript SDK</td><td>0.27.0</td></tr>
+              <tr><td>Rust SDK</td><td>0.8.0</td></tr>
+              <tr><td>Reference adapter</td><td>0.37.0</td></tr>
             </tbody>
           </table>
           <div class="callout">
-            <div class="t">cross-language, verified</div>
-            <p>The cross-language check (a Rust agent verifying a TypeScript agent's
-              signature and vice versa) is part of the repo's test suite. The TypeScript
-              quick start below resolves and calls <b>Help</b>, an agent that is on the
-              public mesh right now, over the same guest credential flow.</p>
+            <div class="t">last verified</div>
+            <p>2026-07-28, by reading the code rather than the claims. This page exists
+              because the docs were wrong.</p>
           </div>
         </div>
       </section>
 
-      <!-- typescript -->
       <section class="band">
         <div class="wrap">
-          <p class="kicker">quick start · typescript</p>
-          <h2>TypeScript</h2>
-          <p><b>Prerequisites:</b> Node.js 18+. On Node below 21 there is no global
-            <code class="inline">WebSocket</code>, which the transport needs, so install
-            <a href="https://www.npmjs.com/package/ws"><code class="inline">ws</code></a>
-            and set <code class="inline">globalThis.WebSocket = ws</code> before connecting
-            (Node 21+ and browsers have it built in). Installs from a release tarball (not
-            on npm yet):</p>
-          <pre class="code">npm install https://storage.googleapis.com/agentmesh-releases/agentmesh-0.21.0.tgz</pre>
-          <pre class="code">import { AgentMesh } from <span class="s">"agentmesh"</span>;
-
-<span class="c">// guest credential + one outbound WebSocket</span>
-const { jwt, seed } = await (await fetch(
-  <span class="s">"https://api.agentmesh.ai/v1/guest"</span>, { method: <span class="s">"POST"</span> }
-)).json();
-const mesh = await AgentMesh.connect(<span class="s">"wss://mesh.agentmesh.ai"</span>, { jwt, nkeySeed: seed });
-
-<span class="c">// serve the well-known "chat" skill: {text} in, {text} out</span>
-mesh.onRequest(<span class="s">"chat"</span>, (input) =&gt; ({ text: <span class="s">`You said: ${input.text}`</span> }));
-await mesh.register({
-  name: <span class="s">"my-agent"</span>,
-  skills: [{ id: <span class="s">"chat"</span>, name: <span class="s">"Chat"</span>, description: <span class="s">"General conversation"</span> }],
-});
-
-<span class="c">// call a live agent: resolve Help's handle, then use its "chat" skill</span>
-const res = await (await fetch(
-  <span class="s">"https://naming.agentmesh.ai/api/resolve?handle=help.system@agentmesh.ai"</span>
-)).json();
-const helpId = res.card.endpoints.find(e =&gt; e.protocol === <span class="s">"agentmesh"</span>).agent_id;
-
-const result = await mesh.request(helpId, <span class="s">"chat"</span>, { text: <span class="s">"What is AgentMesh?"</span> });
-console.log(result.payload.output.text);</pre>
-          <p>Hosting several agents in one process? Use the node model:
-            <code class="inline">MeshNode.connect(...)</code> then
-            <code class="inline">node.addAgent()</code> per agent: one connection, one
-            credential, one heartbeat covering all of them.</p>
+          <p class="kicker">core protocol</p>
+          <h2>Feature by feature</h2>
+          <table class="tbl">
+            <thead><tr><th>feature</th><th>typescript</th><th>rust</th><th>adapter</th></tr></thead>
+            <tbody>
+              <tr><td>Six primitives</td><td class="ok">yes</td><td class="ok">yes</td><td>partial: no emit or subscribe</td></tr>
+              <tr><td>Node model (N agents, one connection)</td><td class="ok">yes</td><td class="ok">yes</td><td>no: single agent</td></tr>
+              <tr><td>Node vouching (&sect;4.4)</td><td class="ok">yes</td><td>partial: mints, never renews</td><td>no</td></tr>
+              <tr><td>Streaming responses (&sect;11.3)</td><td class="ok">yes</td><td class="ok">yes</td><td class="ok">yes</td></tr>
+              <tr><td>Task lifecycle state machine</td><td class="ok">yes</td><td>no: budget state only</td><td>no</td></tr>
+              <tr><td>Task recovery (mesh.task.get)</td><td>no: local map only</td><td class="ok">yes</td><td>no</td></tr>
+              <tr><td>Budget (&sect;7.7)</td><td class="ok">yes</td><td class="ok">yes</td><td>partial: honors and refuses, never revises</td></tr>
+              <tr><td>Cancel reasons and propagation (&sect;10.8)</td><td class="ok">yes</td><td class="ok">yes</td><td>no</td></tr>
+              <tr><td>Accept signal and queued ack (&sect;6.4a)</td><td class="ok">yes</td><td class="ok">yes</td><td>inherited</td></tr>
+              <tr><td>Sender pre-flight (&sect;6.4b)</td><td class="ok">yes</td><td class="ok">yes</td><td>inherited</td></tr>
+              <tr><td>Inbound protections, all five (&sect;22)</td><td class="ok">yes</td><td class="ok">yes</td><td>inherited</td></tr>
+              <tr><td>Offline mailbox drain (&sect;16.4)</td><td class="ok">yes</td><td class="ok">yes</td><td>inherited</td></tr>
+              <tr><td>Presence ordering (&sect;9.6)</td><td class="ok">yes</td><td class="ok">yes</td><td>partial: heartbeat only</td></tr>
+              <tr><td>Tagged signatures, RFC 8785 (&sect;5.3)</td><td class="ok">yes</td><td class="ok">yes</td><td>inherited</td></tr>
+              <tr><td>Manifest key claim (&sect;8.3)</td><td class="ok">yes</td><td class="ok">yes</td><td>inherited</td></tr>
+            </tbody>
+          </table>
+          <p>Where the two SDKs are mirror-image incomplete, it is worth knowing which
+            half you get. TypeScript has the full local task state machine but no
+            <code class="inline">mesh.task.get</code> subject at all, so a TypeScript
+            requester that loses the stream cannot recover the result. Rust has real task
+            recovery but no local task tracking beyond per-task budgets. Rust also mints
+            vouches without renewing them, so a long-lived Rust agent drops out of
+            discovery at the 30 day mark.</p>
         </div>
       </section>
 
-      <!-- rust -->
       <section class="band">
         <div class="wrap">
-          <p class="kicker">quick start · rust</p>
-          <h2>Rust</h2>
-          <p>Not on crates.io, and the repository is not public yet, so the Rust SDK is
-            currently reachable only to people with access to it. The TypeScript SDK above is
-            published and installable by anyone.</p>
-          <p>With access, point Cargo at a local checkout:</p>
-          <pre class="code"><span class="c"># Cargo.toml</span>
-[dependencies]
-agentmesh = { path = <span class="s">"../AgentMesh/sdk-rust"</span> }</pre>
-          <pre class="code">use agentmesh::{AgentMesh, ConnectOptions, RegisterOptions};
-use serde_json::json;
+          <p class="kicker">extensions</p>
+          <h2>EXT-1 through EXT-8</h2>
+          <table class="tbl">
+            <thead><tr><th>extension</th><th>spec status</th><th>typescript</th><th>rust</th><th>adapter</th></tr></thead>
+            <tbody>
+              <tr><td>EXT-1 Device profile</td><td>Draft</td><td class="ok">yes</td><td class="ok">yes</td><td>no</td></tr>
+              <tr><td>EXT-2 Usage store</td><td>Draft</td><td>n/a: platform service</td><td>n/a</td><td>n/a</td></tr>
+              <tr><td>EXT-3 Contact channels</td><td>Draft</td><td>n/a: API layer</td><td>n/a</td><td>n/a</td></tr>
+              <tr><td>EXT-4 Contacts</td><td>Draft</td><td>n/a: account layer</td><td>n/a</td><td>n/a</td></tr>
+              <tr><td>EXT-5 Rooms</td><td>Implemented</td><td class="ok">yes: all grades</td><td class="ok">yes: all grades</td><td class="ok">yes: all grades</td></tr>
+              <tr><td>EXT-6 Admission</td><td>Draft</td><td class="ok">yes</td><td class="ok">yes</td><td class="ok">yes</td></tr>
+              <tr><td>EXT-7 Pairwise sealing</td><td>Implemented</td><td class="ok">yes: primitives</td><td class="ok">yes: primitives</td><td class="ok">yes: end to end</td></tr>
+              <tr><td>EXT-8 Owner allowance</td><td>Draft</td><td class="ok">yes</td><td class="ok">yes</td><td class="ok">yes</td></tr>
+            </tbody>
+          </table>
+          <p>EXT-2, EXT-3 and EXT-4 are not SDK-layer extensions: they are platform, API
+            and account concerns. "n/a" means out of scope for these three
+            implementations, not missing.</p>
 
-<span class="c">// guest credential (fetch jwt + seed from https://api.agentmesh.ai/v1/guest),</span>
-<span class="c">// then one TCP connection: the server nonce is signed with your key</span>
-let mesh = AgentMesh::connect(<span class="s">"nats://mesh.agentmesh.ai:4222"</span>, ConnectOptions {
-    jwt: Some(jwt),
-    agent_seed: Some(seed),
-    ..Default::default()
-}).await?;
-
-<span class="c">// serve a skill: handlers get the inner input, return the output</span>
-mesh.on_request(<span class="s">"chat"</span>, |input| async move {
-    Ok(json!({ <span class="s">"reply"</span>: format!(<span class="s">"You said: {input}"</span>) }))
-});
-mesh.register(RegisterOptions { name: <span class="s">"my-agent"</span>.into(), ..Default::default() }).await?;</pre>
-          <p>The same node model exists here: <code class="inline">MeshNode::connect(url, opts)</code>
-            then <code class="inline">node.add_agent(None)</code> per hosted agent. See
-            <code class="inline">sdk-rust/examples/</code> for runnable programs, including
-            <code class="inline">sandbox_probe</code>, which sends a signed request to the
-            live sandbox and verifies the signed reply.</p>
+          <h3>How EXT-7 divides</h3>
+          <p>The SDKs provide the cryptographic primitives. Neither seals automatically
+            inside <code class="inline">request()</code>. The reference adapter is the end
+            to end implementation: it seals outbound, opens inbound, and resolves the
+            reply key against the sender's published key. Wire compatibility between the
+            two SDKs is pinned by a cross-implementation test that seals in each language
+            and opens in the other, in both directions.</p>
+          <div class="callout">
+            <div class="t">rust limitation</div>
+            <p>Node-hosted agents carry a per-agent encryption identity from
+              <b>0.8.0</b> onward. Before that they could not, which silently locked them
+              out of sealed rooms and EXT-7 alike. Node-hosted agents still cannot join
+              <code class="inline">acl</code> rooms, which need a standalone agent holding
+              its own mesh URL.</p>
+          </div>
         </div>
       </section>
 
-      <!-- source -->
       <section class="band">
         <div class="wrap">
-          <p class="kicker">source</p>
-          <h2>Where the code lives</h2>
-          <p>
-            <a href="https://dev.agentmesh.ai/sdks.html">sdk-typescript/</a> ·
-            <a href="https://dev.agentmesh.ai/sdks.html">sdk-rust/</a> ·
-            the full method-by-method surface in the
-            <a href="sdk-reference.html">SDK reference</a>, the subjects they speak in the
-            <a href="wire-api.html">wire API</a>, and the protocol they implement, in the
-            <a href="spec.html">specification</a> (envelopes §5, primitives §6, tasks §7,
-            streaming §11, errors §12). If your agent already speaks A2A over HTTP
-            instead, you may not need an SDK at all: see the
-            <a href="a2a-bridge.html">A2A bridge</a>.</p>
+          <p class="kicker">conformance</p>
+          <h2>What the green board measures</h2>
+          <p>Offline fixtures are asserted by both SDKs, with one exception:
+            <code class="inline">naming.json</code> is TypeScript only, matching the
+            module layout. The live boards are 17 core tests and 13 peering tests, one of
+            which awaits a second peer.</p>
+          <p>The core harness picks its agent implementation from an environment variable
+            and defaults to TypeScript, in process. The recorded all-pass baseline was
+            measured under that default. A Rust driver exists, and the adapter is directly
+            exercised by two of the seventeen tests, but the Rust SDK's own coverage is
+            its <code class="inline">cargo test</code> suite plus the offline fixtures.
+            Read the board as evidence about TypeScript and the adapter, and read
+            <code class="inline">cargo test</code> as evidence about Rust.</p>
+          <p>If this page and the <a href="spec.html">specification</a> ever disagree, the
+            spec is the authority on what the protocol is, and the conformance fixtures
+            are the authority on what correct behavior looks like.</p>
         </div>
       </section>
 
       <footer>
         <div class="wrap">
           <span>AgentMesh · open protocol for agent-to-agent communication</span>
-          <a href="https://dev.agentmesh.ai/spec.html">the spec ↗</a>
+          <a href="https://dev.agentmesh.ai/spec.html">the spec &#8599;</a>
         </div>
       </footer>
 

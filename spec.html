@@ -142,6 +142,7 @@
         <a class="on" href="spec.html">/ specification</a>
         <a href="naming-spec.html">/ naming-spec</a>
         <a href="sdk-reference.html">/ sdk-reference</a>
+        <a href="implementation-status.html">/ implementation-status</a>
         <a href="wire-api.html">/ wire-api</a>
         <a href="faq.html">/ faq</a>
       </nav>
@@ -156,7 +157,7 @@
           <span>status <b>Working Draft</b></span>
           <span>date <b>2026-07-27</b></span>
         </div>
-        <p class="canon">Rendered 2026-07-28 from commit <span class="mono">11a2406</span>.
+        <p class="canon">Rendered 2026-07-28 from commit <span class="mono">83b1e25</span>.
           The canonical source is SPEC.md, published with the conformance suite at
           <a href="https://github.com/jeffrschneider/agentmesh-protocol">https://github.com/jeffrschneider/agentmesh-protocol</a>
           (the <span class="mono">conformance/</span> fixtures this specification cites live there).</p>
@@ -3209,6 +3210,15 @@ back to constructing.</p>
 <li>Breaking changes to an extension MUST use a new URI.</li>
 </ul>
 <h3 id="17-5-defined-and-planned-extensions">17.5. Defined &amp; Planned Extensions<a class="hl" href="#17-5-defined-and-planned-extensions">#</a></h3>
+<p><code>Status</code> describes <strong>the specification</strong>, not any particular implementation:
+<code>Candidate</code> (an idea held open), <code>Draft</code> (specified, still moving), <code>Defined</code>
+(specified and stable), <code>Implemented</code> (specified, stable, and demonstrated
+against the conformance fixtures). It never records which SDK or product has
+caught up. Who implements what — and at which version — changes far faster
+than this document should, and a specification that tracks it teaches an
+implementer nothing about the protocol while advertising gaps that will be
+closed. That belongs in a support matrix maintained beside the conformance
+suite — <code>docs/implementation-status.md</code> — not here.</p>
 <table>
 <thead>
 <tr>
@@ -3230,7 +3240,7 @@ back to constructing.</p>
 <tr>
 <td><code>mesh://extensions/rooms/v1</code></td>
 <td><strong>Implemented</strong> (see <code>extensions/EXT-5-rooms.md</code>)</td>
-<td>Shared conversations for N agents, plus a durable record and artifact drive. Binding-decoupled (three abstract substrate capabilities; NATS/JetStream is one reference binding). All three privacy grades are live: capability (courtesy), sealed (end-to-end via the OPTIONAL agent <code>encryption_key</code>, §4.3/§8.1), and acl (broker-enforced membership via service-issued, room-scoped credentials). Thin by design: services are members, governance is <a href="https://agentcollab.dev">Agent Collab</a> playbooks, commerce is the economics extension. v1.1 names <strong>agent-presence</strong> (EXT-5 §8): the live roster as the fold of join/leave, invited ≠ joined, queryable and observable. v1.2 adds <strong>expel</strong> (EXT-5 §8.1): creator-only removal with a signed severity (timeout / conduct / safety), advisory at the capability grade, credential-revoking at acl. Reference implementation in the TypeScript and Rust SDKs (<code>Room</code>, <code>openRoom</code>) and the rooms service.</td>
+<td>Shared conversations for N agents, plus a durable record and artifact drive. Binding-decoupled (three abstract substrate capabilities; NATS/JetStream is one reference binding). All three privacy grades are live: capability (courtesy), sealed (end-to-end via the OPTIONAL agent <code>encryption_key</code>, §4.3/§8.1), and acl (broker-enforced membership via service-issued, room-scoped credentials). Thin by design: services are members, governance is <a href="https://agentcollab.dev">Agent Collab</a> playbooks, commerce is the economics extension. v1.1 names <strong>agent-presence</strong> (EXT-5 §8): the live roster as the fold of join/leave, invited ≠ joined, queryable and observable. v1.2 adds <strong>expel</strong> (EXT-5 §8.1): creator-only removal with a signed severity (timeout / conduct / safety), advisory at the capability grade, credential-revoking at acl.</td>
 </tr>
 <tr>
 <td><code>mesh://extensions/admission/v1</code></td>
@@ -3240,7 +3250,7 @@ back to constructing.</p>
 <tr>
 <td><code>mesh://extensions/e2e-encryption/v1</code></td>
 <td><strong>Implemented</strong> (see <code>extensions/EXT-7-pairwise-sealing.md</code>)</td>
-<td>End-to-end payload confidentiality. The core still secures only the transport, not payloads; the key substrate is the OPTIONAL agent X25519 <code>encryption_key</code> (§4.3). Two consumers exist: the Rooms <code>sealed</code> grade (rooms/v1, above) for multi-party conversations, and the <strong>pairwise profile</strong> (EXT-7) for direct messages — a request payload is boxed to the recipient&#39;s declared key (<code>sealedpayload.v1</code>, ephemeral-sender crypto_box), replies seal back to the sender&#39;s <code>reply_key</code>, and the mesh routes and buffers only ciphertext. Senders SHOULD seal whenever the recipient&#39;s card or manifest declares a key. TypeScript SDK ≥ 0.8.0 and the reference adapter ≥ 0.12.0; Rust SDK parity pending.</td>
+<td>End-to-end payload confidentiality. The core still secures only the transport, not payloads; the key substrate is the OPTIONAL agent X25519 <code>encryption_key</code> (§4.3). Two consumers exist: the Rooms <code>sealed</code> grade (rooms/v1, above) for multi-party conversations, and the <strong>pairwise profile</strong> (EXT-7) for direct messages — a request payload is boxed to the recipient&#39;s declared key (<code>sealedpayload.v1</code>, ephemeral-sender crypto_box), replies seal back to the sender&#39;s <code>reply_key</code>, and the mesh routes and buffers only ciphertext. Senders SHOULD seal whenever the recipient&#39;s card or manifest declares a key.</td>
 </tr>
 <tr>
 <td><code>mesh://extensions/device-profile/v1</code></td>

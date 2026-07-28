@@ -182,6 +182,7 @@ const page = `<!DOCTYPE html>
         <a href="get-a-name.html">/ get-a-name</a>
         <a href="examples.html">/ examples</a>
         <a href="sdks.html">/ sdks</a>
+        <a href="spending-controls.html">/ spending-controls</a>
         <a href="a2a-bridge.html">/ a2a-bridge</a>
         <a href="mcp.html">/ mcp</a>
         <div class="grp">run your own</div>
@@ -193,6 +194,7 @@ const page = `<!DOCTYPE html>
         <a href="architecture.html">/ architecture</a>
         <a href="topologies.html">/ topologies</a>
         <a href="world-wide-mesh.html">/ world-wide-mesh</a>
+        <a href="budgets-and-allowances.html">/ budgets-and-allowances</a>
         <div class="grp">reference</div>
         <a class="on" href="spec.html">/ specification</a>
         <a href="naming-spec.html">/ naming-spec</a>
@@ -212,7 +214,9 @@ const page = `<!DOCTYPE html>
           <span>date <b>${meta.date}</b></span>
         </div>
         <p class="canon">Rendered ${generated}${commit ? ` from commit <span class="mono">${commit}</span>` : ""}.
-          The canonical source is SPEC.md in the AgentMesh repository.</p>
+          The canonical source is SPEC.md, published with the conformance suite at
+          <a href="https://github.com/jeffrschneider/agentmesh-protocol">https://github.com/jeffrschneider/agentmesh-protocol</a>
+          (the <span class="mono">conformance/</span> fixtures this specification cites live there).</p>
         <div class="toc">
             ${tocHtml}
         </div>

@@ -237,13 +237,20 @@
           <p class="kicker">try it</p>
           <h2>The hosted bridge</h2>
           <p>The public sandbox runs a bridge at
-            <code class="inline">https://a2a.agentmesh.ai</code>. List the exposed agents,
-            fetch a card, and call one, from any HTTP client, no AgentMesh code at all:</p>
+            <code class="inline">https://a2a.agentmesh.ai</code>. It requires an API key:
+            anonymous requests are refused with 401, deliberately, because the bridge mints
+            a mesh identity for each caller and signs mesh traffic on its behalf, so every
+            caller must be identifiable. Keys are currently issued by the operators;
+            self-serve key issuance arrives with the attach feature in
+            <a href="https://app.agentmesh.ai">app.agentmesh.ai</a>. With a key in
+            <code class="inline">$A2A_KEY</code>, any HTTP client works, no AgentMesh code
+            at all:</p>
           <pre class="code"><span class="c"># who's exposed?</span>
-curl https://a2a.agentmesh.ai/agents
+curl -H <span class="s">"Authorization: Bearer $A2A_KEY"</span> https://a2a.agentmesh.ai/agents
 
 <span class="c"># call the Echo agent (stock A2A JSON-RPC)</span>
 curl -X POST https://a2a.agentmesh.ai/agents/&lt;agent-id&gt;/rpc \
+  -H <span class="s">"Authorization: Bearer $A2A_KEY"</span> \
   -H <span class="s">"Content-Type: application/json"</span> \
   -d <span class="s">'{"jsonrpc":"2.0","id":1,"method":"SendMessage",
        "params":{"message":{"role":"ROLE_USER",
@@ -251,8 +258,8 @@ curl -X POST https://a2a.agentmesh.ai/agents/&lt;agent-id&gt;/rpc \
          "metadata":{"agentmesh.skill":"echo"},
          "messageId":"m1"}}}'</span></pre>
           <p>The reply comes back as an A2A message whose parts carry the mesh agent's output.
-            Behind that one HTTP call: a hosted identity was minted for you, an envelope was
-            signed and routed over the mesh, and the agent's signed reply was verified and
+            Behind that one HTTP call: a hosted identity was minted for your key, an envelope
+            was signed and routed over the mesh, and the agent's signed reply was verified and
             translated back.</p>
         </div>
       </section>

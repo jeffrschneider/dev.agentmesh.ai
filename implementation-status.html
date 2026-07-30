@@ -126,6 +126,7 @@
         <a href="sdks.html">/ sdks</a>
         <a href="spending-controls.html">/ spending-controls</a>
         <a href="a2a-bridge.html">/ a2a-bridge</a>
+        <a href="rooms.html">/ rooms</a>
         <a href="mcp.html">/ mcp</a>
         <div class="grp">run your own</div>
         <a href="running-a-mesh.html">/ running-a-mesh</a>
@@ -202,7 +203,7 @@
               <tr><td>Sender pre-flight (&sect;6.4b)</td><td class="ok">yes</td><td class="ok">yes</td><td>inherited</td></tr>
               <tr><td>Inbound protections, all five (&sect;22)</td><td class="ok">yes</td><td class="ok">yes</td><td>inherited</td></tr>
               <tr><td>Offline mailbox drain (&sect;16.4)</td><td class="ok">yes</td><td class="ok">yes</td><td>inherited</td></tr>
-              <tr><td>Presence ordering (&sect;9.6)</td><td class="ok">yes</td><td class="ok">yes</td><td>partial: heartbeat only</td></tr>
+              <tr><td>Presence, subscribe-before-snapshot (&sect;9.6)</td><td class="ok">yes</td><td class="ok">yes</td><td>partial: heartbeat only</td></tr>
               <tr><td>Tagged signatures, RFC 8785 (&sect;5.3)</td><td class="ok">yes</td><td class="ok">yes</td><td>inherited</td></tr>
               <tr><td>Manifest key claim (&sect;8.3)</td><td class="ok">yes</td><td class="ok">yes</td><td>inherited</td></tr>
             </tbody>
@@ -238,6 +239,16 @@
             and account concerns. "n/a" means out of scope for these three
             implementations, not missing.</p>
 
+          <h3>Rust rooms: expel arrives</h3>
+          <p>Rust picked up rooms <code class="inline">expel</code> on 2026-07-30. Before
+            that there was no <code class="inline">Expel</code> variant and no
+            <code class="inline">Room::expel</code> at all, even though this row already
+            claimed all grades for Rust. Wiring rooms into the Egg Gateway is what exposed
+            the gap. Closing it also fixed two receive-side holes that TypeScript didn't
+            have: membership is now enforced first-person, so a signed "leave" naming
+            someone else can no longer erase that member from another agent's roster, and
+            the roster itself is now bounded, so a flood of joins can't grow it without end.</p>
+
           <h3>How EXT-7 divides</h3>
           <p>The SDKs provide the cryptographic primitives. Neither seals automatically
             inside <code class="inline">request()</code>. The reference adapter is the end
@@ -246,12 +257,14 @@
             two SDKs is pinned by a cross-implementation test that seals in each language
             and opens in the other, in both directions.</p>
           <div class="callout">
-            <div class="t">rust limitation</div>
-            <p>Node-hosted agents carry a per-agent encryption identity from
-              <b>0.8.0</b> onward. Before that they could not, which silently locked them
-              out of sealed rooms and EXT-7 alike. Node-hosted agents still cannot join
-              <code class="inline">acl</code> rooms, which need a standalone agent holding
-              its own mesh URL.</p>
+            <div class="t">rust node-hosted agents: both gaps closed</div>
+            <p>Node-hosted agents have carried a per-agent encryption identity since
+              <b>0.8.0</b>, through <code class="inline">MeshNode::add_agent_with</code>.
+              Before that they had none, which silently locked them out of sealed rooms and
+              EXT-7 alike. As of 2026-07-30 they can also join <code class="inline">acl</code>
+              rooms: a node now keeps the URL it dialled and hands it down to each hosted
+              agent, closing the gap that used to refuse them with "acl rooms require a
+              standalone agent."</p>
           </div>
         </div>
       </section>

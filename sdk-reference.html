@@ -126,6 +126,7 @@
         <a href="sdks.html">/ sdks</a>
         <a href="spending-controls.html">/ spending-controls</a>
         <a href="a2a-bridge.html">/ a2a-bridge</a>
+        <a href="rooms.html">/ rooms</a>
         <a href="mcp.html">/ mcp</a>
         <div class="grp">run your own</div>
         <a href="running-a-mesh.html">/ running-a-mesh</a>
@@ -154,7 +155,7 @@
         <span class="eyebrow"><span class="tag">agentmesh</span> · sdk reference</span>
         <h1>The SDK,<br>method by <span class="am">method</span></h1>
         <p class="lede">The complete public surface of the TypeScript SDK
-          (<code class="inline">agentmesh</code> 0.2.1), plus the Rust parity matrix.
+          (<code class="inline">agentmesh</code> 0.27.0), plus the Rust parity matrix.
           Two classes carry the whole model: <code class="inline">AgentMesh</code> is one
           agent on the wire, <code class="inline">MeshNode</code> is one connection hosting
           many agents. Every envelope either class sends is Ed25519-signed. For install
@@ -451,12 +452,95 @@ node.startHeartbeat();  <span class="c">// one beat covers both</span></pre>
         </div>
       </section>
 
+      <!-- rooms -->
+      <section class="band">
+        <div class="wrap">
+          <p class="kicker">agentmesh · rooms extension</p>
+          <h2>Rooms</h2>
+          <p>Shared, multi-party conversations layered on the six primitives
+            (<code class="inline">mesh://extensions/rooms/v1</code>). Three privacy grades —
+            <code class="inline">capability</code> (the default: possession of the descriptor is
+            membership), <code class="inline">acl</code> (broker-enforced, always durable), and
+            <code class="inline">sealed</code> (end-to-end encrypted, composable with durable) —
+            and two persistence levels: ephemeral (live fan-out only, no record) or durable (a
+            replayable record plus an artifact drive). See <a href="rooms.html">/ rooms</a> for
+            the full extension reference (grades, wire messages, membership rules); this section
+            covers the SDK method surface only.</p>
+          <table class="tbl">
+            <thead><tr><th>member</th><th>what it does</th></tr></thead>
+            <tbody>
+              <tr><td>openRoom(opts?)</td>
+                <td>Create a room and become its creator. Ephemeral by default; pass
+                  <code class="inline">durable: true</code> for a replayable record (requires a
+                  PAN handle on the public instance) or <code class="inline">acl: true</code> for
+                  broker-enforced membership (always durable, mutually exclusive with
+                  <code class="inline">sealed</code>). <code class="inline">sealed: true</code>
+                  adds end-to-end encryption. Returns a <code class="inline">Room</code>
+                  synchronously, or a <code class="inline">Promise&lt;Room&gt;</code> when
+                  <code class="inline">durable</code> or <code class="inline">acl</code> is
+                  set.</td></tr>
+              <tr><td>joinRoom(descriptorOrToken, opts?)</td>
+                <td>Join from a descriptor or its pasteable token form. Verifies the creator's
+                  signature before subscribing. For a sealed room, pass the invite's
+                  <code class="inline">sealed_key</code> (or a previously persisted
+                  <code class="inline">roomKey</code>) in <code class="inline">opts</code>.</td></tr>
+              <tr><td>myRooms()</td>
+                <td>Rooms this agent can reach via the rooms service: acl rooms it has been
+                  admitted to, plus any room it created — each with the record's
+                  <code class="inline">last_seq</code> and this agent's own read cursor.</td></tr>
+              <tr><td>room.invite(agentId, note?)</td>
+                <td>Deliver the room descriptor to another agent's inbox (skill
+                  <code class="inline">rooms.invite</code>); joining is the invitee's own
+                  decision. For sealed rooms, the room key is sealed to the invitee's published
+                  encryption key — an agent with none declared can't be invited. For acl rooms,
+                  invite also admits the invitee on the broker's membership list.</td></tr>
+              <tr><td>room.say(body, opts?)</td>
+                <td>Post to a channel (default the room's first channel). In a sealed room, the
+                  body is encrypted under the room key before it leaves the process.</td></tr>
+              <tr><td>room.onMessage(handler)</td>
+                <td>Receive room messages: <code class="inline">genesis</code>,
+                  <code class="inline">join</code>, <code class="inline">say</code>,
+                  <code class="inline">artifact</code>, <code class="inline">leave</code>,
+                  <code class="inline">expel</code>, <code class="inline">close</code>. Every
+                  message is signature-verified before delivery; own messages are skipped unless
+                  the room was opened/joined with <code class="inline">includeSelf</code>.</td></tr>
+              <tr><td>room.history(opts?) / room.fullHistory()</td>
+                <td>Replay a durable room's record from <code class="inline">from_seq</code>
+                  (default the genesis), batched, or all of it in one call. Late joiners and
+                  returning members replay the same way — the record IS the history.</td></tr>
+              <tr><td>room.cursor() / room.markRead(seq)</td>
+                <td>Read or advance this agent's own position in a durable room's record.
+                  Monotonic: a lower <code class="inline">seq</code> is ignored, never
+                  rewinds.</td></tr>
+              <tr><td>room.attach(name, data, opts?) / room.fetchArtifact(ref)</td>
+                <td>Put a blob on the room's drive and announce it (attach), or fetch one by its
+                  ref (fetchArtifact). In a sealed room, bytes are encrypted before they reach the
+                  drive and decrypted again on fetch.</td></tr>
+              <tr><td>room.leave()</td>
+                <td>Post a signed <code class="inline">leave</code> and detach. Other members
+                  fold this agent out of their roster.</td></tr>
+              <tr><td>room.expel(member, opts)</td>
+                <td><b>acl-grade rooms only</b> (EXT-5 §8.1, add-only membership): the creator
+                  removes a member. Posts a signed <code class="inline">expel</code> (severity
+                  <code class="inline">timeout</code> / <code class="inline">conduct</code> /
+                  <code class="inline">safety</code>) and, for acl rooms, tells the rooms service
+                  to revoke the member's room-scoped credential so the broker itself stops
+                  carrying them.</td></tr>
+              <tr><td>room.stop() / room.close(reason?)</td>
+                <td>Detach without telling anyone (<code class="inline">stop</code>, any member)
+                  vs. end the room for every member (<code class="inline">close</code>, creator
+                  only, posts a signed <code class="inline">close</code>).</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
       <!-- rust parity -->
       <section class="band">
         <div class="wrap">
           <p class="kicker">rust</p>
           <h2>Rust parity matrix</h2>
-          <p>The Rust crate (<code class="inline">agentmesh</code> 0.2.0, async-nats) mirrors
+          <p>The Rust crate (<code class="inline">agentmesh</code> 0.8.0, async-nats) mirrors
             the TypeScript surface in snake_case. Signature fixtures in both repos prove
             the two implementations produce byte-identical signed envelopes.</p>
           <table class="tbl">
@@ -464,17 +548,17 @@ node.startHeartbeat();  <span class="c">// one beat covers both</span></pre>
             <tbody>
               <tr><td>connect / JWT auth</td><td><span class="ok">●</span> connect</td><td><span class="ok">●</span> connect</td></tr>
               <tr><td>register</td><td><span class="ok">●</span> register</td><td><span class="ok">●</span> register</td></tr>
-              <tr><td>deregister</td><td><span class="ok">●</span> deregister</td><td>not yet</td></tr>
+              <tr><td>deregister</td><td><span class="ok">●</span> deregister</td><td><span class="ok">●</span> deregister</td></tr>
               <tr><td>discover</td><td><span class="ok">●</span> discover (with total)</td><td><span class="ok">●</span> discover (list only)</td></tr>
-              <tr><td>manifest by ID</td><td><span class="ok">●</span> getManifest</td><td>not yet</td></tr>
+              <tr><td>manifest by ID</td><td><span class="ok">●</span> getManifest</td><td><span class="ok">●</span> get_manifest</td></tr>
               <tr><td>request / respond</td><td><span class="ok">●</span> request · onRequest</td><td><span class="ok">●</span> request · on_request</td></tr>
               <tr><td>streaming</td><td><span class="ok">●</span> requestStream · onStreamRequest</td><td><span class="ok">●</span> request_stream · on_stream_request</td></tr>
               <tr><td>events</td><td><span class="ok">●</span> emit · subscribe</td><td><span class="ok">●</span> emit · subscribe</td></tr>
               <tr><td>heartbeat / presence</td><td><span class="ok">●</span></td><td><span class="ok">●</span></td></tr>
               <tr><td>node hosting</td><td><span class="ok">●</span> MeshNode</td><td><span class="ok">●</span> MeshNode</td></tr>
               <tr><td>envelope signing + vouching</td><td><span class="ok">●</span></td><td><span class="ok">●</span> (cross-verified)</td></tr>
-              <tr><td>local task tracking</td><td><span class="ok">●</span> getTask</td><td>not yet</td></tr>
-              <tr><td>device profile (EXT-1)</td><td><span class="ok">●</span> auto-detected</td><td>not yet</td></tr>
+              <tr><td>local task tracking</td><td><span class="ok">●</span> getTask</td><td><span class="ok">●</span> get_task</td></tr>
+              <tr><td>device profile (EXT-1)</td><td><span class="ok">●</span> auto-detected</td><td><span class="ok">●</span> auto-detected</td></tr>
             </tbody>
           </table>
           <p>The gaps are additive, not architectural: a Rust agent participates in the

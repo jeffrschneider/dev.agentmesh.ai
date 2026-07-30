@@ -134,6 +134,7 @@
         <a href="sdks.html">/ sdks</a>
         <a href="spending-controls.html">/ spending-controls</a>
         <a href="a2a-bridge.html">/ a2a-bridge</a>
+        <a href="rooms.html">/ rooms</a>
         <a href="mcp.html">/ mcp</a>
         <div class="grp">run your own</div>
         <a class="on" href="running-a-mesh.html">/ running-a-mesh</a>
@@ -270,6 +271,11 @@ kubectl -n agentmesh apply -f kubernetes/mesh.yaml</pre>
             needs a backup that is not the same machine, because losing them does not
             just lose the mesh, it makes every credential you have issued unusable
             permanently.</p>
+          <p>Treat both as a checked procedure, not something one person remembers under
+            pressure: keep the broker configuration itself in version control, so a
+            restore is a checkout and a restart rather than a reconstruction, and back up
+            the NATS keystore as routine practice before any credential rotation, not
+            after something has already gone wrong.</p>
           <p>The generated development config is a starting point, not a deployment:
             it serves WebSocket without TLS and keeps accounts in the config file, so
             adding one means editing and restarting.</p>
@@ -279,6 +285,73 @@ kubectl -n agentmesh apply -f kubernetes/mesh.yaml</pre>
             <p>The operator keys are the mesh's identity. Back them up before anything
               depends on them. Nothing can sign replacements that match, so losing them
               is not an outage you recover from, it is a mesh you reissue from scratch.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="band" id="status-health">
+        <div class="wrap">
+          <p class="kicker">is it up</p>
+          <h2>A status page for a person, a health check for a machine</h2>
+          <p>Every deployment serves two public routes side by side, and they answer the
+            same question for two different readers. <code class="inline">/status</code>
+            is an HTML page: a person checking whether their own mesh is up gets a plain
+            verdict at a glance, "all systems operational" or which service is down or
+            degraded, with uptime. <code class="inline">/health</code> is the JSON form of
+            the exact same facts, meant for an uptime checker or a monitoring system to
+            poll on a timer. Point automated monitoring at <code class="inline">/health</code>;
+            reach for <code class="inline">/status</code> yourself when you want to look
+            at it.</p>
+          <p>Both read the same per-service heartbeats, which is worth knowing because an
+            earlier version of this got it wrong: five services that were genuinely alive
+            were reported as down, because heartbeats weren't keyed correctly per service
+            and the reader silently missed most of them. Each expected service now writes
+            its own heartbeat record, so there is nothing left for a reader to miss.</p>
+          <p><code class="inline">/status</code> deliberately serves plain HTML with no
+            scripts and no calls to anything else, and it sends
+            <code class="inline">cache-control: no-store</code> so no cache or proxy can
+            hand back a stale answer. The idea is that this one page should stay
+            trustworthy to check even when other things about the deployment are broken.</p>
+        </div>
+      </section>
+
+      <section class="band" id="advisories">
+        <div class="wrap">
+          <p class="kicker">staying patched</p>
+          <h2>An optional, signed advisory feed &mdash; not phone-home</h2>
+          <p>Every deployment can also check, entirely on its own initiative, whether the
+            version it's running has a known security issue. Once an hour it fetches one
+            small signed file from the release bucket
+            (<code class="inline">gs://agentmesh-releases/advisories.json</code>, itself
+            named by a signing-keys file whose root key is compiled into the release you
+            installed) over a plain HTTPS GET. That's the whole mechanism: no
+            registration, no record anywhere of who is running a mesh or that a given
+            deployment exists, and no email involved at all. It does less than "phone
+            home," and that's the point.</p>
+          <ul class="plain">
+            <li><b>What shows up.</b> The verified result renders as a panel in your own
+              operator console: either a plain "up to date" state, or the specific
+              advisories that apply to your installed version. Each carries a severity,
+              <b>advisory</b> (worth upgrading for, not urgent) or <b>critical</b> (an
+              unpatched deployment is exploitable now), a title and detail, the affected
+              version range, and the version that fixes it, when one is known.</li>
+            <li><b>Fails safe, fails loud.</b> A feed that couldn't be fetched, one that's
+              expired (feeds expire 14 days after publishing if nobody re-publishes), one
+              whose signature doesn't verify, or a deployment that can't even determine
+              its own installed version all render as an amber "unknown" state, never as
+              a false "all clear."</li>
+            <li><b>Turning it off.</b> Set <code class="inline">ADVISORY_CHECK=off</code>
+              and the outbound check never runs at all, for an operator who would rather
+              not have even this leave the building.</li>
+            <li><b>What it isn't.</b> Not an upgrade mechanism, and not a channel for
+              shared threat or blacklist data across deployments, deliberately out of
+              scope. It tells you about your own installed version and nothing else.</li>
+          </ul>
+          <div class="callout">
+            <div class="t">the guarantee</div>
+            <p>An attacker who can block the release bucket can make your console say
+              "unknown." They cannot make it say "you're up to date" when you're not.
+              That is the one property this feature exists to have.</p>
           </div>
         </div>
       </section>

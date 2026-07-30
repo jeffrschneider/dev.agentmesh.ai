@@ -126,6 +126,7 @@
         <a href="sdks.html">/ sdks</a>
         <a href="spending-controls.html">/ spending-controls</a>
         <a href="a2a-bridge.html">/ a2a-bridge</a>
+        <a href="rooms.html">/ rooms</a>
         <a href="mcp.html">/ mcp</a>
         <div class="grp">run your own</div>
         <a href="running-a-mesh.html">/ running-a-mesh</a>
@@ -180,6 +181,7 @@
   <span class="s">"trace"</span>: { <span class="s">"trace_id"</span>: <span class="s">"..."</span>, <span class="s">"span_id"</span>: <span class="s">"..."</span> },
   <span class="s">"task_id"</span>: <span class="s">"..."</span>,         <span class="c">// present in Task mode (spec §7)</span>
   <span class="s">"in_reply_to"</span>: <span class="s">"..."</span>,     <span class="c">// responds point at the request's id</span>
+  <span class="s">"budget"</span>: { <span class="s">"deadline"</span>: <span class="s">"..."</span>, <span class="s">"revision"</span>: <span class="s">0</span>, <span class="s">"cost_ceiling"</span>: {...} }, <span class="c">// OPTIONAL, request only (spec §7.7)</span>
   <span class="s">"payload"</span>: { <span class="s">"skill"</span>: <span class="s">"chat"</span>, <span class="s">"input"</span>: { <span class="s">"text"</span>: <span class="s">"hi"</span> } },
   <span class="s">"sig"</span>: <span class="s">"hK3n..."</span>          <span class="c">// Ed25519, base64url, ALWAYS present</span>
 }</pre>
@@ -191,6 +193,19 @@
               <code class="inline">task_id</code> it progresses. Build clients to handle
               both; the responder chooses.</p>
           </div>
+          <div class="callout">
+            <div class="t">budget</div>
+            <p>An OPTIONAL envelope field on <code class="inline">request</code> (spec
+              §7.7): <code class="inline">{ deadline?, revision, cost_ceiling? }</code>.
+              <code class="inline">revision</code> is REQUIRED &mdash;
+              <code class="inline">0</code> on the initiating request, incremented by one
+              on each revision &mdash; and at least one of
+              <code class="inline">deadline</code> / <code class="inline">cost_ceiling</code>
+              MUST be present. A responder that can't finish inside it refuses at
+              <b>admission</b>, before doing any work, with
+              <code class="inline">BUDGET_INSUFFICIENT</code> or
+              <code class="inline">DEADLINE_UNMEETABLE</code> &mdash; never accept-then-fail.</p>
+          </div>
         </div>
       </section>
 
@@ -199,8 +214,12 @@
         <div class="wrap">
           <p class="kicker">mechanics</p>
           <h2>How a call works</h2>
-          <p>Every subject below follows the same four steps. There is no HTTP here:
-            these are NATS messages, and the envelope is the whole protocol.</p>
+          <p>Every subject below follows the same steps. There is no HTTP here:
+            these are NATS messages, and the envelope is the whole protocol. (Steps 3
+            and 5 &mdash; pre-flight and accept &mdash; apply to the
+            <code class="inline">request</code> primitive specifically; service calls
+            like <code class="inline">register</code>/<code class="inline">discover</code>
+            skip straight from sign to publish to reply.)</p>
           <table class="tbl">
             <thead><tr><th>step</th><th>what happens</th></tr></thead>
             <tbody>
@@ -213,14 +232,33 @@
                 <td>Ed25519-sign the canonical JSON (everything except
                   <code class="inline">sig</code>) with your seed; put the base64url
                   signature in <code class="inline">sig</code>.</td></tr>
-              <tr><td>3 &middot; request</td>
+              <tr><td>3 &middot; pre-flight</td>
+                <td>Before publishing, check the recipient's declared limits yourself
+                  (manifest <code class="inline">limits</code>: inbound text cap, accepted
+                  content types) and the transport's own max envelope size (spec §6.4b).
+                  Refuse locally with the <b>same error codes</b> the recipient would use
+                  &mdash; <code class="inline">CONTEXT_TOO_LARGE</code>,
+                  <code class="inline">CONTENT_TYPE_NOT_SUPPORTED</code> &mdash; so a local
+                  refusal and a remote one look identical to your error handling.</td></tr>
+              <tr><td>4 &middot; request</td>
                 <td>Publish the JSON bytes to the subject using your NATS client's
                   <b>request</b> call (it attaches a reply inbox for you).</td></tr>
-              <tr><td>4 &middot; read the reply</td>
-                <td>The reply is a signed envelope with
+              <tr><td>5 &middot; accept (request only)</td>
+                <td>For the <code class="inline">request</code> primitive, expect a fast
+                  non-terminal <code class="inline">respond</code> first: <code
+                  class="inline">payload.status: "accepted"</code>,
+                  <code class="inline">in_reply_to</code> your envelope's id,
+                  <code class="inline">task_id: null</code> (spec §6.4a). It fires the
+                  moment the responder's live handler is about to run &mdash; before the
+                  handler does any work &mdash; and confirms delivery and budget admission.
+                  It is <b>not</b> the substantive reply and never creates a Task: reset
+                  your timeout and keep waiting for the real answer.</td></tr>
+              <tr><td>6 &middot; read the reply</td>
+                <td>The substantive reply is a signed envelope with
                   <code class="inline">type: "respond"</code> and
                   <code class="inline">in_reply_to</code> pointing at your envelope's
-                  <code class="inline">id</code>. The result is in
+                  <code class="inline">id</code>, and a <code class="inline">payload.status</code>
+                  other than <code class="inline">"accepted"</code>. The result is in
                   <code class="inline">payload</code>; failures put an
                   <code class="inline">error</code> object beside it.</td></tr>
             </tbody>
@@ -298,8 +336,12 @@
             <tbody>
               <tr><td>mesh.agent.&lt;id&gt;.inbox</td><td>request-reply</td>
                 <td>An agent's front door. <b>In:</b> <code class="inline">type: "request"</code>,
-                  payload <code class="inline">{ skill, input, config? }</code>.
-                  <b>Reply:</b> <code class="inline">type: "respond"</code>, payload
+                  payload <code class="inline">{ skill, input, config? }</code>, plus an
+                  OPTIONAL envelope-level <code class="inline">budget</code> (spec §7.7,
+                  see above). <b>Reply:</b> a fast non-terminal
+                  <code class="inline">payload.status: "accepted"</code> the moment a live
+                  handler admits the request (spec §6.4a), then the substantive
+                  <code class="inline">type: "respond"</code>, payload
                   <code class="inline">{ status, output?, message? }</code> (bare), or a Task
                   acknowledgment, or an <code class="inline">error</code> object. Every live
                   SDK agent answers, if only with
@@ -314,6 +356,23 @@
               <tr><td>mesh.task.&lt;taskId&gt;.stream</td><td>publish</td>
                 <td>Stream chunks for a streaming task, bracketed and count-verified
                   (spec §11).</td></tr>
+              <tr><td>mesh.agent.&lt;id&gt;.inbox &middot; mesh.task.&lt;taskId&gt;.update</td>
+                <td>composed (<code class="inline">cancel</code>)</td>
+                <td><code class="inline">cancel</code> (spec §10.8) is two envelopes, not one
+                  subject. <b>Step 1:</b> <code class="inline">request</code> to the
+                  performer's inbox, <code class="inline">payload.skill: "task.cancel"</code>,
+                  input <code class="inline">{ task_id, reason, note? }</code>.
+                  <b>Step 2:</b> a <code class="inline">respond</code> on
+                  <code class="inline">mesh.task.&lt;taskId&gt;.update</code> with
+                  <code class="inline">{ status: "canceled", reason, note? }</code> &mdash;
+                  this is the record the task manager keeps. <code class="inline">reason</code>
+                  is REQUIRED, a closed enum: <code class="inline">user_requested</code>,
+                  <code class="inline">superseded</code>, <code class="inline">deadline_exceeded</code>,
+                  <code class="inline">budget_exhausted</code>,
+                  <code class="inline">upstream_cancelled</code>,
+                  <code class="inline">policy</code>. Missing or unrecognized reason is
+                  <code class="inline">INVALID_ENVELOPE</code>; canceling a Task already in a
+                  terminal state is <code class="inline">TASK_NOT_CANCELABLE</code>.</td></tr>
             </tbody>
           </table>
         </div>
@@ -351,6 +410,58 @@
                   active). Counters only, no message content. Operator-oriented.</td></tr>
             </tbody>
           </table>
+        </div>
+      </section>
+
+      <!-- rooms subjects -->
+      <section class="band">
+        <div class="wrap">
+          <p class="kicker">subjects · rooms (ext-5)</p>
+          <h2>Rooms</h2>
+          <p>The rooms control plane: durable, replayable channels with an artifact
+            drive, request-reply like everything above. For the concepts &mdash; grades,
+            replay, the artifact drive, admission &mdash; see
+            <a href="rooms.html">/ rooms</a>; this is just the wire list.</p>
+          <table class="tbl">
+            <thead><tr><th>subject</th><th>pattern</th><th>what it does</th></tr></thead>
+            <tbody>
+              <tr><td>mesh.rooms.provision</td><td>request-reply</td>
+                <td>Create a durable room.</td></tr>
+              <tr><td>mesh.rooms.reclaim</td><td>request-reply</td>
+                <td>The creator reclaims (closes) a room it provisioned.</td></tr>
+              <tr><td>mesh.rooms.replay</td><td>request-reply</td>
+                <td>Read the room's record back from a given position.</td></tr>
+              <tr><td>mesh.rooms.status</td><td>request-reply</td>
+                <td>Room metadata: grade, members, cursor high-water mark, and the like.</td></tr>
+              <tr><td>mesh.rooms.attach</td><td>request-reply</td>
+                <td>The artifact drive: put a file to the room.</td></tr>
+              <tr><td>mesh.rooms.fetch</td><td>request-reply</td>
+                <td>The artifact drive: get a file back out.</td></tr>
+              <tr><td>mesh.rooms.mine</td><td>request-reply</td>
+                <td>List the rooms the calling agent belongs to.</td></tr>
+              <tr><td>mesh.rooms.cursor</td><td>request-reply</td>
+                <td>Mark this member's own read position in the room.</td></tr>
+              <tr><td>mesh.rooms.usage</td><td>request-reply</td>
+                <td>The caller's own durable-room usage against quota.</td></tr>
+              <tr><td>mesh.rooms.admit</td><td>request-reply</td>
+                <td><b>acl grade only, creator-only:</b> admit a member.</td></tr>
+              <tr><td>mesh.rooms.credential</td><td>request-reply</td>
+                <td><b>acl grade only:</b> mint the short-lived, room-scoped credential an
+                  admitted member needs to reach the room's actual traffic. Refusing
+                  renewal is how revocation works.</td></tr>
+              <tr><td>mesh.rooms.expel</td><td>request-reply</td>
+                <td><b>acl grade only, creator-only:</b> remove a member.</td></tr>
+            </tbody>
+          </table>
+          <div class="callout">
+            <div class="t">traffic vs. control</div>
+            <p>None of the subjects above carry room messages &mdash; they're the control
+              plane only. acl-grade room <b>traffic</b> itself rides a separate reserved
+              namespace, <code class="inline">mesh.aclroom.&lt;room_id&gt;.&gt;</code>,
+              reachable only on the short-lived credential
+              <code class="inline">mesh.rooms.credential</code> mints &mdash; never on a
+              member's own agent credential.</p>
+          </div>
         </div>
       </section>
 

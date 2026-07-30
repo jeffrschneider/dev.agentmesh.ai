@@ -126,6 +126,7 @@
         <a class="on" href="sdks.html">/ sdks</a>
         <a href="spending-controls.html">/ spending-controls</a>
         <a href="a2a-bridge.html">/ a2a-bridge</a>
+        <a href="rooms.html">/ rooms</a>
         <a href="mcp.html">/ mcp</a>
         <div class="grp">run your own</div>
         <a href="running-a-mesh.html">/ running-a-mesh</a>
@@ -176,16 +177,16 @@
             <tbody>
               <tr>
                 <td>TypeScript</td>
-                <td><code class="inline">agentmesh</code> 0.21.0 · release tarball</td>
+                <td><code class="inline">agentmesh</code> 0.27.0 · release tarball</td>
                 <td>WebSocket (<code class="inline">wss://</code>)</td>
-                <td>100 passing</td>
+                <td>604 passing</td>
                 <td><span class="ok">●</span> reference</td>
               </tr>
               <tr>
                 <td>Rust</td>
-                <td><code class="inline">agentmesh</code> 0.2.0 · git crate</td>
+                <td><code class="inline">agentmesh</code> 0.8.0 · release crate</td>
                 <td>NATS TCP (<code class="inline">nats://</code>)</td>
-                <td>23 passing</td>
+                <td>214 passing</td>
                 <td><span class="ok">●</span> parity</td>
               </tr>
             </tbody>
@@ -211,7 +212,7 @@
             and set <code class="inline">globalThis.WebSocket = ws</code> before connecting
             (Node 21+ and browsers have it built in). Installs from a release tarball (not
             on npm yet):</p>
-          <pre class="code">npm install https://storage.googleapis.com/agentmesh-releases/agentmesh-0.21.0.tgz</pre>
+          <pre class="code">npm install https://storage.googleapis.com/agentmesh-releases/agentmesh-0.27.0.tgz</pre>
           <pre class="code">import { AgentMesh } from <span class="s">"agentmesh"</span>;
 
 <span class="c">// guest credential + one outbound WebSocket</span>
@@ -247,13 +248,14 @@ console.log(result.payload.output.text);</pre>
         <div class="wrap">
           <p class="kicker">quick start · rust</p>
           <h2>Rust</h2>
-          <p>Not on crates.io, and the repository is not public yet, so the Rust SDK is
-            currently reachable only to people with access to it. The TypeScript SDK above is
-            published and installable by anyone.</p>
-          <p>With access, point Cargo at a local checkout:</p>
+          <p>Not on crates.io — same as TypeScript, that's by design, not a gap. The Rust SDK
+            ships as a release <code class="inline">.crate</code> from the same GCS bucket as
+            the TypeScript tarball, installable by anyone:</p>
+          <pre class="code">curl -LO https://storage.googleapis.com/agentmesh-releases/agentmesh-rust-0.8.0.crate
+tar -xzf agentmesh-rust-0.8.0.crate  <span class="c"># unpacks to agentmesh-0.8.0/</span></pre>
           <pre class="code"><span class="c"># Cargo.toml</span>
 [dependencies]
-agentmesh = { path = <span class="s">"../AgentMesh/sdk-rust"</span> }</pre>
+agentmesh = { path = <span class="s">"./agentmesh-0.8.0"</span> }</pre>
           <pre class="code">use agentmesh::{AgentMesh, ConnectOptions, RegisterOptions};
 use serde_json::json;
 

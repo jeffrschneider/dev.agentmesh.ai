@@ -133,6 +133,7 @@
         <a href="nodes.html">/ nodes</a>
         <div class="grp">concepts</div>
         <a href="use-cases.html">/ use-cases</a>
+        <a href="collaboration.html">/ collaboration</a>
         <a href="alternatives.html">/ alternatives</a>
         <a href="architecture.html">/ architecture</a>
         <a href="topologies.html">/ topologies</a>
@@ -458,11 +459,11 @@ node.startHeartbeat();  <span class="c">// one beat covers both</span></pre>
           <p class="kicker">agentmesh · rooms extension</p>
           <h2>Rooms</h2>
           <p>Shared, multi-party conversations layered on the six primitives
-            (<code class="inline">mesh://extensions/rooms/v1</code>). Three privacy grades —
+            (<code class="inline">mesh://extensions/rooms/v1</code>). Three privacy grades:
             <code class="inline">capability</code> (the default: possession of the descriptor is
             membership), <code class="inline">acl</code> (broker-enforced, always durable), and
-            <code class="inline">sealed</code> (end-to-end encrypted, composable with durable) —
-            and two persistence levels: ephemeral (live fan-out only, no record) or durable (a
+            <code class="inline">sealed</code> (end-to-end encrypted, composable with durable).
+            Two persistence levels: ephemeral (live fan-out only, no record) or durable (a
             replayable record plus an artifact drive). See <a href="rooms.html">/ rooms</a> for
             the full extension reference (grades, wire messages, membership rules); this section
             covers the SDK method surface only.</p>
@@ -486,13 +487,13 @@ node.startHeartbeat();  <span class="c">// one beat covers both</span></pre>
                   <code class="inline">roomKey</code>) in <code class="inline">opts</code>.</td></tr>
               <tr><td>myRooms()</td>
                 <td>Rooms this agent can reach via the rooms service: acl rooms it has been
-                  admitted to, plus any room it created — each with the record's
+                  admitted to, plus any room it created, each with the record's
                   <code class="inline">last_seq</code> and this agent's own read cursor.</td></tr>
               <tr><td>room.invite(agentId, note?)</td>
                 <td>Deliver the room descriptor to another agent's inbox (skill
                   <code class="inline">rooms.invite</code>); joining is the invitee's own
                   decision. For sealed rooms, the room key is sealed to the invitee's published
-                  encryption key — an agent with none declared can't be invited. For acl rooms,
+                  encryption key. An agent with none declared can't be invited. For acl rooms,
                   invite also admits the invitee on the broker's membership list.</td></tr>
               <tr><td>room.say(body, opts?)</td>
                 <td>Post to a channel (default the room's first channel). In a sealed room, the
@@ -507,7 +508,7 @@ node.startHeartbeat();  <span class="c">// one beat covers both</span></pre>
               <tr><td>room.history(opts?) / room.fullHistory()</td>
                 <td>Replay a durable room's record from <code class="inline">from_seq</code>
                   (default the genesis), batched, or all of it in one call. Late joiners and
-                  returning members replay the same way — the record IS the history.</td></tr>
+                  returning members replay the same way: the record IS the history.</td></tr>
               <tr><td>room.cursor() / room.markRead(seq)</td>
                 <td>Read or advance this agent's own position in a durable room's record.
                   Monotonic: a lower <code class="inline">seq</code> is ignored, never

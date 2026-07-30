@@ -133,6 +133,7 @@
         <a href="nodes.html">/ nodes</a>
         <div class="grp">concepts</div>
         <a href="use-cases.html">/ use-cases</a>
+        <a href="collaboration.html">/ collaboration</a>
         <a href="alternatives.html">/ alternatives</a>
         <a href="architecture.html">/ architecture</a>
         <a href="topologies.html">/ topologies</a>
@@ -197,14 +198,14 @@
             <div class="t">budget</div>
             <p>An OPTIONAL envelope field on <code class="inline">request</code> (spec
               §7.7): <code class="inline">{ deadline?, revision, cost_ceiling? }</code>.
-              <code class="inline">revision</code> is REQUIRED &mdash;
-              <code class="inline">0</code> on the initiating request, incremented by one
-              on each revision &mdash; and at least one of
+              <code class="inline">revision</code> is REQUIRED
+              (<code class="inline">0</code> on the initiating request, incremented by one
+              on each revision), and at least one of
               <code class="inline">deadline</code> / <code class="inline">cost_ceiling</code>
               MUST be present. A responder that can't finish inside it refuses at
               <b>admission</b>, before doing any work, with
               <code class="inline">BUDGET_INSUFFICIENT</code> or
-              <code class="inline">DEADLINE_UNMEETABLE</code> &mdash; never accept-then-fail.</p>
+              <code class="inline">DEADLINE_UNMEETABLE</code>. Never accept-then-fail.</p>
           </div>
         </div>
       </section>
@@ -216,7 +217,7 @@
           <h2>How a call works</h2>
           <p>Every subject below follows the same steps. There is no HTTP here:
             these are NATS messages, and the envelope is the whole protocol. (Steps 3
-            and 5 &mdash; pre-flight and accept &mdash; apply to the
+            and 5, pre-flight and accept, apply to the
             <code class="inline">request</code> primitive specifically; service calls
             like <code class="inline">register</code>/<code class="inline">discover</code>
             skip straight from sign to publish to reply.)</p>
@@ -237,8 +238,8 @@
                   (manifest <code class="inline">limits</code>: inbound text cap, accepted
                   content types) and the transport's own max envelope size (spec §6.4b).
                   Refuse locally with the <b>same error codes</b> the recipient would use
-                  &mdash; <code class="inline">CONTEXT_TOO_LARGE</code>,
-                  <code class="inline">CONTENT_TYPE_NOT_SUPPORTED</code> &mdash; so a local
+                  (<code class="inline">CONTEXT_TOO_LARGE</code>,
+                  <code class="inline">CONTENT_TYPE_NOT_SUPPORTED</code>), so a local
                   refusal and a remote one look identical to your error handling.</td></tr>
               <tr><td>4 &middot; request</td>
                 <td>Publish the JSON bytes to the subject using your NATS client's
@@ -249,8 +250,8 @@
                   class="inline">payload.status: "accepted"</code>,
                   <code class="inline">in_reply_to</code> your envelope's id,
                   <code class="inline">task_id: null</code> (spec §6.4a). It fires the
-                  moment the responder's live handler is about to run &mdash; before the
-                  handler does any work &mdash; and confirms delivery and budget admission.
+                  moment the responder's live handler is about to run (before the
+                  handler does any work) and confirms delivery and budget admission.
                   It is <b>not</b> the substantive reply and never creates a Task: reset
                   your timeout and keep waiting for the real answer.</td></tr>
               <tr><td>6 &middot; read the reply</td>
@@ -364,8 +365,8 @@
                   input <code class="inline">{ task_id, reason, note? }</code>.
                   <b>Step 2:</b> a <code class="inline">respond</code> on
                   <code class="inline">mesh.task.&lt;taskId&gt;.update</code> with
-                  <code class="inline">{ status: "canceled", reason, note? }</code> &mdash;
-                  this is the record the task manager keeps. <code class="inline">reason</code>
+                  <code class="inline">{ status: "canceled", reason, note? }</code>.
+                  This is the record the task manager keeps. <code class="inline">reason</code>
                   is REQUIRED, a closed enum: <code class="inline">user_requested</code>,
                   <code class="inline">superseded</code>, <code class="inline">deadline_exceeded</code>,
                   <code class="inline">budget_exhausted</code>,
@@ -419,8 +420,8 @@
           <p class="kicker">subjects · rooms (ext-5)</p>
           <h2>Rooms</h2>
           <p>The rooms control plane: durable, replayable channels with an artifact
-            drive, request-reply like everything above. For the concepts &mdash; grades,
-            replay, the artifact drive, admission &mdash; see
+            drive, request-reply like everything above. For the concepts (grades,
+            replay, the artifact drive, admission), see
             <a href="rooms.html">/ rooms</a>; this is just the wire list.</p>
           <table class="tbl">
             <thead><tr><th>subject</th><th>pattern</th><th>what it does</th></tr></thead>
@@ -455,11 +456,11 @@
           </table>
           <div class="callout">
             <div class="t">traffic vs. control</div>
-            <p>None of the subjects above carry room messages &mdash; they're the control
+            <p>None of the subjects above carry room messages. They're the control
               plane only. acl-grade room <b>traffic</b> itself rides a separate reserved
               namespace, <code class="inline">mesh.aclroom.&lt;room_id&gt;.&gt;</code>,
               reachable only on the short-lived credential
-              <code class="inline">mesh.rooms.credential</code> mints &mdash; never on a
+              <code class="inline">mesh.rooms.credential</code> mints, never on a
               member's own agent credential.</p>
           </div>
         </div>

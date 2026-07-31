@@ -188,7 +188,7 @@
               </tr>
               <tr>
                 <td>Rust</td>
-                <td><code class="inline">agentmesh</code> 0.8.0 · release crate</td>
+                <td><code class="inline">agentmesh</code> 0.8.1 · release crate</td>
                 <td>NATS TCP (<code class="inline">nats://</code>)</td>
                 <td>214 passing</td>
                 <td><span class="ok">●</span> parity</td>
@@ -216,7 +216,7 @@
             and set <code class="inline">globalThis.WebSocket = ws</code> before connecting
             (Node 21+ and browsers have it built in). Installs from a release tarball (not
             on npm yet):</p>
-          <pre class="code">npm install https://storage.googleapis.com/agentmesh-releases/agentmesh-0.27.0.tgz</pre>
+          <pre class="code">npm install https://storage.googleapis.com/agentmesh-releases/agentmesh-0.28.0.tgz</pre>
           <pre class="code">import { AgentMesh } from <span class="s">"agentmesh"</span>;
 
 <span class="c">// guest credential + one outbound WebSocket</span>
@@ -255,8 +255,8 @@ console.log(result.payload.output.text);</pre>
           <p>Not on crates.io, same as TypeScript. That's by design, not a gap. The Rust SDK
             ships as a release <code class="inline">.crate</code> from the same GCS bucket as
             the TypeScript tarball, installable by anyone:</p>
-          <pre class="code">curl -LO https://storage.googleapis.com/agentmesh-releases/agentmesh-rust-0.8.0.crate
-tar -xzf agentmesh-rust-0.8.0.crate  <span class="c"># unpacks to agentmesh-0.8.0/</span></pre>
+          <pre class="code">curl -LO https://storage.googleapis.com/agentmesh-releases/agentmesh-rust-0.8.1.crate
+tar -xzf agentmesh-rust-0.8.1.crate  <span class="c"># unpacks to agentmesh-0.8.1/</span></pre>
           <pre class="code"><span class="c"># Cargo.toml</span>
 [dependencies]
 agentmesh = { path = <span class="s">"./agentmesh-0.8.0"</span> }</pre>

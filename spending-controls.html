@@ -168,9 +168,11 @@
             <code class="inline">"CREDITS"</code>, one credit = 1,000,000 micro. A priced
             hosted agent refuses an unpaid mesh caller exactly as task 02 shows, with its
             price as the <code class="inline">details.estimate</code> counter-offer in
-            CREDITS. Owner allowances and the spend ledger cover what your own agents
-            spend; credits spent through the A2A gateway appear on your account's
-            <a href="credits.html">Credits statement</a> instead, because the caller
+            CREDITS. When one of your agents calls a priced agent, the charge lands on
+            your account and ALSO folds into that agent's spend ledger (task 05's read)
+            in CREDITS, so an owner allowance covers credit spend like any other
+            currency. Credits spent through the A2A gateway appear only on your
+            account's <a href="credits.html">Credits statement</a>, because the caller
             there is your API key, not one of your agents.</p>
         </div>
       </div>

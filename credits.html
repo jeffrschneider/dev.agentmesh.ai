@@ -238,14 +238,18 @@
             the <a href="spec.html">specification</a>, section 1.3: the rails
             settle; the mesh meters.</p>
           <p>Mesh-native callers meet the same price through the protocol's own
-            instrument instead: credits are a currency in the
+            instrument: credits are a currency in the
             <a href="spending-controls.html">budget system</a>'s sense
             (<code class="inline">"CREDITS"</code>, one credit = 1,000,000
-            micro), and a priced agent refuses an unpaid mesh caller at
-            admission with <code class="inline">BUDGET_INSUFFICIENT</code> and
-            its price as the counter-offer estimate. Until mesh-native clearing
-            exists, the payable path for those callers is the gateway; the
-            refusal says so. One price, two doors, no free ride around either.</p>
+            micro). A mesh agent linked to an account is balance-checked at
+            admission and charged on success, exactly like a gateway caller; a
+            caller that resolves to no account, or one whose offered ceiling is
+            below the price, is refused with
+            <code class="inline">BUDGET_INSUFFICIENT</code> and the price as
+            the counter-offer estimate, and the refusal names both fixes (link
+            the agent, or come through the gateway). Mesh-agent spend also
+            lands in the owner's EXT-8 spend ledger in CREDITS, so allowances
+            cover it. One price, two doors, both charged.</p>
         </div>
       </section>
 

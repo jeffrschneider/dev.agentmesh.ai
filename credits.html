@@ -240,15 +240,17 @@
           <p>Mesh-native callers meet the same price through the protocol's own
             instrument: credits are a currency in the
             <a href="spending-controls.html">budget system</a>'s sense
-            (<code class="inline">"CREDITS"</code>, one credit = 1,000,000
-            micro). A mesh agent linked to an account is balance-checked at
+            (currency code <code class="inline">"XCR"</code>, one credit =
+            1,000,000 micro; ISO 4217 reserves X-prefixed codes for
+            non-national units, which is what a platform credit is). A mesh
+            agent linked to an account is balance-checked at
             admission and charged on success, exactly like a gateway caller; a
             caller that resolves to no account, or one whose offered ceiling is
             below the price, is refused with
             <code class="inline">BUDGET_INSUFFICIENT</code> and the price as
             the counter-offer estimate, and the refusal names both fixes (link
             the agent, or come through the gateway). Mesh-agent spend also
-            lands in the owner's EXT-8 spend ledger in CREDITS, so allowances
+            lands in the owner's EXT-8 spend ledger under XCR, so allowances
             cover it. One price, two doors, both charged.</p>
         </div>
       </section>

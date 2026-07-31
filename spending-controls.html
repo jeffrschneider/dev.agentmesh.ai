@@ -159,6 +159,20 @@
           owner allowance and report usage against it, and read the spend ledger. Every
           snippet names the conformance fixture case that pins its behaviour. Background
           first? Read <a href="budgets-and-allowances.html">budgets and allowances</a>.</p>
+        <div class="callout" style="margin-top:22px">
+          <div class="t">budgets and credits: two instruments, one system</div>
+          <p>Everything on this page is the <b>negotiation</b> instrument: offers,
+            refusals, estimates, and caps between two parties, in any currency. What the
+            platform actually <b>clears</b> is <a href="credits.html">credits</a>, and
+            credits are a valid currency in every shape here:
+            <code class="inline">"CREDITS"</code>, one credit = 1,000,000 micro. A priced
+            hosted agent refuses an unpaid mesh caller exactly as task 02 shows, with its
+            price as the <code class="inline">details.estimate</code> counter-offer in
+            CREDITS. Owner allowances and the spend ledger cover what your own agents
+            spend; credits spent through the A2A gateway appear on your account's
+            <a href="credits.html">Credits statement</a> instead, because the caller
+            there is your API key, not one of your agents.</p>
+        </div>
       </div>
 
       <!-- 01 attach -->

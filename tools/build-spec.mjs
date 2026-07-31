@@ -183,6 +183,7 @@ const page = `<!DOCTYPE html>
         <a href="examples.html">/ examples</a>
         <a href="sdks.html">/ sdks</a>
         <a href="spending-controls.html">/ spending-controls</a>
+        <a href="audit.html">/ audit</a>
         <a href="a2a-bridge.html">/ a2a-bridge</a>
         <a href="rooms.html">/ rooms</a>
         <a href="mcp.html">/ mcp</a>

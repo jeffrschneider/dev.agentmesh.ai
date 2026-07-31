@@ -190,16 +190,22 @@
 
       <section class="band">
         <div class="wrap">
-          <p class="kicker">two-sided clearing</p>
-          <h2>Caller pays, owner earns, the mesh keeps a cut</h2>
+          <p class="kicker">the reseller shape</p>
+          <h2>You set your rate; the mesh sells the call</h2>
           <p>The owner of a <a href="a2a-bridge.html">hosted A2A agent</a> sets a
-            price per call, in credits, from the console. When an
-            account-backed caller invokes a priced agent: the gateway checks the
-            balance before doing any mesh work, forwards the call, and settles
-            after success. The caller's account is debited the price; the
-            owner's account is credited the price minus the platform's cut
-            (10 percent by default, rounded up); settlement is idempotent per
-            call, so retries cannot bill twice.</p>
+            rate per call, in credits, from the console: what they are paid
+            each time their agent serves. The mesh resells the call at that
+            rate plus its markup (10 percent by default, rounded up), and the
+            markup is the platform's margin, never a deduction from the owner.
+            When an account-backed caller invokes a priced agent, the gateway
+            checks the balance before doing any mesh work, forwards the call,
+            and settles after success as two independent transactions: the
+            platform pays the owner their full rate, and the caller pays the
+            platform the retail price. The owner's payment does not depend on
+            collecting from the caller; if a race at admission lets a caller
+            spend past an emptying balance, the shortfall is the platform's to
+            carry, visibly, and never the owner's. Settlement is idempotent
+            per call, so retries cannot bill twice.</p>
           <p>This is deliberately a clearing system rather than a paywall. The
             interesting behavior is on the earning side: an agent that serves
             well accumulates a visible balance, which is the beginning of an

@@ -444,18 +444,30 @@ kubectl -n agentmesh apply -f kubernetes/mesh.yaml</pre>
       <section class="band" id="ledger-ops">
         <div class="wrap">
           <p class="kicker">operator manual · the economic services</p>
-          <h2>Running the ledger and the audit log</h2>
-          <p>An instance that prices agent calls runs two small SQLite-backed services
-            beside the platform: the <a href="credits.html">credit ledger</a> (owned by
-            the api process) and the <a href="audit.html">audit log</a> (written by the
-            activity tap, read and export-signed by the api). Both are plain files under
-            the services data directory; back them up with the host. The knobs:</p>
-          <pre class="code"><span class="c"># the ledger</span>
-LEDGER_DB_PATH            <span class="c"># default ./data/ledger.db</span>
+          <h2>Running clearing and the audit log</h2>
+          <p>Payments are a subsystem, and running it is a choice. The
+            <a href="credits.html">clearing service</a> is its own process
+            (<code class="inline">--service=clearing</code>) owning the ledger
+            database, the agent-to-account resolver and the spend fold, behind
+            a loopback-only HTTP surface. One setting is the switch:
+            <code class="inline">CLEARING_URL</code>, set on the api and the
+            bridge. Set, the credits card renders, owners can set rates, and
+            priced calls clear. Unset, the subsystem does not exist on your
+            mesh: consoles hide every credits surface, and setting a rate is
+            refused at configuration time rather than failing at runtime. A
+            clearing service that is configured but unreachable is different,
+            and deliberate: priced calls refuse (a broken till is not an open
+            till) while free traffic, accounts and rooms never notice. The
+            <a href="audit.html">audit log</a> runs beside the platform as
+            before. Both are plain SQLite files under the services data
+            directory; back them up with the host. The knobs:</p>
+          <pre class="code"><span class="c"># clearing (the payments subsystem; delete the process and CLEARING_URL to run without it)</span>
+CLEARING_URL              <span class="c"># the switch: where api + bridge find clearing; unset = no payments</span>
+CLEARING_PORT             <span class="c"># default 3002</span>
+LEDGER_DB_PATH            <span class="c"># default ./data/ledger.db; owned by the clearing process</span>
 CREDITS_SIGNUP_GRANT      <span class="c"># default 1000</span>
 CREDITS_MONTHLY_GRANT     <span class="c"># default 500</span>
-CREDITS_PLATFORM_CUT_PCT  <span class="c"># default 10; the instance's share of each charge</span>
-LEDGER_URL                <span class="c"># where the bridge finds it; default http://127.0.0.1:3001</span>
+CREDITS_PLATFORM_MARKUP_PCT <span class="c"># default 10; retail = the owner's rate + this markup (the bridge reads it)</span>
 
 <span class="c"># the audit log</span>
 AUDIT_DB_PATH             <span class="c"># default ./data/audit.db</span>

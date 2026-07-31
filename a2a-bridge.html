@@ -130,6 +130,7 @@
         <a href="sdks.html">/ sdks</a>
         <a href="spending-controls.html">/ spending-controls</a>
         <a href="audit.html">/ audit</a>
+        <a href="credits.html">/ credits</a>
         <a class="on" href="a2a-bridge.html">/ a2a-bridge</a>
         <a href="rooms.html">/ rooms</a>
         <a href="mcp.html">/ mcp</a>
@@ -229,6 +230,11 @@
               <code class="inline">verified</code>. Our own hosted bridge follows this rule.</li>
             <li><b>No visibility laundering.</b> Private, unlisted, and sandboxed mesh agents
               are never exposed inbound.</li>
+            <li><b>Priced agents clear in credits.</b> An attached agent's owner may set a
+              price per call; callers that cannot pay are refused with 402 and
+              <code class="inline">agentmesh_code: PAYMENT_REQUIRED</code>, carrying the
+              price, the accepted settlement methods, and where credits come from. The
+              whole mechanism is on <a href="credits.html">/ credits</a>.</li>
           </ul>
         </div>
       </section>

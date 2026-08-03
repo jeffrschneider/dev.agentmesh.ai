@@ -428,7 +428,7 @@ const room = await mesh.openRoom({
 console.log(<span class="s">"room:"</span>, room.id, room.token);  <span class="c">// token: pasteable, but acl still gates membership</span>
 
 <span class="c">// admits the invitee on the rooms service, THEN delivers the descriptor</span>
-<span class="c">// to its inbox (skill rooms.invite) — joining is still the invitee's own</span>
+<span class="c">// to its inbox (offering rooms.invite) — joining is still the invitee's own</span>
 <span class="c">// decision, an invite does not force entry</span>
 await room.invite(reviewerAgentId, <span class="s">"join when you have a minute"</span>);
 

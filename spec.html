@@ -159,9 +159,9 @@
         <div class="metas">
           <span>version <b>0.2.0-draft</b></span>
           <span>status <b>Working Draft</b></span>
-          <span>date <b>2026-07-27</b></span>
+          <span>date <b>2026-08-03</b></span>
         </div>
-        <p class="canon">Rendered 2026-07-31 from commit <span class="mono">120757f</span>.
+        <p class="canon">Rendered 2026-08-03 from commit <span class="mono">558421b</span>.
           The canonical source is SPEC.md, published with the conformance suite at
           <a href="https://github.com/jeffrschneider/agentmesh-protocol">https://github.com/jeffrschneider/agentmesh-protocol</a>
           (the <span class="mono">conformance/</span> fixtures this specification cites live there).</p>
@@ -375,6 +375,53 @@ shape, really-signed vectors under the <code>agentmesh-allowance-v1</code> tag,
 floor-rounded metering arithmetic, smallest-remaining ceiling precedence,
 the refusal shape, and both exhaustion behaviours.</p>
 </blockquote>
+<blockquote>
+<p><strong>2026-08-02: metering made first-class; economics re-cut as SKU, price,
+and agreement.</strong> New <strong>§13.5</strong> defines the metering substrate in core: a
+<strong>meter</strong> is a named unit of consumption in one of two classes — <em>observed</em>
+(counted by the platform from traffic it can attest: requests, bytes, task
+completions) and <em>declared</em> (measurable only inside the responder: tokens,
+model time, tool calls) — and a <strong>meter event</strong> is the atom of usage:
+quantity, provider, consumer, the deriving envelope&#39;s id as the idempotency
+key. Declared usage rides <code>payload.usage</code> of the <code>respond</code>, which the
+envelope signature already covers — a usage report is a signed receipt with
+no new signature. Refusals are events too (quantity zero, carrying the
+code), so declined demand is as recorded as served demand. §19 is re-cut
+around it: the manifest <code>cost</code> block is retired in favour of <strong>SKUs</strong>
+(§19.1) — covered offerings + a <strong>price</strong> (<code>free</code> / <code>flat</code> / <code>per_unit</code> /
+<code>package</code> / <code>tiered</code>, rated against named meters) + a billing <strong>provider</strong>
+(§19.4) — whose commercial terms are pinned by a tagged SHA-256 <strong>digest</strong>;
+a signed, account-level <strong>agreement</strong> (§19.5) binds a consumer&#39;s owner key
+to that digest before paid work, enforced at admission by the new
+<code>AGREEMENT_REQUIRED</code> refusal (§12.2) carrying the approval URL — the §1.3
+&quot;payment required&quot; refusal, now typed; and <strong>rating</strong> (§19.6) is a
+deterministic, replayable fold of meter events × agreed price, bounded by
+the budget&#39;s ceiling. The task receipt (§19.2) becomes a derived view over
+§13.5 events, same subjects. Settlement remains out of scope. New fixtures
+<code>conformance/metering.json</code> and <code>conformance/commerce.json</code> pin the shapes,
+the rating arithmetic, the digest, and really-signed vectors under
+<code>agentmesh-agreement-v1</code>.</p>
+</blockquote>
+<blockquote>
+<p><strong>2026-08-03: <em>skill</em> renamed to <em>offering</em>; shared resources; the
+engagement contract.</strong> The unit of capability an agent advertises is renamed
+from <em>skill</em> to <strong>offering</strong> throughout — the ecosystem has settled &quot;skill&quot;
+to mean a packaged procedure loaded <em>into</em> an agent, which is not this
+concept — with the legacy field names (<code>skills</code>, <code>payload.skill</code>,
+<code>skill_details</code>, <code>SKILL_NOT_FOUND</code>) accepted as inbound aliases for a
+deprecation window (§8.5). New <strong>§7.5.5</strong> distinguishes what every prior
+part type is (a copy — inline bytes outright, a <code>ref</code> as an immutable
+snapshot) from a <strong>shared resource</strong>: one live object both parties knowingly
+operate on, carried as <code>payload.resources</code> with <code>uri</code>, <code>kind</code> (<code>git</code>
+reserved), and declared <code>access</code> — exempt from digest and retention because
+no snapshot-shaped claim can honestly be made about a place, with access
+arranged in the resource&#39;s own auth domain and cleartext credentials
+forbidden. New <strong>§8.5.1</strong> adds the coarse engagement contract for
+general-purpose agents: <code>needs</code> (what to have in hand — resources, files, or
+prose) and <code>delivers</code> (final form, interim checkpoints, and whether the
+deliverable lands in the caller&#39;s resource), both registry-materialized into
+the storefront (§8.7).</p>
+</blockquote>
 <hr>
 <h2 id="1-introduction">1. Introduction<a class="hl" href="#1-introduction">#</a></h2>
 <p>The AgentMesh Protocol is an open specification for reliable, secure agent-to-agent communication over messaging infrastructure. Unlike HTTP-based agent protocols that impose a client-server interaction model, AgentMesh treats the network as a <strong>mesh</strong> — any agent can request, respond, emit, subscribe, and discover any other agent, with the platform providing routing, delivery, persistence, security, and observability.</p>
@@ -466,7 +513,7 @@ the refusal shape, and both exhaustion behaviours.</p>
 <li><strong>World Wide Mesh:</strong> The connected whole — every peered instance, one namespace, one protocol. The ladder reads: instance → peered mesh → World Wide Mesh.</li>
 <li><strong>Primitive:</strong> An irreducible protocol operation. All agent interactions compose from primitives.</li>
 <li><strong>Composed Operation:</strong> A higher-level interaction pattern built from multiple primitives. Standardized for interoperability but not fundamental.</li>
-<li><strong>Manifest:</strong> A durable self-description document published by an agent, declaring its identity, hosting node, capabilities, and skills. (Liveness is <em>not</em> in the manifest — see Presence; cost is an extension field — see Section 17.)</li>
+<li><strong>Manifest:</strong> A durable self-description document published by an agent, declaring its identity, hosting node, capabilities, and offerings. (Liveness is <em>not</em> in the manifest — see Presence; cost is an extension field — see Section 17.)</li>
 <li><strong>Task:</strong> A stateful unit of work with a defined lifecycle, created when an agent processes a request.</li>
 <li><strong>Message:</strong> A structured communication between agents, carrying metadata, identity, and payload.</li>
 <li><strong>Artifact:</strong> A discrete output produced by an agent as the result of a Task, distinct from conversational messages.</li>
@@ -799,7 +846,7 @@ the refusal shape, and both exhaustion behaviours.</p>
 <td><code>payload</code></td>
 <td>any</td>
 <td>OPTIONAL</td>
-<td>The message payload. Structure depends on the primitive type and the agent&#39;s skill contract.</td>
+<td>The message payload. Structure depends on the primitive type and the agent&#39;s offering contract.</td>
 </tr>
 <tr>
 <td><code>artifacts</code></td>
@@ -946,7 +993,7 @@ binding provides publish-side deduplication (§18.8).</li>
   &quot;payload&quot;: {
     &quot;capabilities&quot;: [&quot;web-scrape&quot;, &quot;search&quot;],
     &quot;availability&quot;: &quot;online&quot;,
-    &quot;skill_id&quot;: &quot;&lt;optional-specific-skill&gt;&quot;,
+    &quot;offering_id&quot;: &quot;&lt;optional-specific-offering&gt;&quot;,
     &quot;tags&quot;: [&quot;&lt;optional-tags&gt;&quot;],
     &quot;version&quot;: &quot;&lt;optional-semver-range&gt;&quot;,
     &quot;limit&quot;: 10
@@ -986,8 +1033,8 @@ binding provides publish-side deduplication (§18.8).</li>
   &quot;trace&quot;: { &quot;trace_id&quot;: &quot;...&quot;, &quot;span_id&quot;: &quot;...&quot;, &quot;parent_span_id&quot;: &quot;...&quot; },
   &quot;context_id&quot;: &quot;&lt;optional-session-context&gt;&quot;,
   &quot;payload&quot;: {
-    &quot;skill&quot;: &quot;&lt;skill-id&gt;&quot;,
-    &quot;input&quot;: { &quot;&lt;skill-specific-input&gt;&quot; },
+    &quot;offering&quot;: &quot;&lt;offering-id&gt;&quot;,
+    &quot;input&quot;: { &quot;&lt;offering-specific-input&gt;&quot; },
     &quot;config&quot;: {
       &quot;timeout_ms&quot;: 30000,
       &quot;stream&quot;: false,
@@ -1014,7 +1061,7 @@ binding provides publish-side deduplication (§18.8).</li>
 <li>If <code>config.stream</code> is <code>true</code>, the agent SHOULD use the Task response shape and deliver incremental results as a sequence of <code>respond</code> messages on a task-specific subject (see Section 11).</li>
 <li>If <code>config.stream</code> is <code>true</code>, the agent SHOULD deliver incremental results as a sequence of <code>respond</code> messages on a task-specific subject (see Section 11).</li>
 <li>If <code>config.timeout_ms</code> is specified, the requester SHOULD cancel the request if no response is received within the timeout.</li>
-<li>If <code>payload.skill</code> is specified, the agent SHOULD dispatch to the named skill. If the skill is not found, the agent MUST respond with a <code>SKILL_NOT_FOUND</code> error.</li>
+<li>If <code>payload.offering</code> is specified, the agent SHOULD dispatch to the named offering. If the offering is not found, the agent MUST respond with an <code>OFFERING_NOT_FOUND</code> error.</li>
 </ul>
 <p><strong>Offline targets (the queued outcome).</strong> A request to an agent that is not
 currently connected is not necessarily lost: if the target has a redelivery
@@ -1031,9 +1078,9 @@ still create a Task (Section 7) for buffered work; nothing requires it —
 <p><strong>Errors:</strong></p>
 <ul>
 <li><code>AGENT_UNAVAILABLE</code>: The agent is not accepting requests and has no redelivery buffer (offline sandbox agent, unregistered id, or at capacity).</li>
-<li><code>SKILL_NOT_FOUND</code>: The requested skill is not supported by the agent.</li>
-<li><code>INPUT_INVALID</code>: The input payload does not conform to the skill&#39;s expected schema.</li>
-<li><code>UNAUTHORIZED</code>: The requesting agent does not have permission to invoke this skill.</li>
+<li><code>OFFERING_NOT_FOUND</code>: The requested offering is not supported by the agent.</li>
+<li><code>INPUT_INVALID</code>: The input payload does not conform to the offering&#39;s expected schema.</li>
+<li><code>UNAUTHORIZED</code>: The requesting agent does not have permission to invoke this offering.</li>
 <li><code>CONTENT_TYPE_NOT_SUPPORTED</code>: The requested output modes are not supported.</li>
 </ul>
 <h3 id="6-4a-the-accept-signal">6.4a. The Accept Signal<a class="hl" href="#6-4a-the-accept-signal">#</a></h3>
@@ -1058,7 +1105,7 @@ accept, never after one: a §22 protection refusal (§22.7) and a budget
 refusal (<code>BUDGET_INSUFFICIENT</code> / <code>DEADLINE_UNMEETABLE</code>, §7.7) are each
 themselves the first reply, and emitting an accept asserts that admission
 already happened. What MAY follow an accept is the work&#39;s own outcome —
-including a terminal error such as <code>SKILL_NOT_FOUND</code> or <code>INPUT_INVALID</code>
+including a terminal error such as <code>OFFERING_NOT_FOUND</code> or <code>INPUT_INVALID</code>
 discovered at dispatch, or a plain failure. A failure of the <em>work</em> may
 follow an accept; a refusal of <em>admission</em> may not.</p>
 <p><strong>What it means to the caller.</strong> An accept confirms delivery and admission in
@@ -1117,7 +1164,7 @@ terms.</p>
 <h3 id="6-4b-sender-pre-flight-sender-obligations">6.4b. Sender Pre-Flight (Sender Obligations)<a class="hl" href="#6-4b-sender-pre-flight-sender-obligations">#</a></h3>
 <p>Every limit a message can break is published before the message is sent: the
 recipient&#39;s inbound sender-text cap (§22.5, declared per agent via the
-manifest <code>limits</code> block, §8.1), the content types its skills accept and
+manifest <code>limits</code> block, §8.1), the content types its offerings accept and
 produce (§8.1), its rate limits (§8.1 <code>rate_limits</code>), and the transport&#39;s own
 maximum message size (§18.9). §22 obliges the receiver to enforce its side of
 those limits; nothing, until this subsection, obliged a sender to read them.
@@ -1145,8 +1192,8 @@ the transport refuses it — so the pre-flight turns a raw transport error
 into a deterministic, protocol-legible local refusal under the same code a
 caller already handles for &quot;too large&quot;.</li>
 <li><strong>Content type</strong>, against the manifest: a <code>config.accepted_output</code> that no
-output mode of the target skill can satisfy, or input in a type the
-skill&#39;s <code>input_modes</code> exclude, refuses with <code>CONTENT_TYPE_NOT_SUPPORTED</code> —
+output mode of the target offering can satisfy, or input in a type the
+offering&#39;s <code>input_modes</code> exclude, refuses with <code>CONTENT_TYPE_NOT_SUPPORTED</code> —
 the code §6.4 answers with.</li>
 </ul>
 <p>The recipient&#39;s published <code>rate_limits</code> (§8.1) carry the same logic as a
@@ -1181,7 +1228,7 @@ fixture is the authority, on §22.8&#39;s terms.</p>
   &quot;payload&quot;: {
     &quot;status&quot;: &quot;&lt;TaskState&gt;&quot;,
     &quot;message&quot;: &quot;&lt;optional-human-readable-status&gt;&quot;,
-    &quot;output&quot;: { &quot;&lt;skill-specific-output&gt;&quot; }
+    &quot;output&quot;: { &quot;&lt;offering-specific-output&gt;&quot; }
   },
   &quot;artifacts&quot;: [
     {
@@ -1265,7 +1312,7 @@ fixture is the authority, on §22.8&#39;s terms.</p>
   &quot;context_id&quot;: &quot;&lt;uuid&gt;&quot;,
   &quot;requester&quot;: &quot;&lt;agent-nkey&gt;&quot;,
   &quot;responder&quot;: &quot;&lt;agent-nkey&gt;&quot;,
-  &quot;skill&quot;: &quot;&lt;skill-id&gt;&quot;,
+  &quot;offering&quot;: &quot;&lt;offering-id&gt;&quot;,
   &quot;state&quot;: &quot;&lt;TaskState&gt;&quot;,
   &quot;created_at&quot;: &quot;&lt;ISO-8601&gt;&quot;,
   &quot;updated_at&quot;: &quot;&lt;ISO-8601&gt;&quot;,
@@ -1342,7 +1389,7 @@ fixture is the authority, on §22.8&#39;s terms.</p>
 <tr>
 <td><code>rejected</code></td>
 <td>Yes</td>
-<td>Responder declined the Task (cannot or will not perform the skill). Distinct from <code>failed</code>, which is an error <em>during</em> execution. Matches A2A&#39;s <code>rejected</code>.</td>
+<td>Responder declined the Task (cannot or will not perform the offering). Distinct from <code>failed</code>, which is an error <em>during</em> execution. Matches A2A&#39;s <code>rejected</code>.</td>
 </tr>
 </tbody></table>
 <blockquote>
@@ -1436,7 +1483,13 @@ fixture is the authority, on §22.8&#39;s terms.</p>
   &quot;parts&quot;: [
     { &quot;text&quot;: &quot;&lt;text-content&gt;&quot; },
     { &quot;data&quot;: { &quot;&lt;structured-json&gt;&quot; } },
-    { &quot;ref&quot;: &quot;&lt;nats-object-store-reference&gt;&quot;, &quot;media_type&quot;: &quot;&lt;MIME&gt;&quot;, &quot;size&quot;: 12345 }
+    {
+      &quot;ref&quot;: &quot;&lt;artifact-ref-uri&gt;&quot;,
+      &quot;media_type&quot;: &quot;&lt;MIME&gt;&quot;,
+      &quot;size&quot;: 12345,
+      &quot;digest&quot;: &quot;sha256:&lt;64 lowercase hex&gt;&quot;,
+      &quot;name&quot;: &quot;report.pdf&quot;
+    }
   ],
   &quot;created_at&quot;: &quot;&lt;ISO-8601&gt;&quot;,
   &quot;meta&quot;: {}
@@ -1446,9 +1499,74 @@ fixture is the authority, on §22.8&#39;s terms.</p>
 <ul>
 <li><code>text</code>: Inline text content.</li>
 <li><code>data</code>: Inline structured JSON data.</li>
-<li><code>ref</code>: A reference to a binary object stored in NATS Object Store. Used for files, images, and large payloads that exceed the NATS maximum message size.</li>
+<li><code>ref</code>: A pointer to bytes held outside the message. Used for files, images, and payloads too large to travel inline.</li>
 </ul>
 <p>An artifact MAY contain multiple parts (e.g., a text summary + a data table + a PDF reference).</p>
+<h4 id="7-5-1-references">7.5.1. References<a class="hl" href="#7-5-1-references">#</a></h4>
+<p>A <code>ref</code> is an <strong>opaque URI</strong>. Readers MUST resolve it through their SDK and MUST NOT parse it to locate the bytes themselves: the scheme names which store answers for it, and the store&#39;s addressing is the operator&#39;s business, not the protocol&#39;s. Two schemes are defined by this specification&#39;s reference binding (§18): <code>mesh:artifacts:…</code> for the mesh-wide artifact store, and <code>mesh:rooms:…</code> for a room&#39;s drive. An implementation that meets a ref whose scheme it does not know MUST surface it as an unresolvable reference rather than guessing.</p>
+<p>Ref fields:</p>
+<ul>
+<li><code>ref</code> — REQUIRED. The opaque URI.</li>
+<li><code>media_type</code> — REQUIRED. The MIME type of the referenced bytes.</li>
+<li><code>size</code> — REQUIRED. Length in bytes, so a reader can decide whether to fetch before it does.</li>
+<li><code>digest</code> — OPTIONAL, <code>sha256:&lt;64 lowercase hex&gt;</code> over the referenced bytes. A reader that fetches a ref carrying a digest MUST verify it and MUST treat a mismatch as a failed fetch. Its absence means unverifiable, never verified.</li>
+<li><code>name</code> — OPTIONAL. A filename, when the bytes are a file. Distinct from the artifact&#39;s <code>name</code>: one artifact may carry several files, and this is how each keeps its own.</li>
+</ul>
+<p><code>digest</code> is what makes a reference safe to hand to a stranger. Without it the holder of the store decides what a reference means after the fact, and a reader has no way to notice a substitution; with it, the sender&#39;s claim about the content travels with the pointer and anyone can check it. It is OPTIONAL only because artifacts predate it on the wire — new implementations SHOULD always emit it, and a party that requires the guarantee should refuse refs that lack one rather than assume.</p>
+<p>Because a ref carries its own digest and length, it is safe to cache and to deduplicate, and it survives being re-fetched from a mirror without the reader having to trust that mirror.</p>
+<h4 id="7-5-2-who-may-store-and-for-how-long">7.5.2. Who May Store, and For How Long<a class="hl" href="#7-5-2-who-may-store-and-for-how-long">#</a></h4>
+<p>A store that accepts bytes from anyone and keeps them forever is not a feature, it is an unpriced liability. Three rules bound it, and they are deliberately the same shape as the registration rules in §9.2 — <strong>ephemerality is the default, durability is declared</strong>.</p>
+<p><strong>Who may write.</strong> A store MUST refuse writes from parties it cannot attribute to a registered agent. Every stored object records the agent that wrote it and the owner that agent belongs to (§8.6); a store that cannot establish both MUST refuse rather than store anonymously. Reads are governed separately, by the reference itself: a <code>ref</code> is unguessable, and possession of one is what a store checks (§7.5.3).</p>
+<p><strong>How much.</strong> A store MUST apply a per-owner quota covering both total bytes and object count, and MUST refuse a write that would exceed it with a retryable-false error naming the limit. RECOMMENDED defaults are deployment-specific; the requirement is that a limit exists and that exceeding it is a clear refusal rather than a silent drop or an unbounded bill.</p>
+<p><strong>How long.</strong> An artifact&#39;s default lifetime is the lifetime of the work that produced it plus a grace window — RECOMMENDED: the task retention period (§18.4) plus 7 days — after which a store MAY reclaim it. An owner MAY declare a longer retention for an object at write time, and a store MAY refuse a declaration beyond what its quota allows. Nothing gets durability for free: an artifact written by work nobody kept is litter, and the party asking for permanence is the party that should have to say so.</p>
+<p>Reclaiming an object MUST NOT rewrite history. The artifact reference in a task record, a room&#39;s dossier, or a signed export remains exactly as it was written — <code>size</code> and <code>digest</code> still describe the bytes truthfully — and a fetch of a reclaimed ref returns a distinct &quot;gone&quot; outcome rather than &quot;not found&quot;. A reader can then tell <em>expired</em> from <em>never existed</em>, which are different facts about a deliverable and are routinely confused by stores that collapse them.</p>
+<h4 id="7-5-3-attaching-files-to-a-message">7.5.3. Attaching Files to a Message<a class="hl" href="#7-5-3-attaching-files-to-a-message">#</a></h4>
+<p>§7.5&#39;s artifacts are the outputs of a Task. A file travelling the other way — one a REQUESTER attaches to the work it is asking for — has no artifact to live in, because no task has produced anything yet. Implementations converged on carrying it in the request payload, and this section writes that convention down rather than leaving four components to each guess at it:</p>
+<pre><code class="language-json">&quot;payload&quot;: {
+  &quot;text&quot;: &quot;summarise the attached report&quot;,
+  &quot;files&quot;: [
+    { &quot;name&quot;: &quot;report.pdf&quot;, &quot;media_type&quot;: &quot;application/pdf&quot;, &quot;ref&quot;: &quot;mesh:artifacts:…&quot;, &quot;size&quot;: 482913 },
+    { &quot;name&quot;: &quot;chart.png&quot;, &quot;media_type&quot;: &quot;image/png&quot;, &quot;uri&quot;: &quot;https://example.com/chart.png&quot; }
+  ]
+}
+</code></pre>
+<p>Each entry carries exactly one of <code>ref</code> (bytes in a store this mesh can resolve, §7.5.1) or <code>uri</code> (bytes somewhere else). <code>name</code>, <code>media_type</code> and <code>size</code> are OPTIONAL and advisory.</p>
+<p>Two rules matter more than the shape:</p>
+<ul>
+<li><strong>A receiver MUST NOT fetch a <code>uri</code> implicitly.</strong> A <code>ref</code> resolves through a store the receiver already authenticates to; a <code>uri</code> is an address the SENDER chose, and dereferencing it automatically turns every agent into a fetch-on-demand proxy for whoever can address it — reachable, by construction, from inside the receiver&#39;s own network. Surface it to whatever can reason about whether to fetch it.</li>
+<li><strong>A receiver SHOULD NOT fetch anything before it has decided to accept the message.</strong> A reference costs nothing to receive; the bytes do not. Fetching during admission lets an unadmitted sender spend the receiver&#39;s bandwidth, disk and storage quota merely by addressing it, which is a denial-of-service primitive handed out for free.</li>
+</ul>
+<p><code>files</code> is a payload convention, not an envelope field: the envelope&#39;s <code>artifacts</code> (§7.5) remain the way OUTPUTS are returned, and a responder that produces files answers with artifacts carrying <code>ref</code> parts rather than with this block.</p>
+<h4 id="7-5-4-reading-a-reference">7.5.4. Reading a Reference<a class="hl" href="#7-5-4-reading-a-reference">#</a></h4>
+<p>Possession of a <code>ref</code> is the read capability. A store MUST therefore mint refs that are unguessable — an unpredictable object identifier, not a counter and not a name derived from the content or the task — because a guessable ref is a public store with extra steps.</p>
+<p>This is a deliberately modest guarantee, and implementations should not oversell it: a reference can be forwarded, so anyone the holder shares it with can read the bytes. That is the same property a signed download URL has, and it is the right one for a deliverable that is meant to be handed onward. Content that must not travel that way should be sealed before it is stored (§4.3), so the store holds ciphertext and the reference alone is not enough.</p>
+<h4 id="7-5-5-shared-resources">7.5.5. Shared Resources<a class="hl" href="#7-5-5-shared-resources">#</a></h4>
+<p>Everything above this section hands the receiver its own copy of the work. Inline <code>text</code> and <code>data</code> are copies outright; a <code>ref</code> is a pointer, but to bytes that can never change (§7.5.1), so holding one is just an efficient way of holding a copy. Whichever way the bytes travel, one party&#39;s work cannot alter what the other is looking at.</p>
+<p>A <strong>resource</strong> is the other thing: one live object that both parties knowingly operate on — a git repository two agents are coding in together, where a push by one is a fact for the other. Files, inline or by ref, give the receiver its own copy; a resource points both parties at the same live thing, and each should expect the other&#39;s changes to appear in it. The word <em>knowingly</em> is why this is an explicit block rather than a URL-shaped string in the text: shared-object semantics change how both sides must behave, and neither should have to infer that from a substring.</p>
+<p>Resources travel in the request payload beside <code>files</code> (§7.5.3):</p>
+<pre><code class="language-json">&quot;payload&quot;: {
+  &quot;text&quot;: &quot;let&#39;s split the work on the parser bug — take the lexer, I&#39;ll take the tests&quot;,
+  &quot;resources&quot;: [
+    {
+      &quot;uri&quot;: &quot;https://github.com/example/parser&quot;,
+      &quot;kind&quot;: &quot;git&quot;,
+      &quot;access&quot;: &quot;read-write&quot;,
+      &quot;name&quot;: &quot;parser&quot;,
+      &quot;description&quot;: &quot;work on a branch, open a PR into main&quot;
+    }
+  ]
+}
+</code></pre>
+<ul>
+<li><code>uri</code> — REQUIRED. Where the resource lives. It is never resolved through a mesh store: the resource belongs to whatever system serves it, and that system&#39;s rules govern it.</li>
+<li><code>kind</code> — REQUIRED. What sort of thing this is. <code>git</code> is reserved by this specification; the field is otherwise open vocabulary, and a receiver that does not recognise a kind should treat the entry as opaque rather than guessing.</li>
+<li><code>access</code> — REQUIRED. <code>read</code> or <code>read-write</code>: what the sender intends the receiver to do with the resource. A receiver granted <code>read</code> that intends to write has left the agreement, whatever the resource&#39;s own permissions happen to allow.</li>
+<li><code>name</code>, <code>description</code> — OPTIONAL, advisory. The description is the right place for working conventions (&quot;branch, then PR&quot;), which are part of the agreement and not expressible in any field.</li>
+</ul>
+<p>A resource entry deliberately carries <strong>none</strong> of a ref&#39;s fields — no <code>digest</code>, no <code>size</code>, no <code>media_type</code>, no expiry. Those are snapshot-shaped claims, and no snapshot-shaped claim can honestly be made about a place: a <code>ref</code> promises the bytes will not change, while a resource makes no promise about the bytes at all. For the same reason the mesh asserts nothing about a resource — not that the URI resolves, not that the sender may grant access to it, not that it will still exist tomorrow. Verifying any of that is the receiver&#39;s business, in the resource&#39;s own world. And because the mesh holds nothing, the retention rules of §7.5.2 do not apply: there is nothing here for a store to reclaim.</p>
+<p><strong>Access is arranged in the resource&#39;s own auth domain.</strong> The normal way to share a private repository is to grant access where the repository lives — an invitation, a deploy key — with the mesh conveying only the pointer and the intent. A resource entry MUST NOT carry a credential in cleartext: a secret that must travel travels in a sealed payload (§4.3), to a verified key (§8.3), or not at all.</p>
+<p>The rules of §7.5.3 apply unchanged: a receiver MUST NOT fetch, clone, or probe a resource implicitly, and SHOULD NOT touch it before deciding to accept the work.</p>
+<p><strong>Deliverables may land in the resource.</strong> When a responder holds <code>read-write</code> access, the natural output is often a change to the resource itself — a pushed branch, an opened pull request — rather than bytes returned through the mesh. That is a legitimate deliverable: the completing <code>respond</code> then carries a pointer to what changed and a summary of it, not a copy of the bytes. Task records stay truthful because the response says where the work went; they do not need to contain it.</p>
 <h3 id="7-6-context">7.6. Context<a class="hl" href="#7-6-context">#</a></h3>
 <p>A <code>context_id</code> groups related Tasks into a logical session. When a requester sends multiple related requests, they SHOULD use the same <code>context_id</code>. The responder MAY use the context to maintain conversational state, memory, or shared context across tasks.</p>
 <ul>
@@ -1576,7 +1694,7 @@ budget that can cover it is the acceptance.</p>
 
   &quot;public&quot;: {
     &quot;description&quot;: &quot;&lt;one-paragraph storefront: what this agent does, in the operator&#39;s words&gt;&quot;,
-    &quot;skills&quot;: [&quot;&lt;skill-ids the operator advertises to strangers&gt;&quot;],
+    &quot;offerings&quot;: [&quot;&lt;offering-ids the operator advertises to strangers&gt;&quot;],
     &quot;admission&quot;: &quot;&lt;what admission takes: terms, expectations, or a URL&gt;&quot;,
     &quot;links&quot;: [ { &quot;handle&quot;: &quot;&lt;related-agent-handle&gt;&quot;, &quot;rel&quot;: &quot;&lt;relationship&gt;&quot; } ]
   },
@@ -1594,11 +1712,11 @@ budget that can cover it is the acceptance.</p>
 
   &quot;capabilities&quot;: [&quot;&lt;capability-tag&gt;&quot;],
 
-  &quot;skills&quot;: [
+  &quot;offerings&quot;: [
     {
-      &quot;id&quot;: &quot;&lt;skill-id&gt;&quot;,
+      &quot;id&quot;: &quot;&lt;offering-id&gt;&quot;,
       &quot;name&quot;: &quot;&lt;human-readable&gt;&quot;,
-      &quot;description&quot;: &quot;&lt;what-this-skill-does&gt;&quot;,
+      &quot;description&quot;: &quot;&lt;what-this-offering-does&gt;&quot;,
       &quot;tags&quot;: [&quot;&lt;tag&gt;&quot;],
       &quot;input_schema&quot;: { &quot;&lt;json-schema&gt;&quot; },
       &quot;output_schema&quot;: { &quot;&lt;json-schema&gt;&quot; },
@@ -1611,19 +1729,26 @@ budget that can cover it is the acceptance.</p>
         }
       ],
       &quot;streaming&quot;: false,
-      &quot;estimated_duration_ms&quot;: 5000
+      &quot;estimated_duration_ms&quot;: 5000,
+      &quot;needs&quot;: [
+        { &quot;resource&quot;: &quot;git&quot;, &quot;access&quot;: &quot;read-write&quot;, &quot;description&quot;: &quot;the repository to work in&quot; },
+        { &quot;text&quot;: &quot;&lt;anything-else-to-have-in-hand, in prose&gt;&quot; }
+      ],
+      &quot;delivers&quot;: { &quot;final&quot;: &quot;&lt;prose or MIME type&gt;&quot;, &quot;interim&quot;: true, &quot;in_resource&quot;: true }
     }
   ],
 
   &quot;accepts&quot;: [&quot;&lt;event-subject-patterns-this-agent-subscribes-to&gt;&quot;],
   &quot;emits&quot;: [&quot;&lt;event-subject-patterns-this-agent-publishes&gt;&quot;],
 
-  &quot;cost&quot;: {
-    &quot;per_request&quot;: 0.01,
-    &quot;per_token&quot;: 0.0001,
-    &quot;currency&quot;: &quot;credits&quot;,
-    &quot;billing_model&quot;: &quot;per_request&quot;
-  },
+  &quot;skus&quot;: [
+    {
+      &quot;sku&quot;: &quot;default-metered&quot;,
+      &quot;covers&quot;: { &quot;agent&quot;: true },
+      &quot;price&quot;: { &quot;model&quot;: &quot;per_unit&quot;, &quot;currency&quot;: &quot;USD&quot;, &quot;meter&quot;: &quot;tokens_out&quot;, &quot;per&quot;: 1000, &quot;amount_micro&quot;: 1500 },
+      &quot;provider&quot;: { &quot;id&quot;: &quot;internal&quot; }
+    }
+  ],
 
   &quot;rate_limits&quot;: {
     &quot;requests_per_second&quot;: 10,
@@ -1709,9 +1834,9 @@ budget that can cover it is the acceptance.</p>
 <td>Flat list of capability tags for coarse discovery filtering.</td>
 </tr>
 <tr>
-<td><code>skills</code></td>
+<td><code>offerings</code></td>
 <td>REQUIRED</td>
-<td>Detailed skill definitions. MAY be empty array.</td>
+<td>Detailed offering definitions. MAY be empty array.</td>
 </tr>
 <tr>
 <td><code>rate_limits</code></td>
@@ -1868,7 +1993,7 @@ that served the manifest is honest.</p>
 <td>Not a security boundary (Section 8.3a), and it already fails safe: a caller SHOULD read an absent or unverifiable value as <code>interactive</code>. A signature cannot distinguish an honest declaration from a false one, because the agent signs whatever it declares.</td>
 </tr>
 <tr>
-<td>Descriptive fields (<code>name</code>, <code>description</code>, <code>skills</code>, <code>cost</code>, …)</td>
+<td>Descriptive fields (<code>name</code>, <code>description</code>, <code>offerings</code>, <code>cost</code>, …)</td>
 <td>A forged reply can misstate these, but the harm is misinformation a caller can notice and act on, not silent loss of confidentiality. The remedy is authenticating the registry&#39;s response (Section 9.2), not widening this claim.</td>
 </tr>
 </tbody></table>
@@ -1947,15 +2072,39 @@ machine-readable; this field is.</p>
 </tr>
 </tbody></table>
 <p>Presence is reported per <strong>node</strong> by default (one heartbeat covers all agents the node hosts); an agent MAY report a finer per-agent status. Missing heartbeats expire <em>presence</em> to <code>offline</code> — they never touch the manifest. Discovery joins manifest + presence at query time (Section 9.3).</p>
-<h3 id="8-5-skill-definitions">8.5. Skill Definitions<a class="hl" href="#8-5-skill-definitions">#</a></h3>
-<p>Skills are the fine-grained capabilities an agent offers. Each skill is independently addressable in a <code>request</code>.</p>
+<h3 id="8-5-offering-definitions">8.5. Offering Definitions<a class="hl" href="#8-5-offering-definitions">#</a></h3>
+<p>Offerings are the fine-grained units of work an agent advertises. Each offering is independently addressable in a <code>request</code>.</p>
+<blockquote>
+<p><strong>Renamed.</strong> Earlier drafts of this specification called an offering a <em>skill</em>, and the wire carried <code>skills</code>, <code>payload.skill</code>, <code>skill_details</code> and <code>SKILL_NOT_FOUND</code>. The agent ecosystem has since settled &quot;skill&quot; to mean something else entirely — a packaged procedure loaded <em>into</em> an agent — so this specification renamed the concept. During the deprecation window, implementations MUST accept the legacy field names as aliases on inbound messages and manifests, treat the error code <code>SKILL_NOT_FOUND</code> as <code>OFFERING_NOT_FOUND</code>, and MUST emit only the new names.</p>
+</blockquote>
 <ul>
-<li><code>id</code>: Stable identifier for the skill. Used in <code>request.payload.skill</code>.</li>
+<li><code>id</code>: Stable identifier for the offering. Used in <code>request.payload.offering</code>.</li>
 <li><code>input_schema</code> / <code>output_schema</code>: JSON Schema defining expected input and output structures.</li>
-<li><code>input_modes</code> / <code>output_modes</code>: MIME types the skill accepts and produces.</li>
-<li><code>streaming</code>: Whether this skill supports streaming responses.</li>
+<li><code>input_modes</code> / <code>output_modes</code>: MIME types the offering accepts and produces.</li>
+<li><code>streaming</code>: Whether this offering supports streaming responses.</li>
 <li><code>estimated_duration_ms</code>: Hint for timeout configuration.</li>
+<li><code>needs</code> / <code>delivers</code>: The engagement contract, coarser than any schema — below (§8.5.1).</li>
 </ul>
+<p><strong>Card-level defaults.</strong> The manifest MAY declare <code>default_input_modes</code> and <code>default_output_modes</code>: what the agent accepts and produces when an offering does not say for itself. An offering&#39;s own <code>input_modes</code> / <code>output_modes</code> always win where present; the card-level values are the fallback, not an override.</p>
+<p>Resolution order for &quot;what does this offering take&quot; is therefore: the offering&#39;s own modes, then the agent&#39;s defaults, then nothing — and <em>nothing</em> means the agent has not said, which a caller should read as text and MUST NOT read as a refusal of other types. Agents that handle anything beyond text SHOULD declare, because a caller has no other way to learn it before sending: an agent that accepts PDFs and says nothing is indistinguishable from one that does not, and consumers faced with that silence have historically invented an answer on the agent&#39;s behalf.</p>
+<p>These fields exist so that the interface an agent presents is publishable <em>pre-admission</em> — they are carried into the storefront (§8.7), which is what makes &quot;can I send this thing a file?&quot; answerable by a stranger.</p>
+<h4 id="8-5-1-needs-and-delivers">8.5.1. Needs and Delivers<a class="hl" href="#8-5-1-needs-and-delivers">#</a></h4>
+<p>Schemas suit offerings with deterministic callers. General-purpose agents engage differently: the parameters get settled in conversation (the task lifecycle&#39;s <code>input_required</code> state is that negotiation&#39;s protocol home, §7.2), and what a caller actually must know <strong>before</strong> engaging is coarser — what to have in hand, and what to expect back. Two OPTIONAL fields on an offering declare exactly that, the way a contractor would:</p>
+<ul>
+<li><code>needs</code> — what must be in hand before work can start. An array where each entry is ONE of:<ul>
+<li><code>{ &quot;resource&quot;: &quot;&lt;kind&gt;&quot;, &quot;access&quot;: &quot;read&quot; | &quot;read-write&quot;, &quot;description&quot;?: &quot;…&quot; }</code> — a shared resource (§7.5.5) the caller must provide, e.g. a git repository the agent will push to;</li>
+<li><code>{ &quot;file&quot;: &quot;&lt;MIME type&gt;&quot;, &quot;description&quot;?: &quot;…&quot; }</code> — material the caller should attach (§7.5.3);</li>
+<li><code>{ &quot;text&quot;: &quot;&lt;prose&gt;&quot; }</code> — anything that fits neither, in plain language (&quot;your brand guidelines, if you have them&quot;).</li>
+</ul>
+</li>
+<li><code>delivers</code> — what the caller gets. An object:<ul>
+<li><code>final</code> — prose or a MIME type: the form of the finished deliverable;</li>
+<li><code>interim</code> — OPTIONAL boolean: whether the offering produces checkpoint deliverables as task updates along the way (the machinery is §7.4&#39;s update channel; this declares that it will be used);</li>
+<li><code>in_resource</code> — OPTIONAL boolean: whether the deliverable lands in a caller-provided resource (a pushed branch, an opened PR — §7.5.5) rather than travelling back through the mesh.</li>
+</ul>
+</li>
+</ul>
+<p>Both are declarations, deliberately loose: the reader at discovery time is usually a model deciding whom to hire, so these must read well to a model, not validate well in a parser. They are carried into the storefront (§8.7) alongside the modes, and the same honesty doctrine applies — an agent that needs a repo and says nothing is indistinguishable from one that needs nothing.</p>
 <h3 id="8-6-ownership-and-visibility">8.6. Ownership &amp; Visibility<a class="hl" href="#8-6-ownership-and-visibility">#</a></h3>
 <p>Agents are individually addressed and <strong>never interchangeable</strong> — but they are
 frequently <em>related</em>: one person&#39;s laptop and desktop each host their own
@@ -1993,16 +2142,47 @@ specification, <code>SPEC-NAMING.md</code> (PAN).</p>
 homepage: written by the operator, served verbatim, and safe to hand to
 strangers precisely because nothing generates it at request time.</p>
 <ul>
-<li><code>description</code> and <code>admission</code> are free text: what the agent does, and what
-getting admitted takes.</li>
-<li><code>skills</code> lists the skill IDs the operator chooses to advertise to
-strangers. It MAY be any subset of the full <code>skills</code> array (§8.5) —
-advertising less than you can do is a choice this spec protects.</li>
-<li><code>links</code> names related agents <strong>by handle</strong> — collaborators, siblings in a
+<li><p><code>description</code> and <code>admission</code> are free text: what the agent does, and what
+getting admitted takes.</p>
+</li>
+<li><p><code>offerings</code> lists the offering IDs the operator chooses to advertise to
+strangers. It MAY be any subset of the full <code>offerings</code> array (§8.5) —
+advertising less than you can do is a choice this spec protects. It is a
+<strong>selection</strong>, not a description: what each advertised offering actually takes
+and returns is materialized by the registry, below.</p>
+</li>
+<li><p><code>offering_details</code>, <code>default_input_modes</code> and <code>default_output_modes</code> are
+<strong>registry-materialized</strong> and MUST NOT be accepted from a registrant. At
+register time the registry copies each offering named in <code>offerings</code> out of the
+manifest&#39;s own <code>offerings</code> array — id, name, description, tags, modes, schemas,
+<code>streaming</code>, <code>estimated_duration_ms</code>, <code>needs</code>, <code>delivers</code> (§8.5.1) — and
+copies the card-level defaults from §8.5. A registrant-supplied value MUST be discarded and rebuilt; an
+advertised ID matching no declared offering MUST be dropped rather than
+invented.</p>
+<p>This is derivation, not generation-per-request: it happens once, on the way
+in, exactly like the <code>owner</code> / <code>visibility</code> / <code>sandbox</code> rewrites of §8.3, so
+the block is still served verbatim to every reader. The reason it is derived
+rather than written is that the manifest already carries these facts — an
+operator-authored second copy is two statements of the same thing, and two
+copies drift until the storefront advertises an interface the agent no longer
+has, with nothing in the system able to say which copy is lying.</p>
+<p>The effect is that a stranger can read, before admission, what an agent takes
+and returns. Without it the storefront could name an offering but never describe
+its interface, so the most basic question a buyer has — can I send it a
+file? — had no answer anywhere in the protocol.</p>
+</li>
+<li><p><code>links</code> names related agents <strong>by handle</strong> — collaborators, siblings in a
 fleet, the operator&#39;s other agents. Links are the mesh&#39;s hyperlinks: they
 are what makes the public graph crawlable, and directories and search are
 expected to emerge from them — built by anyone, outside the protocol —
-rather than from any protocol-level index.</li>
+rather than from any protocol-level index.</p>
+</li>
+<li><p><code>skus</code> advertises commercial terms to strangers (Economics extension,
+§19.1): each entry a SKU id, its price, and its digest, any subset of the
+manifest&#39;s <code>skus</code>. Price is pre-admission data by design — a buyer
+compares terms before knocking, and an <code>AGREEMENT_REQUIRED</code> refusal
+(§19.5) points at terms the storefront already showed.</p>
+</li>
 </ul>
 <p>Everything outside the <code>public</code> block is served only per the visibility
 tiers of §8.6, and interaction beyond <code>describe</code> only after admission.</p>
@@ -2080,16 +2260,16 @@ storefront says — the same division the web settled on, made explicit here.</p
 <td>Agent must have ALL specified capabilities.</td>
 </tr>
 <tr>
-<td><code>skill_id</code></td>
+<td><code>offering_id</code></td>
 <td>string</td>
 <td>registry</td>
-<td>Agent must offer a skill with this ID.</td>
+<td>Agent must have an offering with this ID.</td>
 </tr>
 <tr>
 <td><code>tags</code></td>
 <td>string[]</td>
 <td>registry</td>
-<td>Agent must have at least one matching tag across its skills.</td>
+<td>Agent must have at least one matching tag across its offerings.</td>
 </tr>
 <tr>
 <td><code>availability</code></td>
@@ -2308,7 +2488,7 @@ storefront says — the same division the web settled on, made explicit here.</p
 <p><strong>Flow:</strong></p>
 <ol>
 <li>Initiator discovers target agent.</li>
-<li>Initiator sends <code>request</code> with <code>payload.skill: &quot;session.connect&quot;</code> and a proposed <code>context_id</code>.</li>
+<li>Initiator sends <code>request</code> with <code>payload.offering: &quot;session.connect&quot;</code> and a proposed <code>context_id</code>.</li>
 <li>Target responds with <code>status: &quot;completed&quot;</code> (accept) or <code>status: &quot;failed&quot;</code> (reject).</li>
 <li>Both parties subscribe to <code>mesh.session.{context_id}.&gt;</code> for session messages.</li>
 <li>Session messages use <code>emit</code> on <code>mesh.session.{context_id}.message</code>.</li>
@@ -2367,24 +2547,24 @@ merits.</p>
 <li>Agent discovers all agents matching criteria.</li>
 <li>Agent emits an event to each discovered agent&#39;s inbox, or to a shared event subject that matching agents subscribe to.</li>
 </ol>
-<h3 id="10-7-chat-well-known-skill">10.7. <code>chat</code> <em>(well-known skill)</em><a class="hl" href="#10-7-chat-well-known-skill">#</a></h3>
-<p>A single well-known skill name for open conversation, so that any two
-agents can hold a plain exchange without prior agreement on a skill name.</p>
+<h3 id="10-7-chat-well-known-offering">10.7. <code>chat</code> <em>(well-known offering)</em><a class="hl" href="#10-7-chat-well-known-offering">#</a></h3>
+<p>A single well-known offering name for open conversation, so that any two
+agents can hold a plain exchange without prior agreement on an offering name.</p>
 <p><strong>Composed from:</strong> <code>request</code> + <code>respond</code></p>
 <ul>
-<li>An agent that can converse in natural language SHOULD register a skill
+<li>An agent that can converse in natural language SHOULD register an offering
 with <code>id: &quot;chat&quot;</code>, taking <code>{ &quot;text&quot;: string }</code> and returning
 <code>{ &quot;text&quot;: string }</code>.</li>
 <li>A sender that wants to talk (rather than invoke a specific capability)
-SHOULD <code>request</code> the <code>chat</code> skill. If the target has no <code>chat</code> handler,
-it responds with <code>SKILL_NOT_FOUND</code> (§12) — the sender learns the agent
+SHOULD <code>request</code> the <code>chat</code> offering. If the target has no <code>chat</code> handler,
+it responds with <code>OFFERING_NOT_FOUND</code> (§12) — the sender learns the agent
 is reachable but not conversational, and MAY inspect its manifest for
-the skills it does expose.</li>
+the offerings it does expose.</li>
 </ul>
 <p>This is a naming convention, not a new capability: <code>chat</code> is to
 conversation what a phone number is to a call. Tool-only agents (those
-that expose task skills but not <code>chat</code>) remain fully reachable by their
-declared skills; they simply decline open conversation. Rooms
+that expose task offerings but not <code>chat</code>) remain fully reachable by their
+declared offerings; they simply decline open conversation. Rooms
 (<code>mesh://extensions/rooms/v1</code>) carry conversation among many agents; <code>chat</code>
 is the pairwise case.</p>
 <h3 id="10-8-cancel">10.8. <code>cancel</code><a class="hl" href="#10-8-cancel">#</a></h3>
@@ -2392,7 +2572,7 @@ is the pairwise case.</p>
 <p><strong>Composed from:</strong> <code>request</code> (to the responder&#39;s inbox) + <code>respond</code> (on the task update subject)</p>
 <p><strong>Flow:</strong></p>
 <ol>
-<li>The canceling party sends <code>request</code> with <code>payload.skill: &quot;task.cancel&quot;</code> and
+<li>The canceling party sends <code>request</code> with <code>payload.offering: &quot;task.cancel&quot;</code> and
 <code>payload.input: { &quot;task_id&quot;: &quot;&lt;uuid&gt;&quot;, &quot;reason&quot;: &quot;&lt;CancelReason&gt;&quot;, &quot;note&quot;: &quot;&lt;optional&gt;&quot; }</code>.</li>
 <li>It also publishes the cancellation as a <code>respond</code> on <code>mesh.task.{task_id}.update</code>
 with <code>payload: { &quot;status&quot;: &quot;canceled&quot;, &quot;reason&quot;: &quot;&lt;CancelReason&gt;&quot;, &quot;note&quot;: &quot;&lt;optional&gt;&quot; }</code> —
@@ -2483,7 +2663,7 @@ the reject cases are pinned in <code>conformance/cancel.json</code>.</p>
 <p><strong>Composed from:</strong> <code>request</code> + context payload</p>
 <p><strong>Flow:</strong></p>
 <ol>
-<li>Agent A sends <code>request</code> to Agent B with <code>payload.skill: &quot;task.transfer&quot;</code>, including the full Task history and artifacts.</li>
+<li>Agent A sends <code>request</code> to Agent B with <code>payload.offering: &quot;task.transfer&quot;</code>, including the full Task history and artifacts.</li>
 <li>Agent B creates a new Task (or adopts the existing <code>task_id</code>) and takes over.</li>
 <li>Agent A responds to the original requester with <code>meta.transferred_to: &quot;&lt;agent-B-nkey&gt;&quot;</code>.</li>
 </ol>
@@ -2522,7 +2702,7 @@ the reject cases are pinned in <code>conformance/cancel.json</code>.</p>
 <p><strong>Composed from:</strong> <code>request</code> (well-known schema)</p>
 <p><strong>Flow:</strong></p>
 <ol>
-<li>Requester sends <code>request</code> with <code>payload.skill: &quot;agent.status&quot;</code>.</li>
+<li>Requester sends <code>request</code> with <code>payload.offering: &quot;agent.status&quot;</code>.</li>
 <li>Agent responds with current state, active tasks, availability, and any relevant diagnostics.</li>
 </ol>
 <h3 id="10-12-authorize-parked-0-2-not-core">10.12. <code>authorize</code> <em>(Parked — 0.2; not core)</em><a class="hl" href="#10-12-authorize-parked-0-2-not-core">#</a></h3>
@@ -2530,7 +2710,7 @@ the reject cases are pinned in <code>conformance/cancel.json</code>.</p>
 <p><strong>Composed from:</strong> <code>request</code> (against policy)</p>
 <p><strong>Flow:</strong></p>
 <ol>
-<li>Agent A sends <code>request</code> with <code>payload.skill: &quot;auth.check&quot;</code> and the proposed operation details.</li>
+<li>Agent A sends <code>request</code> with <code>payload.offering: &quot;auth.check&quot;</code> and the proposed operation details.</li>
 <li>The target (or a dedicated policy agent) responds with <code>allowed: true/false</code> and the reason.</li>
 </ol>
 <h3 id="10-13-propose-parked-0-2-likely-to-return-not-core">10.13. <code>propose</code> <em>(Parked — 0.2, likely to return; not core)</em><a class="hl" href="#10-13-propose-parked-0-2-likely-to-return-not-core">#</a></h3>
@@ -2538,13 +2718,13 @@ the reject cases are pinned in <code>conformance/cancel.json</code>.</p>
 <p><strong>Composed from:</strong> <code>request</code> (non-binding)</p>
 <p><strong>Flow:</strong></p>
 <ol>
-<li>Agent sends <code>request</code> with <code>payload.skill: &quot;propose&quot;</code> and the proposed action.</li>
+<li>Agent sends <code>request</code> with <code>payload.offering: &quot;propose&quot;</code> and the proposed action.</li>
 <li>The recipient (human or orchestrator) reviews and responds with <code>approved: true/false</code>.</li>
 <li>The agent proceeds only if approved.</li>
 </ol>
 <h3 id="10-14-describe">10.14. <code>describe</code><a class="hl" href="#10-14-describe">#</a></h3>
 <p>The pre-admission read: the one substantive request any agent may make of any other <strong>before</strong> admission — the mesh equivalent of an unauthenticated HTTP GET. It exists so that first contact between strangers can be informed rather than blind; without it, every introduction is a cold knock on a closed door, and no third party can ever build a map of what exists.</p>
-<p><strong>Composed from:</strong> <code>request</code> with the reserved skill <code>describe</code>.</p>
+<p><strong>Composed from:</strong> <code>request</code> with the reserved offering <code>describe</code>.</p>
 <p><strong>Rules (all normative):</strong></p>
 <ul>
 <li>An agent&#39;s node or platform MUST answer <code>describe</code> regardless of the requester&#39;s admission stance; admission filtering (EXT-6) MUST NOT apply to it. Pre-admission, exactly two verbs exist: <code>describe</code> reads, <code>knock</code> asks (§1.5, invariant 4).</li>
@@ -2734,13 +2914,13 @@ the reject cases are pinned in <code>conformance/cancel.json</code>.</p>
 <td>Yes</td>
 </tr>
 <tr>
-<td><code>SKILL_NOT_FOUND</code></td>
-<td>The requested skill is not offered by this agent.</td>
+<td><code>OFFERING_NOT_FOUND</code></td>
+<td>The requested offering is not offered by this agent.</td>
 <td>No</td>
 </tr>
 <tr>
 <td><code>INPUT_INVALID</code></td>
-<td>The input payload does not match the skill&#39;s schema.</td>
+<td>The input payload does not match the offering&#39;s schema.</td>
 <td>No</td>
 </tr>
 <tr>
@@ -2761,6 +2941,11 @@ the reject cases are pinned in <code>conformance/cancel.json</code>.</p>
 <tr>
 <td><code>DEADLINE_UNMEETABLE</code></td>
 <td>Refused at admission: the work cannot be completed by the offered deadline. SHOULD carry the responder&#39;s earliest realistic completion. (Section 7.7.)</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>AGREEMENT_REQUIRED</code></td>
+<td>Refused at admission: the requested work is covered by a paid SKU and the consumer&#39;s account holds no agreement for the SKU&#39;s current digest. <code>details</code> names the <code>sku</code>, the <code>sku_digest</code>, and the <code>approval_url</code>. The Section 1.3 &quot;payment required&quot; refusal, typed. (Economics extension, Sections 19.1, 19.5.)</td>
 <td>No</td>
 </tr>
 <tr>
@@ -2804,6 +2989,36 @@ the reject cases are pinned in <code>conformance/cancel.json</code>.</p>
 <td>Yes</td>
 </tr>
 </tbody></table>
+<p><strong>Storage (§7.5, provisioned resources):</strong></p>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Description</th>
+<th>Retryable</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>NOT_FOUND</code></td>
+<td>No such object on this mesh.</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>QUOTA_EXCEEDED</code></td>
+<td>The writer&#39;s owner is at its storage limit. Freed by deleting something or by letting artifacts expire.</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>PAYLOAD_TOO_LARGE</code></td>
+<td>One object exceeds what this mesh stores or carries (§7.5.2, §18.9). Distinct from <code>QUOTA_EXCEEDED</code>: no amount of tidying up helps, because the same bytes are too big next time.</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>ARTIFACT_GONE</code></td>
+<td>The artifact existed and its bytes have been reclaimed (§7.5.2). MUST NOT be reported as <code>NOT_FOUND</code> — &quot;this expired&quot; and &quot;this never existed here&quot; are different facts about a deliverable, and collapsing them makes every old task record ambiguous in the same way. The error SHOULD carry the size and digest the reference had, which remain true.</td>
+<td>No</td>
+</tr>
+</tbody></table>
 <h3 id="12-3-error-delivery">12.3. Error Delivery<a class="hl" href="#12-3-error-delivery">#</a></h3>
 <p>Errors are delivered as standard <code>respond</code> envelopes with the <code>error</code> field populated and <code>payload.status</code> set to <code>failed</code>:</p>
 <pre><code class="language-json">{
@@ -2812,11 +3027,11 @@ the reject cases are pinned in <code>conformance/cancel.json</code>.</p>
   &quot;task_id&quot;: &quot;&lt;task-id&gt;&quot;,
   &quot;payload&quot;: { &quot;status&quot;: &quot;failed&quot; },
   &quot;error&quot;: {
-    &quot;code&quot;: &quot;SKILL_NOT_FOUND&quot;,
-    &quot;message&quot;: &quot;Skill &#39;web-scrape-v2&#39; is not supported. Available skills: web-scrape, search.&quot;,
+    &quot;code&quot;: &quot;OFFERING_NOT_FOUND&quot;,
+    &quot;message&quot;: &quot;Offering &#39;web-scrape-v2&#39; is not supported. Available offerings: web-scrape, search.&quot;,
     &quot;details&quot;: {
-      &quot;requested_skill&quot;: &quot;web-scrape-v2&quot;,
-      &quot;available_skills&quot;: [&quot;web-scrape&quot;, &quot;search&quot;]
+      &quot;requested_offering&quot;: &quot;web-scrape-v2&quot;,
+      &quot;available_offerings&quot;: [&quot;web-scrape&quot;, &quot;search&quot;]
     },
     &quot;retryable&quot;: false
   }
@@ -2848,7 +3063,7 @@ the reject cases are pinned in <code>conformance/cancel.json</code>.</p>
 </li>
 <li>When an agent emits an event as a side-effect of processing a request, it MUST preserve the <code>trace_id</code> and SHOULD set <code>parent_span_id</code> to the span that triggered the emit.</li>
 </ul>
-<p>SDKs MUST apply these rules automatically for calls made from within a skill handler, so that propagation requires no application code. Propagation is the load-bearing half of this section: it cannot be retrofitted after the fact, which is why it is core and always on while everything else in §13 is optional.</p>
+<p>SDKs MUST apply these rules automatically for calls made from within an offering handler, so that propagation requires no application code. Propagation is the load-bearing half of this section: it cannot be retrofitted after the fact, which is why it is core and always on while everything else in §13 is optional.</p>
 <p><strong>Trace Storage:</strong></p>
 <p>Trace data SHOULD be collected into a dedicated JetStream stream (<code>mesh.trace.&gt;</code>) for analysis. Agents SHOULD publish span completion events:</p>
 <pre><code class="language-json">{
@@ -2863,7 +3078,7 @@ the reject cases are pinned in <code>conformance/cancel.json</code>.</p>
       &quot;parent_span_id&quot;: &quot;&lt;16-hex-char span-id&gt;&quot;,
       &quot;agent_id&quot;: &quot;&lt;nkey&gt;&quot;,
       &quot;operation&quot;: &quot;request&quot;,
-      &quot;skill&quot;: &quot;web-scrape&quot;,
+      &quot;offering&quot;: &quot;web-scrape&quot;,
       &quot;started_at&quot;: &quot;&lt;ISO-8601&gt;&quot;,
       &quot;ended_at&quot;: &quot;&lt;ISO-8601&gt;&quot;,
       &quot;duration_ms&quot;: 1234,
@@ -2902,9 +3117,151 @@ the reject cases are pinned in <code>conformance/cancel.json</code>.</p>
 <li><strong>Inside an agent</strong>, the <a href="https://opentelemetry.io/docs/specs/semconv/gen-ai/">OpenTelemetry Semantic Conventions for Generative AI</a> apply: <code>invoke_agent</code> spans for agent invocations, <code>chat</code> spans for model calls, <code>execute_tool</code> spans for tool executions, with <code>gen_ai.*</code> attributes for model, token usage, and finish reasons. This specification defines none of that and defers to those conventions.</li>
 <li><strong>Between agents</strong>, a mesh hop corresponds to an OpenTelemetry <strong>messaging span</strong> (the existing messaging semantic conventions), with the envelope&#39;s <code>trace</code> object supplying the context. A runtime that emits interior spans and propagates the envelope&#39;s trace context per §13.1 produces one continuous trace: the caller&#39;s <code>invoke_agent</code> at the root, the mesh hop as an edge, the callee&#39;s <code>invoke_agent</code> as its child.</li>
 <li><strong>Export is a subscriber&#39;s job, not the mesh&#39;s.</strong> The span, metric, and log events of §§13.1–13.3 are ordinary <code>emit</code> traffic. An observer that subscribes to them and exports OTLP connects a mesh to any OpenTelemetry backend; it is an ordinary agent and requires nothing from the broker. The mesh itself operates no collector.</li>
-<li><strong>Attribute mapping.</strong> Where a span or metric attribute has an OpenTelemetry semantic-convention name, implementations SHOULD use it; mesh-specific attributes use the <code>agentmesh.</code> prefix (e.g. <code>agentmesh.task.id</code>, <code>agentmesh.skill</code>, <code>agentmesh.node.id</code>).</li>
+<li><strong>Attribute mapping.</strong> Where a span or metric attribute has an OpenTelemetry semantic-convention name, implementations SHOULD use it; mesh-specific attributes use the <code>agentmesh.</code> prefix (e.g. <code>agentmesh.task.id</code>, <code>agentmesh.offering</code>, <code>agentmesh.node.id</code>).</li>
 <li><strong>Work-product visibility.</strong> Task artifacts (§7.5) and task status updates (§7) are the between-agents facts that the GenAI conventions do not yet cover. Emitting them as events per §13.1 gives generic tooling (dashboards, visualizers, replayers) a framework-neutral view of what a team of agents is producing and passing around, without payload inspection. A dedicated event vocabulary for artifact and progress rendering may be specified once there is a second independent consumer to validate it against.</li>
 </ul>
+<h3 id="13-5-metering">13.5. Metering<a class="hl" href="#13-5-metering">#</a></h3>
+<blockquote>
+<p><strong>Core vs. money.</strong> Metering is the transport-level record of <em>who consumed
+what from whom</em> — a fact about traffic, not about money. Core defines the
+meter, the meter event, and the usage receipt because they are facts only
+the transport and the parties can produce and — like trace propagation
+(§13.1) — they cannot be retrofitted after the fact. What a metered
+quantity <em>costs</em> is the Economics extension&#39;s concern (§19); aggregation
+into usage analytics is EXT-2&#39;s; both consume the events defined here and
+define none of their own.</p>
+</blockquote>
+<h4 id="meters">Meters<a class="hl" href="#meters">#</a></h4>
+<p>A <strong>meter</strong> is a named unit of consumption. Meter names MUST match
+<code>[a-z0-9_]{1,64}</code>. Every meter belongs to one of two classes, and the class
+is a trust statement:</p>
+<ul>
+<li><strong>Observed</strong> — counted by the platform from traffic it can attest:
+envelopes delivered, bytes carried, Tasks completed. An observed meter
+event is the platform&#39;s own record; neither party can inflate or
+repudiate it.</li>
+<li><strong>Declared</strong> — measurable only inside the responder: model tokens, model
+wall-time, tool invocations. A declared meter event is the responder&#39;s
+claim: attributable, because it arrives under the responder&#39;s envelope
+signature, but verifiable by no one else. §7.7&#39;s enforcement sentence
+applies unchanged — you can oblige an agent to report; you cannot oblige
+the report to be true. What a claim is worth is a rating decision
+(§19.6), never a transport one.</li>
+</ul>
+<p>Core names the observed meters — the closed set a metering deployment MUST
+be able to produce:</p>
+<table>
+<thead>
+<tr>
+<th>Meter</th>
+<th>Unit</th>
+<th>Counted when</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>requests</code></td>
+<td>request envelopes</td>
+<td>a <code>request</code> is delivered to the provider, or refused at admission (refusal events, below)</td>
+</tr>
+<tr>
+<td><code>responses</code></td>
+<td>respond envelopes</td>
+<td>a <code>respond</code> is delivered to the consumer</td>
+</tr>
+<tr>
+<td><code>events</code></td>
+<td>emit envelopes</td>
+<td>an <code>emit</code> is delivered to a subscriber</td>
+</tr>
+<tr>
+<td><code>bytes_in</code> / <code>bytes_out</code></td>
+<td>bytes</td>
+<td>envelope bytes delivered, from the provider&#39;s perspective</td>
+</tr>
+<tr>
+<td><code>tasks_completed</code></td>
+<td>Tasks</td>
+<td>a Task reaches <code>completed</code></td>
+</tr>
+<tr>
+<td><code>task_ms</code></td>
+<td>milliseconds</td>
+<td>a Task reaches a terminal state (duration since <code>submitted</code>)</td>
+</tr>
+</tbody></table>
+<p>Declared meter names are the responder&#39;s to choose, and MUST NOT collide
+with the observed set. Where a common name fits, responders SHOULD use it so
+a consumer can compare its own usage across providers: <code>tokens_in</code>,
+<code>tokens_out</code>, <code>model_ms</code>, <code>tool_calls</code>. (Comparing <em>prices</em> across two
+providers&#39; token meters remains meaningless — §19.1 keeps §7.7&#39;s
+non-fungibility rule.)</p>
+<h4 id="the-meter-event">The Meter Event<a class="hl" href="#the-meter-event">#</a></h4>
+<p>The atom of usage:</p>
+<pre><code class="language-json">{
+  &quot;meter&quot;: &quot;tokens_out&quot;,
+  &quot;class&quot;: &quot;declared&quot;,
+  &quot;quantity&quot;: 4210,
+  &quot;provider&quot;: &quot;&lt;nkey of the serving agent&gt;&quot;,
+  &quot;consumer&quot;: &quot;&lt;nkey of the requesting agent&gt;&quot;,
+  &quot;offering&quot;: &quot;caselaw-summary&quot;,
+  &quot;task_id&quot;: &quot;&lt;uuid, when a Task exists&gt;&quot;,
+  &quot;envelope_id&quot;: &quot;&lt;id of the envelope this event derives from&gt;&quot;,
+  &quot;ts&quot;: &quot;&lt;RFC-3339 UTC&gt;&quot;
+}
+</code></pre>
+<ul>
+<li><code>quantity</code> — a non-negative integer in the meter&#39;s unit. Fractional
+quantities do not exist: a meter that needs fractions has the wrong unit.</li>
+<li><code>provider</code> / <code>consumer</code> — the two sides, always both. The point of the
+event is that consumption is attributable in both directions: &quot;who did I
+serve&quot; and &quot;whose agents did I consume&quot; are the same stream read from
+opposite ends.</li>
+<li><code>envelope_id</code> — the id of the envelope the event derives from.
+<strong>(<code>meter</code>, <code>envelope_id</code>) is the idempotency key</strong>: a consumer folding
+the stream MUST deduplicate on it, so redelivery can never double-count.
+Events not derived from a single envelope (<code>tasks_completed</code>, <code>task_ms</code>)
+use the Task&#39;s terminal envelope id.</li>
+<li><code>refused</code> / <code>refusal_code</code> — present only on refusal events, below.</li>
+</ul>
+<p><strong>Subject:</strong> <code>mesh.event.metering.usage</code>. A metering deployment SHOULD
+persist events durably (reference binding, §18.3); the durable stream is the
+substrate everything downstream folds — usage analytics (EXT-2), spend
+rollups (EXT-8 §3), the task receipt (§19.2), rating (§19.6).</p>
+<p><strong>Refusal events.</strong> An admission refusal is demand, and declined demand is a
+fact both parties reasonably want recorded: the consumer&#39;s side of &quot;what did
+I fail to buy&quot; and the provider&#39;s side of &quot;what work did I turn away at my
+price&quot;. When a request is refused at admission (<code>BUDGET_INSUFFICIENT</code>,
+<code>DEADLINE_UNMEETABLE</code>, <code>AGREEMENT_REQUIRED</code>), a metering deployment SHOULD
+record a <code>requests</code> event with <code>quantity</code> <code>0</code>, <code>refused</code> <code>true</code>, and
+<code>refusal_code</code> carrying the code. A refusal event rates to zero, always
+(§19.6): it is a record, never a charge.</p>
+<h4 id="the-usage-receipt">The Usage Receipt<a class="hl" href="#the-usage-receipt">#</a></h4>
+<p>A responder reporting declared usage puts it in the <strong>payload</strong> of a
+<code>respond</code> — <code>payload.usage</code>, an array of <code>{ &quot;meter&quot;, &quot;quantity&quot; }</code> entries —
+on the terminal respond. A non-terminal respond MAY carry cumulative usage
+so far; a later report <strong>supersedes</strong> an earlier one, never adds to it. This
+extends the spend-report pattern of §19.3 (<code>payload.cost</code>) and shares its
+rule: the payload, not the envelope — §5.2&#39;s field set does not grow here.</p>
+<p>An agent that answers by sending a <strong>new <code>request</code> carrying <code>in_reply_to</code></strong>,
+rather than by responding, reports the same way: <code>payload.usage</code> on that
+request. This is the shape a human-paced or inbox-driven agent takes — the
+answer is composed long after the asking envelope was acknowledged — and its
+work is metered like any other. Note that the parties read the other way
+round: on a <code>respond</code> the provider is the envelope&#39;s recipient, and on a
+reply-request the provider is its <strong>sender</strong>. A platform lifting receipts
+MUST distinguish the two, because reversing them attributes each party&#39;s
+usage to the other and produces figures that are self-consistent and wrong.</p>
+<p>The receipt needs no signature of its own, and that is the point of putting
+it in the payload: <strong>the envelope signature (§4.5) already covers it.</strong> A
+usage report is therefore a signed receipt — the platform lifts each entry
+into a declared meter event at delivery time, a responder cannot later
+disown a quantity it signed, and a recorded receipt is exactly as
+tamper-evident as the envelope it rode in on. What the signature proves is
+authorship, not truth: a signed claim is still a claim.</p>
+<p>Metering, like trace storage, is optional infrastructure: a minimal
+deployment records nothing, and nothing in this section adds an obligation
+between agents beyond the one already stated — a consumer folding meter
+events MUST deduplicate on the idempotency key.</p>
 <hr>
 <h2 id="14-subject-namespace">14. Subject Namespace<a class="hl" href="#14-subject-namespace">#</a></h2>
 <p>All AgentMesh subjects follow a hierarchical naming convention under the <code>mesh.</code> prefix.</p>
@@ -3199,7 +3556,7 @@ back to constructing.</p>
   &quot;extensions&quot;: [
     {
       &quot;uri&quot;: &quot;mesh://extensions/economics/v1&quot;,
-      &quot;description&quot;: &quot;Prices in the manifest, cost ceilings on budgets, spend reports on completions.&quot;,
+      &quot;description&quot;: &quot;SKUs and prices in the manifest, agreements, cost ceilings on budgets, usage and spend reports on completions.&quot;,
       &quot;required&quot;: false,
       &quot;version&quot;: &quot;1.0&quot;
     }
@@ -3245,7 +3602,7 @@ suite — <code>docs/implementation-status.md</code> — not here.</p>
 <tbody><tr>
 <td><code>mesh://extensions/economics/v1</code></td>
 <td><strong>Defined</strong> (0.2)</td>
-<td>The money axis of the protocol: the manifest <code>cost</code> block (advertising), discovery <code>max_cost</code>, the <code>cost_ceiling</code> field of the core budget (§7.7/§19.3), <code>BUDGET_INSUFFICIENT</code>/<code>BUDGET_EXHAUSTED</code>, the informative spend report on completion, and metering events (§19). <code>negotiate</code> and <code>COST_LIMIT_EXCEEDED</code> retired in 0.2, subsumed by budget admission (§7.7). Settlement out of scope.</td>
+<td>The money axis of the protocol, cut around the core metering substrate (§13.5): <strong>SKUs and prices</strong> (§19.1 — <code>free</code>/<code>flat</code>/<code>per_unit</code>/<code>package</code>/<code>tiered</code> against named meters, terms pinned by a tagged SHA-256 digest, advertised in the §8.7 storefront), the <strong>billing provider</strong> (§19.4), the signed account-level <strong>agreement</strong> and its <code>AGREEMENT_REQUIRED</code> admission enforcement (§19.5), <strong>rating</strong> (§19.6 — deterministic fold of meter events × agreed price, ceiling-bounded), discovery <code>max_cost</code>, the <code>cost_ceiling</code> of the core budget (§7.7/§19.3), <code>BUDGET_INSUFFICIENT</code>/<code>BUDGET_EXHAUSTED</code>, spend reports and task receipts (§19.2). The manifest <code>cost</code> block is retired in 0.2 in favour of <code>skus</code>; <code>negotiate</code> and <code>COST_LIMIT_EXCEEDED</code> retired earlier, subsumed by budget admission (§7.7). Settlement out of scope (§1.3).</td>
 </tr>
 <tr>
 <td><code>mesh://extensions/a2a-bridge/v1</code></td>
@@ -3463,14 +3820,28 @@ primitive layer, not the wire layer.</p>
 <thead>
 <tr>
 <th>Bucket Name</th>
+<th>Key Pattern</th>
 <th>Purpose</th>
 </tr>
 </thead>
 <tbody><tr>
 <td><code>mesh_artifacts</code></td>
-<td>Binary artifact storage (files, images, large payloads)</td>
+<td><code>{owner}/{object_id}</code></td>
+<td>Artifact bytes: files, images, payloads too large to travel inline (§7.5)</td>
+</tr>
+<tr>
+<td><code>rooms_drive</code></td>
+<td><code>{room_id}/{object_id}</code></td>
+<td>A room&#39;s drive (CAP-3)</td>
 </tr>
 </tbody></table>
+<p>Artifact metadata — owner, writing agent, media type, size, digest, declared retention — lives in the <code>mesh_artifacts_index</code> KV bucket keyed by <code>object_id</code>, so a store can answer &quot;who owns this, is it still live, and what should it hash to&quot; without reading the bytes. That index is also what makes the per-owner quota of §7.5.2 computable and the reclaim sweep of §7.5.2 possible.</p>
+<p><strong>Reference URIs.</strong> The refs these stores mint (§7.5.1) are:</p>
+<pre><code>mesh:artifacts:{object_id}
+mesh:rooms:{room_id}/drive/{object_id}
+</code></pre>
+<p><code>object_id</code> MUST be unpredictable (RECOMMENDED: 128 bits of randomness, base64url) — §7.5.3 makes possession of a ref the read capability, so a guessable identifier defeats it. Note that the artifact ref does NOT contain the owner even though the bucket key does: the owner is a fact the index holds, not one a reference should leak to everyone it is forwarded to.</p>
+<p>Both stores MAY be backed by something other than the JetStream Object Store — a filesystem, an object-storage bucket — without any change on the wire, since §7.5.1 makes the ref opaque precisely so this stays the operator&#39;s choice.</p>
 <h3 id="18-6-consumer-configuration">18.6. Consumer Configuration<a class="hl" href="#18-6-consumer-configuration">#</a></h3>
 <p><strong>Task Update Consumer (per requester):</strong></p>
 <pre><code>Stream: MESH_TASKS
@@ -3520,6 +3891,36 @@ Durable: mesh_event_{agent_id}_{subscription_hash}
 agent inbox no longer implies the request was lost — only that the agent was
 not live; the buffered copy survives and the queued-outcome semantics of §6.4
 apply.</p>
+<p><strong>Artifact store (§7.5).</strong> The store answers request-reply on well-known subjects, each on a queue group so exactly one instance serves a request:</p>
+<table>
+<thead>
+<tr>
+<th>Subject</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>mesh.artifacts.put</code></td>
+<td>Store bytes; returns a ref, digest, size and expiry.</td>
+</tr>
+<tr>
+<td><code>mesh.artifacts.fetch</code></td>
+<td>Retrieve bytes by ref.</td>
+</tr>
+<tr>
+<td><code>mesh.artifacts.stat</code></td>
+<td>The reference&#39;s metadata without moving the bytes.</td>
+</tr>
+<tr>
+<td><code>mesh.artifacts.remove</code></td>
+<td>Delete; the owner only.</td>
+</tr>
+<tr>
+<td><code>mesh.artifacts.usage</code></td>
+<td>The calling owner&#39;s usage against quota.</td>
+</tr>
+</tbody></table>
+<p>Bytes ride base64-encoded in the payload, which bounds one object to what the transport carries (§18.9); a store&#39;s own per-object limit therefore sits at or below it. The writing agent is <code>from</code> on the signed envelope (§4.5) and the owner is resolved from the registry (§8.6) — §7.5.2 requires both, so a store that cannot establish an owner MUST refuse the write rather than store anonymously.</p>
 <p><em>Informative:</em> core NATS answers a request on a subject with no subscribers with an immediate <strong>no-responders</strong> error rather than a timeout. In this binding that signal doubles as a definitive agent-liveness probe: an agent&#39;s inbox has a subscriber exactly while the agent is connected and serving, so a registry implementing the retention policy (§9.2) can distinguish a dead agent on a live node (no responders) from a slow one (any reply, including an error, proves liveness). This is a binding technique, not core protocol — other bindings supply their own liveness signal or rely on node-level presence alone.</p>
 <h3 id="18-8-exactly-once-delivery">18.8. Exactly-Once Delivery<a class="hl" href="#18-8-exactly-once-delivery">#</a></h3>
 <p>For critical operations (task state transitions, artifact delivery):</p>
@@ -3579,35 +3980,127 @@ instance the domain part is implicit and MAY be omitted.</p>
 yet; keeping economics out of core keeps the core focused on connectivity,
 identity, and delivery. The material is retained here as the extension&#39;s
 normative content and will move to a standalone extension document.</p>
-<p>The division of labour with core: <strong>core owns the budget mechanism</strong> (§7.7 —
-attachment, admission refusal, revisions, deadline semantics, lifecycle
-interaction), because those are obligations between agents and §17.4 forbids
-an extension from altering core primitive semantics. <strong>This extension owns
-money</strong>: what a price looks like, what the budget&#39;s cost ceiling means, and
-what gets reported after the fact. The deadline axis of a budget works with
-no extension at all.</p>
+<p>The division of labour with core: <strong>core owns the budget mechanism</strong> (§7.7)
+and <strong>the metering substrate</strong> (§13.5 — meters, meter events, the usage
+receipt), because those are obligations between agents and facts of the
+transport, and §17.4 forbids an extension from altering core primitive
+semantics. <strong>This extension owns money</strong>: what is for sale and at what
+price (the SKU), what the budget&#39;s cost ceiling means, what acceptance of
+terms looks like (the agreement), and how metered quantity becomes
+obligation (rating). The deadline axis of a budget works with no extension
+at all; so does metering — a deployment can meter everything and charge
+for nothing.</p>
 </blockquote>
-<h3 id="19-1-cost-model">19.1. Cost Model<a class="hl" href="#19-1-cost-model">#</a></h3>
-<p>Agents declare their cost structure in the manifest <code>cost</code> block (§8.1):
-<code>per_request</code>, <code>per_token</code>, <code>currency</code>, <code>billing_model</code>. The platform provides
-metering infrastructure; billing is application-defined.</p>
-<p>One comparability rule, stated plainly: <strong><code>per_request</code> prices are comparable
-across agents; <code>per_token</code> prices are not.</strong> A token is each responder&#39;s
-private unit — model size, reasoning passes, and tooling make one agent&#39;s
-token orders of magnitude dearer than another&#39;s — so an advertised token price
-is indicative of that agent&#39;s own arithmetic, never a basis for cross-agent
-comparison. The number that actually binds an interaction is the budget&#39;s
-<code>cost_ceiling</code> (§19.3), which is denominated in currency precisely because
-currency is the unit that IS fungible across agents.</p>
-<h3 id="19-2-metering-events">19.2. Metering Events<a class="hl" href="#19-2-metering-events">#</a></h3>
-<p>The platform SHOULD emit a metering event for every completed task — the
-receipt that billing, if it ever exists, would be built from:</p>
+<h3 id="19-1-the-sku-and-its-price">19.1. The SKU and its Price<a class="hl" href="#19-1-the-sku-and-its-price">#</a></h3>
+<p>What an agent sells is declared as a <strong>SKU</strong>: a named unit of commercial
+terms — what is covered, what it costs, and who bills for it. The manifest
+carries <code>skus</code>, an array (§8.1), replacing the <code>cost</code> block retired in 0.2:</p>
+<pre><code class="language-json">{
+  &quot;sku&quot;: &quot;caselaw-metered&quot;,
+  &quot;covers&quot;: { &quot;offerings&quot;: [&quot;caselaw-summary&quot;, &quot;caselaw-cite-check&quot;] },
+  &quot;price&quot;: {
+    &quot;model&quot;: &quot;per_unit&quot;,
+    &quot;currency&quot;: &quot;USD&quot;,
+    &quot;meter&quot;: &quot;tokens_out&quot;,
+    &quot;per&quot;: 1000,
+    &quot;amount_micro&quot;: 1500,
+    &quot;included&quot;: { &quot;quantity&quot;: 10000, &quot;period&quot;: &quot;day&quot; }
+  },
+  &quot;provider&quot;: { &quot;id&quot;: &quot;internal&quot;, &quot;terms_url&quot;: &quot;https://example.com/agent-terms/v3&quot; }
+}
+</code></pre>
+<ul>
+<li><code>sku</code> — stable identifier, <code>[a-z0-9-]{1,64}</code>, unique within the manifest.</li>
+<li><code>covers</code> — either <code>{ &quot;agent&quot;: true }</code> (every offering) or <code>{ &quot;offerings&quot;: [...] }</code>
+(a subset of §8.5 offering ids). Where SKUs overlap, the most specific match
+applies — an offering named explicitly is covered by that SKU, not by an
+agent-wide one. <strong>An offering covered by no SKU is free.</strong> That is today&#39;s
+mesh as the default and paid as the declared exception, the same
+default-flip shape as §9.2 retention: charging is something an operator
+says out loud, never something a consumer discovers on an invoice.</li>
+<li><code>price</code> — one of five shapes, below.</li>
+<li><code>provider</code> — who bills for it (§19.4).</li>
+</ul>
+<p><strong>Price shapes.</strong> <code>model</code> is one of a closed five, and each shape names the
+fields it uses; money fields follow §19.3&#39;s rules (<code>amount_micro</code>
+non-negative integer micro-units, <code>currency</code> an ISO 4217 code — a
+private-use <code>X</code>-prefixed code is legal where a deployment clears in its own
+credit unit):</p>
+<table>
+<thead>
+<tr>
+<th><code>model</code></th>
+<th>Fields</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>free</code></td>
+<td>—</td>
+<td>No charge. Declarable (rather than omitting the SKU) so a free offering can still carry terms and a provider — agreement without money is a terms gate (§19.5).</td>
+</tr>
+<tr>
+<td><code>flat</code></td>
+<td><code>amount_micro</code></td>
+<td>Per delivered request: rated against the <code>requests</code> observed meter (§13.5).</td>
+</tr>
+<tr>
+<td><code>per_unit</code></td>
+<td><code>meter</code>, <code>per</code>, <code>amount_micro</code></td>
+<td><code>amount_micro</code> per <code>per</code> units of the named meter. <code>per</code> defaults to 1. Charge = <code>floor(quantity × amount_micro / per)</code> — integer arithmetic, floor, EXT-8&#39;s convention.</td>
+</tr>
+<tr>
+<td><code>package</code></td>
+<td><code>meter</code>, <code>size</code>, <code>amount_micro</code>, <code>period</code></td>
+<td><code>amount_micro</code> per package of <code>size</code> units, partial packages rounded <strong>up</strong>: charge = <code>ceil(quantity / size) × amount_micro</code> over the period&#39;s aggregate quantity.</td>
+</tr>
+<tr>
+<td><code>tiered</code></td>
+<td><code>meter</code>, <code>per</code>, <code>tiers</code>, <code>period</code></td>
+<td>Graduated: each tier rates its own span. <code>tiers</code> is an ordered array of <code>{ &quot;up_to&quot;, &quot;amount_micro&quot; }</code>; the last tier omits <code>up_to</code> (unbounded). Volume pricing (whole quantity at the reached tier&#39;s rate) is deliberately not offered — one shape, no flag.</td>
+</tr>
+</tbody></table>
+<p>An optional <code>included</code> block (<code>{ &quot;quantity&quot;, &quot;period&quot; }</code>) on <code>per_unit</code>,
+<code>package</code>, or <code>tiered</code> grants a free allowance deducted before rating.
+<code>period</code> is <code>&quot;day&quot;</code> or <code>&quot;month&quot;</code>, UTC calendar; period aggregation is per
+<strong>consumer account</strong> (owner key, §8.6), because agreements are
+account-level (§19.5). The arithmetic for every shape is pinned in
+<code>conformance/commerce.json</code>.</p>
+<p>The comparability rule survives the re-cut, restated: <strong><code>flat</code> prices are
+comparable across agents; declared-meter prices are not.</strong> A token is each
+responder&#39;s private unit — model size, reasoning passes, and tooling make
+one agent&#39;s token orders of magnitude dearer than another&#39;s — so a
+<code>per_unit</code> price on <code>tokens_out</code> is indicative of that agent&#39;s own
+arithmetic, never a basis for cross-agent comparison. The number that binds
+an interaction is still the budget&#39;s <code>cost_ceiling</code> (§19.3), denominated in
+currency precisely because currency is the unit that IS fungible across
+agents.</p>
+<p><strong>The digest pins the terms.</strong> A SKU&#39;s digest is the base64url (unpadded)
+SHA-256 of its tagged bytes: the ASCII prefix <code>agentmesh-sku-v1</code>, one
+newline (0x0A), then the canonical JSON (§5.3) of the SKU object. Any
+change to <code>covers</code>, <code>price</code>, or <code>provider</code> moves the digest; the digest is
+what an agreement (§19.5) binds to, so no consumer can be rated against
+terms they never accepted. The digest covers the SKU object — for
+<code>terms_url</code>, the URL, not the document behind it. An operator who edits the
+document at an unchanged URL is changing terms out from under standing
+agreements; providers SHOULD version terms URLs so a terms change is a URL
+change. For an external provider (§19.4), that provider&#39;s own terms flow is
+authoritative on its rail regardless.</p>
+<p>SKUs travel on the public surface: the §8.7 public block advertises them
+(id, price, digest) pre-admission, and cost-based discovery filtering
+(<code>max_cost</code>, §9.3) is anchored here — a buyer compares terms before ever
+messaging the agent.</p>
+<h3 id="19-2-metering-receipts">19.2. Metering Receipts<a class="hl" href="#19-2-metering-receipts">#</a></h3>
+<p>With metering in core (§13.5), the task receipt is a <strong>derived view</strong>: the
+fold of a Task&#39;s meter events plus its budget context, retained as one
+message per Task for consumers that want a receipt rather than a stream.
+The platform SHOULD emit one for every completed task:</p>
 <p><strong>Subject:</strong> <code>mesh.event.metering.task_completed</code></p>
 <pre><code class="language-json">{
   &quot;task_id&quot;: &quot;&lt;uuid&gt;&quot;,
   &quot;requester&quot;: &quot;&lt;nkey&gt;&quot;,
   &quot;responder&quot;: &quot;&lt;nkey&gt;&quot;,
-  &quot;skill&quot;: &quot;&lt;skill-id&gt;&quot;,
+  &quot;offering&quot;: &quot;&lt;offering-id&gt;&quot;,
   &quot;started_at&quot;: &quot;&lt;RFC-3339 UTC&gt;&quot;,
   &quot;completed_at&quot;: &quot;&lt;RFC-3339 UTC&gt;&quot;,
   &quot;duration_ms&quot;: 1234,
@@ -3637,11 +4130,11 @@ the enum is the meaning the record keeps.</li>
 <p>A distinct subject, deliberately: a consumer folding completed receipts must
 never have cancellations arrive under the name <code>task_completed</code>.</p>
 <ul>
-<li>Token counts are deliberately absent. They were removed for the §19.1
-comparability reason: a bare token count is meaningless across responders.
-Itemized usage detail (per-model token breakdowns, tool-call counts), where
-an operator wants it, is operational metadata and belongs in the usage
-extension (EXT-2, <code>mesh://extensions/usage/v1</code>), not in this receipt.</li>
+<li>Token counts are deliberately absent from the receipt. A bare token count
+is meaningless across responders (§19.1&#39;s comparability rule); itemized
+quantities live where they belong — in the meter events themselves
+(§13.5), where each carries its meter&#39;s name and class. The receipt
+summarizes money and terms; the stream carries the quantities.</li>
 </ul>
 <h3 id="19-3-the-budget39s-money-axis">19.3. The Budget&#39;s Money Axis<a class="hl" href="#19-3-the-budget39s-money-axis">#</a></h3>
 <p>Core defines the budget block, its lifecycle, and the deadline axis (§7.7).
@@ -3675,6 +4168,95 @@ not grow here, and the platform reads spend from the payload. The report
 is informative rather than normative, deliberately: you can oblige an agent to
 respect a ceiling, but you cannot oblige its spend report to be true.
 Verified metering and settlement are out of scope.</p>
+<h3 id="19-4-the-billing-provider">19.4. The Billing Provider<a class="hl" href="#19-4-the-billing-provider">#</a></h3>
+<p>Every SKU names who bills for it. <code>provider.id</code> is either the reserved value
+<code>&quot;internal&quot;</code> — the deployment&#39;s own ledger and clearing, which is an
+operator service and out of scope here per §1.3 — or the name of an external
+commerce provider. <code>checkout_url</code> and <code>terms_url</code> are where a consumer&#39;s
+human approves; <code>account_ref</code>, where present, is the seller&#39;s account handle
+on that provider, opaque to the mesh.</p>
+<p>§1.3&#39;s division applies literally. The mesh records the <em>fact and digest</em> of
+agreement and produces the metered, attributable, idempotent usage record
+any biller can consume. Checkout, card data, mandates, tax, refunds, and
+settlement live on the provider&#39;s rail and never cross the mesh surface.
+Forwarding meter events to an external provider&#39;s usage-ingestion API is an
+operator service, not protocol surface — the protocol&#39;s whole contribution
+is that the events are worth forwarding.</p>
+<h3 id="19-5-the-agreement">19.5. The Agreement<a class="hl" href="#19-5-the-agreement">#</a></h3>
+<p>A declared price and a signed usage receipt are two legs of a stool. The
+third is proof the buyer accepted the terms — without it, a receipt is an
+invoice nobody agreed to pay. An <strong>agreement</strong> binds a consumer account to a
+SKU at a specific digest:</p>
+<pre><code class="language-json">{
+  &quot;v&quot;: 1,
+  &quot;consumer_owner&quot;: &quot;UOWNER…&quot;,
+  &quot;seller_agent&quot;: &quot;UAGENT…&quot;,
+  &quot;sku&quot;: &quot;caselaw-metered&quot;,
+  &quot;sku_digest&quot;: &quot;&lt;base64url SHA-256 of the SKU&#39;s tagged bytes, §19.1&gt;&quot;,
+  &quot;agreed_at&quot;: &quot;&lt;RFC-3339 UTC&gt;&quot;,
+  &quot;expires_at&quot;: &quot;&lt;RFC-3339 UTC — OPTIONAL&gt;&quot;,
+  &quot;evidence&quot;: { &quot;provider&quot;: &quot;&lt;provider id&gt;&quot;, &quot;ref&quot;: &quot;&lt;provider-side confirmation id&gt;&quot; },
+  &quot;sig&quot;: &quot;&lt;consumer owner key over the tagged signed bytes: `agentmesh-agreement-v1` + LF + the canonical JSON (§5.3) of this object excluding `sig`&gt;&quot;
+}
+</code></pre>
+<ul>
+<li><strong>Signed by the consumer&#39;s owner key</strong> (§8.6), never an agent key.
+Agreement is account-level for the same reason the allowance is
+owner-signed: it is a human&#39;s money. One person approves once; every
+agent under that owner is covered. An agent cannot click through a terms
+page, and this shape never asks it to.</li>
+<li><code>sku_digest</code> — the terms accepted. <strong>A digest mismatch is a missing
+agreement</strong>: when the seller changes price or terms the digest moves and
+every standing agreement goes stale at once. There is no grandfathering
+rule because there is nothing to grandfather — re-approval is the rule.</li>
+<li><code>evidence</code> — for external providers (§19.4), the provider-side
+confirmation (a checkout session, a mandate id) backing this agreement.
+Informative to the mesh; authoritative on the provider&#39;s rail.</li>
+<li>Agreements are registered with the platform in the EXT-6/EXT-8
+store-and-sync posture and are revocable by their signer. Revocation is
+prospective only: usage already metered under a live agreement remains
+rated.</li>
+</ul>
+<p><strong>Enforcement.</strong> Admission gains one check, in the §7.7/§22 slot: a
+<code>request</code> whose offering is covered by a SKU whose price is not <code>free</code>, from a
+consumer whose owner holds no unexpired agreement matching that SKU&#39;s
+current digest, MUST be refused before any work with <code>AGREEMENT_REQUIRED</code>
+(§12.2), <code>details</code> carrying <code>sku</code>, <code>sku_digest</code>, and <code>approval_url</code> — the
+provider&#39;s <code>checkout_url</code>, or the deployment&#39;s own approval surface for
+<code>internal</code>. This is §1.3&#39;s &quot;payment required&quot; refusal, typed. The consumer&#39;s
+owner is resolved the way EXT-2 §7.1 resolves it — the registry-populated
+<code>owner</code> of the requesting agent&#39;s manifest; an unresolvable owner holds no
+agreements. The requester MAY carry the digest it believes current in
+envelope <code>meta</code> as a hint; the check is the responder&#39;s regardless. A
+<code>free</code>-priced SKU that carries terms MAY be enforced the same way:
+agreement without money is a terms gate.</p>
+<h3 id="19-6-rating">19.6. Rating<a class="hl" href="#19-6-rating">#</a></h3>
+<p>Rating turns usage into obligation: a fold of meter events (§13.5) × the
+agreed price into ledger entries. The ledger itself is an operator service
+(§1.3), but rating&#39;s contract is normative, because both parties&#39; money
+depends on it:</p>
+<ul>
+<li><strong>Deterministic and replayable.</strong> Rating MUST be a pure function of the
+event stream, the SKUs, and the registered agreements: replaying the same
+events reproduces the same charges to the micro-unit. All arithmetic is
+integer — <code>per_unit</code> floors, <code>package</code> rounds up, <code>tiered</code> rates each
+span — pinned in <code>conformance/commerce.json</code>.</li>
+<li><strong>No agreement, no charge.</strong> An event for a paid SKU with no agreement
+matching the digest current at the event&#39;s <code>ts</code> rates to <strong>zero</strong> — a
+recorded fact, never a retroactive bill. Enforcement should have refused
+the work (§19.5); rating declining to charge for it is the second wall.</li>
+<li><strong>Refusal events rate to zero.</strong> Always (§13.5).</li>
+<li><strong>The ceiling binds rating.</strong> Where the interaction carried a budget,
+rated charges against it MUST NOT exceed the budget&#39;s <code>cost_ceiling</code>
+(§19.3). The ceiling composed with an agreed unit price is the consumer&#39;s
+hard bound on declared meters: a responder that declares more quantity
+than the ceiling covers has declared unpaid work. This is §7.7&#39;s honor
+system given mechanical teeth on the money side — spend past the ceiling
+lands on the responder&#39;s account by arithmetic, not by dispute.</li>
+<li><strong>Period aggregation</strong> — tiers, packages, included allowances — is per
+consumer account (owner key) per UTC period, matching the agreement&#39;s
+grain.</li>
+</ul>
 <hr>
 <h2 id="20-versioning">20. Versioning<a class="hl" href="#20-versioning">#</a></h2>
 <h3 id="20-1-protocol-versioning">20.1. Protocol Versioning<a class="hl" href="#20-1-protocol-versioning">#</a></h3>
@@ -3691,12 +4273,12 @@ Verified metering and settlement are out of scope.</p>
 <li>Receivers SHOULD accept messages with the same major version and a higher minor version, ignoring unknown fields.</li>
 <li>The manifest includes <code>protocol_version</code> so that discovery can filter by protocol compatibility.</li>
 </ul>
-<h3 id="20-3-skill-versioning">20.3. Skill Versioning<a class="hl" href="#20-3-skill-versioning">#</a></h3>
-<p>Skills are versioned independently of the protocol:</p>
+<h3 id="20-3-offering-versioning">20.3. Offering Versioning<a class="hl" href="#20-3-offering-versioning">#</a></h3>
+<p>Offerings are versioned independently of the protocol:</p>
 <ul>
-<li>Skill IDs SHOULD include a version suffix when breaking changes occur (e.g., <code>web-scrape-v2</code>).</li>
+<li>Offering IDs SHOULD include a version suffix when breaking changes occur (e.g., <code>web-scrape-v2</code>).</li>
 <li>The manifest <code>version</code> field tracks the agent&#39;s overall version.</li>
-<li>An agent offered a skill version it does not serve refuses with <code>SKILL_NOT_FOUND</code>, naming the versions it does; resubmitting against one of those is the agreement mechanism (the same refuse-with-estimate shape as §7.7).</li>
+<li>An agent offered an offering version it does not serve refuses with <code>OFFERING_NOT_FOUND</code>, naming the versions it does; resubmitting against one of those is the agreement mechanism (the same refuse-with-estimate shape as §7.7).</li>
 </ul>
 <h3 id="20-4-the-0-3-subject-tree">20.4. The 0.3 Subject Tree<a class="hl" href="#20-4-the-0-3-subject-tree">#</a></h3>
 <p>A declared migration mechanism, not a current behavior. When 0.3 breaks the
@@ -3912,7 +4494,7 @@ prevents, so <strong>§22 is paired with a machine-checkable fixture</strong>,
 appear to differ, the fixture is what an implementation is tested against.</p>
 <h3 id="22-1-scope-and-where-the-checks-apply">22.1. Scope, and where the checks apply<a class="hl" href="#22-1-scope-and-where-the-checks-apply">#</a></h3>
 <p>These obligations bind any implementation that hands an inbound message to
-application code — a skill handler, a model prompt, a tool call. They are
+application code — an offering handler, a model prompt, a tool call. They are
 receiver-side and local: none of them requires a registry, a peer, or a round
 trip, and all of them are checkable offline.</p>
 <ul>
@@ -4205,7 +4787,7 @@ is the shape the last paragraph of this section forbids.</p>
 holder of the key, and there is no plaintext here to warn anybody about.
 Whoever opens it owns fencing the plaintext.</li>
 <li>a payload with <strong>no string on the ladder</strong> — a frame is prose for a model, and
-stringifying an object into one destroys every structured skill contract there
+stringifying an object into one destroys every structured offering contract there
 is.</li>
 </ul>
 <p><strong>What must not be touched.</strong> The <strong>envelope</strong> MUST remain verbatim. It is the
@@ -4312,7 +4894,7 @@ Everything else in the fixture is a promise.</li>
        |------&gt; mesh.registry.discover          |
        |&lt;------ [manifest of Agent B]           |
        |                                        |
-       |  2. request(skill: &quot;web-scrape&quot;)       |
+       |  2. request(offering: &quot;web-scrape&quot;)       |
        |------&gt; mesh.agent.{B}.inbox            |
        |        reply: _INBOX.abc123            |
        |                                        |
@@ -4461,6 +5043,18 @@ section wins — and the disagreement is a defect in this appendix.</p>
 <td>Honor cancel: closed reason enum, stop work, forward <code>upstream_cancelled</code> to every still-live delegate</td>
 <td>§10.8</td>
 <td><code>cancel.json</code></td>
+</tr>
+<tr>
+<td>12</td>
+<td>Enforce agreements at admission where a paid SKU covers the offering: no unexpired agreement at the current digest → <code>AGREEMENT_REQUIRED</code> with <code>sku</code>, <code>sku_digest</code>, <code>approval_url</code></td>
+<td>§19.5</td>
+<td><code>commerce.json</code></td>
+</tr>
+<tr>
+<td>13</td>
+<td>Report declared usage in <code>payload.usage</code> of the terminal respond, or of a reply-<code>request</code> carrying <code>in_reply_to</code> — cumulative, superseding, covered by the envelope signature; the provider is the respond&#39;s recipient but the reply-request&#39;s SENDER</td>
+<td>§13.5</td>
+<td><code>metering.json</code></td>
 </tr>
 </tbody></table>
 <h3 id="d-2-a-caller-a-sender-of-requests">D.2. A caller (a sender of requests)<a class="hl" href="#d-2-a-caller-a-sender-of-requests">#</a></h3>

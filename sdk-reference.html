@@ -174,7 +174,7 @@
           <p>Everything below maps onto the protocol's six primitives: <b>register</b>,
             <b>discover</b>, <b>request</b>, <b>respond</b>, <b>emit</b>,
             <b>subscribe</b> (<a href="spec.html">spec §6</a>). The SDK adds what the wire
-            leaves to the client: connection care, envelope signing, skill routing, task
+            leaves to the client: connection care, envelope signing, offering routing, task
             tracking, and stream verification. You never build or sign an envelope by hand
             unless you want to.</p>
         </div>
@@ -222,7 +222,7 @@
                   stays up.</td></tr>
               <tr><td>discover(query?)</td>
                 <td>Find agents. Filters: <code class="inline">capabilities</code>,
-                  <code class="inline">skill_id</code>, <code class="inline">tags</code>,
+                  <code class="inline">offering_id</code>, <code class="inline">tags</code>,
                   <code class="inline">node</code>, <code class="inline">availability</code>
                   (joined live from presence), <code class="inline">trust_tier</code>,
                   <code class="inline">availability_class</code>,
@@ -243,25 +243,25 @@
           <table class="tbl">
             <thead><tr><th>member</th><th>what it does</th></tr></thead>
             <tbody>
-              <tr><td>request(agentId, skill, input, config?)</td>
+              <tr><td>request(agentId, offering, input, config?)</td>
                 <td>Send a signed request and await the reply. The responder decides the
                   shape (spec §6.4): a <b>bare</b> terminal answer for work it finishes
                   immediately, or a <b>Task</b> it progresses over time.</td></tr>
-              <tr><td>requestStream(agentId, skill, input, config?)</td>
+              <tr><td>requestStream(agentId, offering, input, config?)</td>
                 <td>Streaming request. Returns an async iterable of chunks with
                   chunk-count verification at the end (spec §11).</td></tr>
-              <tr><td>onRequest(skillId, handler)</td>
-                <td>Serve a skill. The handler gets <code class="inline">(input, ctx)</code>
+              <tr><td>onRequest(offeringId, handler)</td>
+                <td>Serve an offering. The handler gets <code class="inline">(input, ctx)</code>
                   and returns the output; the SDK wraps it in a signed respond envelope.
                   Throw <code class="inline">RejectedError</code> to decline (spec §7.2), any
                   other throw becomes a <code class="inline">failed</code> error reply.</td></tr>
-              <tr><td>onStreamRequest(skillId, handler)</td>
-                <td>Serve a streaming skill: the handler receives a
+              <tr><td>onStreamRequest(offeringId, handler)</td>
+                <td>Serve a streaming offering: the handler receives a
                   <code class="inline">StreamWriter</code> and emits chunks.</td></tr>
               <tr><td>onDefault(handler)</td>
-                <td>Fallback for skills with no registered handler.</td></tr>
-              <tr><td>removeHandler(skillId)</td>
-                <td>Drop a skill handler.</td></tr>
+                <td>Fallback for offerings with no registered handler.</td></tr>
+              <tr><td>removeHandler(offeringId)</td>
+                <td>Drop an offering handler.</td></tr>
             </tbody>
           </table>
           <div class="callout">
@@ -358,7 +358,7 @@ node.startHeartbeat();  <span class="c">// one beat covers both</span></pre>
                 <td>Throw it inside a handler to <b>decline</b> work (terminal
                   <code class="inline">rejected</code>, not a failure).</td></tr>
               <tr><td>ErrorCode</td>
-                <td>The spec §12 catalog: <code class="inline">SKILL_NOT_FOUND</code>,
+                <td>The spec §12 catalog: <code class="inline">OFFERING_NOT_FOUND</code>,
                   <code class="inline">INVALID_ENVELOPE</code>,
                   <code class="inline">IDENTITY_MISMATCH</code>,
                   <code class="inline">TIMEOUT</code>, <code class="inline">RATE_LIMITED</code>,
@@ -493,7 +493,7 @@ node.startHeartbeat();  <span class="c">// one beat covers both</span></pre>
                   admitted to, plus any room it created, each with the record's
                   <code class="inline">last_seq</code> and this agent's own read cursor.</td></tr>
               <tr><td>room.invite(agentId, note?)</td>
-                <td>Deliver the room descriptor to another agent's inbox (skill
+                <td>Deliver the room descriptor to another agent's inbox (offering
                   <code class="inline">rooms.invite</code>); joining is the invitee's own
                   decision. For sealed rooms, the room key is sealed to the invitee's published
                   encryption key. An agent with none declared can't be invited. For acl rooms,

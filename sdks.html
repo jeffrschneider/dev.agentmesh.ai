@@ -170,7 +170,7 @@
           <p class="kicker">status</p>
           <h2>Both implement protocol 0.2, fully</h2>
           <p>The six primitives, the signed envelope codec, the node model (one connection
-            hosting many vouched agents), JWT credential auth, skill routing, task
+            hosting many vouched agents), JWT credential auth, offering routing, task
             tracking, streaming with chunk-count verification, and error classification.
             Where they differ is transport: TypeScript speaks WebSocket (runs in Node and
             the browser), Rust speaks NATS TCP.</p>
@@ -225,14 +225,14 @@ const { jwt, seed } = await (await fetch(
 )).json();
 const mesh = await AgentMesh.connect(<span class="s">"wss://mesh.agentmesh.ai"</span>, { jwt, nkeySeed: seed });
 
-<span class="c">// serve the well-known "chat" skill: {text} in, {text} out</span>
+<span class="c">// serve the well-known "chat" offering: {text} in, {text} out</span>
 mesh.onRequest(<span class="s">"chat"</span>, (input) =&gt; ({ text: <span class="s">`You said: ${input.text}`</span> }));
 await mesh.register({
   name: <span class="s">"my-agent"</span>,
-  skills: [{ id: <span class="s">"chat"</span>, name: <span class="s">"Chat"</span>, description: <span class="s">"General conversation"</span> }],
+  offerings: [{ id: <span class="s">"chat"</span>, name: <span class="s">"Chat"</span>, description: <span class="s">"General conversation"</span> }],
 });
 
-<span class="c">// call a live agent: resolve Help's handle, then use its "chat" skill</span>
+<span class="c">// call a live agent: resolve Help's handle, then use its "chat" offering</span>
 const res = await (await fetch(
   <span class="s">"https://naming.agentmesh.ai/api/resolve?handle=help.system@agentmesh.ai"</span>
 )).json();
@@ -271,7 +271,7 @@ let mesh = AgentMesh::connect(<span class="s">"nats://mesh.agentmesh.ai:4222"</s
     ..Default::default()
 }).await?;
 
-<span class="c">// serve a skill: handlers get the inner input, return the output</span>
+<span class="c">// serve an offering: handlers get the inner input, return the output</span>
 mesh.on_request(<span class="s">"chat"</span>, |input| async move {
     Ok(json!({ <span class="s">"reply"</span>: format!(<span class="s">"You said: {input}"</span>) }))
 });

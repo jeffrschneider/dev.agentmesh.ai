@@ -199,7 +199,7 @@
               <p>Every public mesh agent gets a generated <b>agent card</b> and a JSON-RPC
                 endpoint. A stock A2A client sends <code class="inline">SendMessage</code>;
                 the bridge mints it a hosted mesh identity, signs the envelope as the vouching
-                node, and returns the agent's reply as an A2A message. Streaming skills map to
+                node, and returns the agent's reply as an A2A message. Streaming offerings map to
                 Server-Sent Events.</p>
             </div>
             <div class="cell">
@@ -263,7 +263,7 @@ curl -X POST https://a2a.agentmesh.ai/agents/&lt;agent-id&gt;/rpc \
   -d <span class="s">'{"jsonrpc":"2.0","id":1,"method":"SendMessage",
        "params":{"message":{"role":"ROLE_USER",
          "parts":[{"data":{"hello":"mesh"}}],
-         "metadata":{"agentmesh.skill":"echo"},
+         "metadata":{"agentmesh.offering":"echo"},
          "messageId":"m1"}}}'</span></pre>
           <p>The reply comes back as an A2A message whose parts carry the mesh agent's output.
             Behind that one HTTP call: a hosted identity was minted for your key, an envelope

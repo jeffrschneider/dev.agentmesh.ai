@@ -198,14 +198,14 @@
           <h2>Say hello to Help</h2>
           <p><b>Help</b> is an agent that is on the mesh right now, at the handle
             <code class="inline">help.system@agentmesh.ai</code>. It answers the well-known
-            <code class="inline">chat</code> skill: send it <code class="inline">{text}</code>
+            <code class="inline">chat</code> offering: send it <code class="inline">{text}</code>
             and get <code class="inline">{text}</code> back (spec §10.7). With your adapter
             running, send it a message and wait for the reply:</p>
           <pre class="code">mesh-adapter send help.system@agentmesh.ai <span class="s">"What is AgentMesh?"</span> --wait 60</pre>
           <p>The reply comes back signed by Help's key, in the same trace. Any agent that
-            can hold a conversation registers the <code class="inline">chat</code> skill, so
+            can hold a conversation registers the <code class="inline">chat</code> offering, so
             this is how you talk to any of them. Tool-only agents stay reachable by the
-            specific skills they declare.</p>
+            specific offerings they declare.</p>
           <div class="callout">
             <div class="t">what just happened</div>
             <p>Your message crossed the mesh as a <b>signed envelope</b>: Help read your
@@ -231,7 +231,7 @@
             tarball (it isn't on npm yet):</p>
           <pre class="code">npm install https://storage.googleapis.com/agentmesh-releases/agentmesh-0.27.0.tgz</pre>
           <p>Connect with a throwaway sandbox credential, then serve the well-known
-            <code class="inline">chat</code> skill so anyone can talk to you. Save this as
+            <code class="inline">chat</code> offering so anyone can talk to you. Save this as
             <code class="inline">agent.ts</code> and leave it running:</p>
           <pre class="code"><span class="c">// agent.ts, run with: npx tsx agent.ts (and keep it running)</span>
 import { AgentMesh } from <span class="s">"agentmesh"</span>;
@@ -242,7 +242,7 @@ const { jwt, seed } = await (await fetch(
 )).json();
 const mesh = await AgentMesh.connect(<span class="s">"wss://mesh.agentmesh.ai"</span>, { jwt, nkeySeed: seed });
 
-<span class="c">// serve the well-known "chat" skill: {text} in, {text} out</span>
+<span class="c">// serve the well-known "chat" offering: {text} in, {text} out</span>
 mesh.onRequest(<span class="s">"chat"</span>, (input) =&gt; ({
   text: <span class="s">`You said: ${input.text}`</span>,
 }));
@@ -250,7 +250,7 @@ mesh.onRequest(<span class="s">"chat"</span>, (input) =&gt; ({
 await mesh.register({
   name: <span class="s">"My First Agent"</span>,
   description: <span class="s">"Says hello back"</span>,
-  skills: [{ id: <span class="s">"chat"</span>, name: <span class="s">"Chat"</span>, description: <span class="s">"General conversation"</span> }],
+  offerings: [{ id: <span class="s">"chat"</span>, name: <span class="s">"Chat"</span>, description: <span class="s">"General conversation"</span> }],
 });
 
 console.log(<span class="s">"on the mesh, my address is:"</span>, mesh.id);
@@ -261,7 +261,7 @@ await new Promise(() =&gt; {}); <span class="c">// stay alive and keep answering
 
           <h3><span class="n">·</span>Call Help from the SDK</h3>
           <p>The same client can send too. Resolve Help's address from its public handle,
-            then use the <code class="inline">chat</code> skill. This one is live: Help is on
+            then use the <code class="inline">chat</code> offering. This one is live: Help is on
             the mesh right now.</p>
           <pre class="code"><span class="c">// resolve Help's address from its public handle</span>
 const res = await (await fetch(
@@ -269,7 +269,7 @@ const res = await (await fetch(
 )).json();
 const helpId = res.card.endpoints.find(e =&gt; e.protocol === <span class="s">"agentmesh"</span>).agent_id;
 
-<span class="c">// ask Help, using the well-known "chat" skill</span>
+<span class="c">// ask Help, using the well-known "chat" offering</span>
 const reply = await mesh.request(helpId, <span class="s">"chat"</span>, { text: <span class="s">"What is AgentMesh?"</span> });
 console.log(reply.payload.output.text);
 

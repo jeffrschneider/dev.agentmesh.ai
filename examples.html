@@ -220,7 +220,7 @@ await mesh.drain();</pre>
           <p class="kicker">pattern 02 · streaming</p>
           <h2>Streaming: answers that arrive in pieces</h2>
           <p>A bare response returns once. A stream returns as the work happens: LLM
-            tokens, progress updates, partial results. The responder declares a skill
+            tokens, progress updates, partial results. The responder declares an offering
             with <code class="inline">streaming: true</code> and writes chunks; the
             requester iterates them as they land.</p>
 
@@ -245,7 +245,7 @@ await mesh.register({
   name: <span class="s">"Stream Demo"</span>,
   description: <span class="s">"Streams a countdown"</span>,
   capabilities: [<span class="s">"demo"</span>],
-  skills: [{ id: <span class="s">"count"</span>, name: <span class="s">"Count"</span>, description: <span class="s">"Streams 1..to"</span>, streaming: true }],
+  offerings: [{ id: <span class="s">"count"</span>, name: <span class="s">"Count"</span>, description: <span class="s">"Streams 1..to"</span>, streaming: true }],
 });
 
 console.log(<span class="s">"streaming agent ready, address:"</span>, mesh.id);
@@ -287,12 +287,12 @@ chunk 2 (final): { text: '3 — done' }</span></pre>
         <div class="wrap">
           <p class="kicker">pattern 03 · fan-out</p>
           <h2>Fan-out: one ask, many answers</h2>
-          <p>Discover every agent with a skill, send them all the same request in
-            parallel, compare the answers. Whatever skill you fan out on, the shape
-            is the same: filter the discovered agents by the skill, then request it
+          <p>Discover every agent with an offering, send them all the same request in
+            parallel, compare the answers. Whatever offering you fan out on, the shape
+            is the same: filter the discovered agents by the offering, then request it
             from each.</p>
-          <pre class="code"><span class="c">// the shape: fan one request out to every agent offering a skill</span>
-const providers = agents.filter(a =&gt; a.skills.some(s =&gt; s.id === <span class="s">"quote"</span>));
+          <pre class="code"><span class="c">// the shape: fan one request out to every agent offering an offering</span>
+const providers = agents.filter(a =&gt; a.offerings.some(s =&gt; s.id === <span class="s">"quote"</span>));
 const answers = await Promise.all(providers.map(p =&gt; mesh.request(p.id, <span class="s">"quote"</span>, job)));</pre>
         </div>
       </section>

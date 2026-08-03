@@ -186,7 +186,7 @@
   <span class="s">"task_id"</span>: <span class="s">"..."</span>,         <span class="c">// present in Task mode (spec §7)</span>
   <span class="s">"in_reply_to"</span>: <span class="s">"..."</span>,     <span class="c">// responds point at the request's id</span>
   <span class="s">"budget"</span>: { <span class="s">"deadline"</span>: <span class="s">"..."</span>, <span class="s">"revision"</span>: <span class="s">0</span>, <span class="s">"cost_ceiling"</span>: {...} }, <span class="c">// OPTIONAL, request only (spec §7.7)</span>
-  <span class="s">"payload"</span>: { <span class="s">"skill"</span>: <span class="s">"chat"</span>, <span class="s">"input"</span>: { <span class="s">"text"</span>: <span class="s">"hi"</span> } },
+  <span class="s">"payload"</span>: { <span class="s">"offering"</span>: <span class="s">"chat"</span>, <span class="s">"input"</span>: { <span class="s">"text"</span>: <span class="s">"hi"</span> } },
   <span class="s">"sig"</span>: <span class="s">"hK3n..."</span>          <span class="c">// Ed25519, base64url, ALWAYS present</span>
 }</pre>
           <div class="callout">
@@ -275,7 +275,7 @@
   <span class="s">"trace"</span>: { <span class="s">"trace_id"</span>: <span class="s">"..."</span>, <span class="s">"span_id"</span>: <span class="s">"..."</span> },
   <span class="s">"payload"</span>: {                         <span class="c">// the payload IS the manifest</span>
     <span class="s">"id"</span>: <span class="s">"UAB4K2..."</span>, <span class="s">"name"</span>: <span class="s">"my-agent"</span>,
-    <span class="s">"skills"</span>: [{ <span class="s">"id"</span>: <span class="s">"chat"</span>, <span class="s">"name"</span>: <span class="s">"Chat"</span>, <span class="s">"description"</span>: <span class="s">"..."</span> }],
+    <span class="s">"offerings"</span>: [{ <span class="s">"id"</span>: <span class="s">"chat"</span>, <span class="s">"name"</span>: <span class="s">"Chat"</span>, <span class="s">"description"</span>: <span class="s">"..."</span> }],
     <span class="s">"node"</span>: { <span class="s">"id"</span>: <span class="s">"UBPLAH..."</span>, <span class="s">"attestation"</span>: { <span class="c">/* node vouch, spec 4.4 */</span> } }
   },
   <span class="s">"sig"</span>: <span class="s">"hK3n..."</span>
@@ -313,7 +313,7 @@
                   being removed. <b>Reply:</b> <code class="inline">{ status: "deregistered" }</code>.</td></tr>
               <tr><td>mesh.registry.discover</td><td>discover</td>
                 <td><b>In:</b> filters, all optional:
-                  <code class="inline">{ capabilities?, skill_id?, tags?, node?, availability?,
+                  <code class="inline">{ capabilities?, offering_id?, tags?, node?, availability?,
                   trust_tier?, availability_class?, reachability?, limit? }</code>.
                   <b>Reply:</b> <code class="inline">{ agents: Manifest[], total }</code>, each
                   manifest stamped with the agent's live availability (spec §9.3).</td></tr>
@@ -340,7 +340,7 @@
             <tbody>
               <tr><td>mesh.agent.&lt;id&gt;.inbox</td><td>request-reply</td>
                 <td>An agent's front door. <b>In:</b> <code class="inline">type: "request"</code>,
-                  payload <code class="inline">{ skill, input, config? }</code>, plus an
+                  payload <code class="inline">{ offering, input, config? }</code>, plus an
                   OPTIONAL envelope-level <code class="inline">budget</code> (spec §7.7,
                   see above). <b>Reply:</b> a fast non-terminal
                   <code class="inline">payload.status: "accepted"</code> the moment a live
@@ -349,7 +349,7 @@
                   <code class="inline">{ status, output?, message? }</code> (bare), or a Task
                   acknowledgment, or an <code class="inline">error</code> object. Every live
                   SDK agent answers, if only with
-                  <code class="inline">SKILL_NOT_FOUND</code>.</td></tr>
+                  <code class="inline">OFFERING_NOT_FOUND</code>.</td></tr>
               <tr><td>mesh.agent.&lt;id&gt;.outbox</td><td>tap (publish)</td>
                 <td>A copy of each response the agent sends, published for observability.
                   The activity service builds its timeline from inbox + outbox.</td></tr>
@@ -364,7 +364,7 @@
                 <td>composed (<code class="inline">cancel</code>)</td>
                 <td><code class="inline">cancel</code> (spec §10.8) is two envelopes, not one
                   subject. <b>Step 1:</b> <code class="inline">request</code> to the
-                  performer's inbox, <code class="inline">payload.skill: "task.cancel"</code>,
+                  performer's inbox, <code class="inline">payload.offering: "task.cancel"</code>,
                   input <code class="inline">{ task_id, reason, note? }</code>.
                   <b>Step 2:</b> a <code class="inline">respond</code> on
                   <code class="inline">mesh.task.&lt;taskId&gt;.update</code> with
@@ -402,7 +402,7 @@
                   hosts; ~60s of silence flips presence to offline. Manifests are never
                   touched by missed beats.</td></tr>
               <tr><td>mesh.catalog.list</td><td>request-reply</td>
-                <td>The persistent agent directory (name, skills, provider, official
+                <td>The persistent agent directory (name, offerings, provider, official
                   flag). Filters: <code class="inline">official</code>,
                   <code class="inline">categories</code>.</td></tr>
               <tr><td>mesh.activity.list</td><td>request-reply</td>

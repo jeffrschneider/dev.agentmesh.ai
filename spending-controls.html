@@ -226,7 +226,7 @@ let result = mesh.request_with_options(&amp;agent_id, <span class="s">"caselaw-s
     json!({ <span class="s">"question"</span>: <span class="s">"controlling case law on anticipatory repudiation"</span> }),
     RequestOptions { budget: Some(budget), ..Default::default() },
 ).await?;
-<span class="c">// convenience wrapper for exactly this: mesh.request_with_budget(id, skill, input, budget)</span>
+<span class="c">// convenience wrapper for exactly this: mesh.request_with_budget(id, offering, input, budget)</span>
 <span class="c">// a refusal surfaces as MeshError::Refusal with code BUDGET_INSUFFICIENT /</span>
 <span class="c">// DEADLINE_UNMEETABLE and the counter-offer in error.details</span></pre>
 

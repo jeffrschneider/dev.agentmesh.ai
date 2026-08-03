@@ -228,7 +228,7 @@ DELETE /v1/accounts/:id/api-tokens/:tid</pre>
             be published; attach then creates the record. The endpoint must be
             public HTTPS: addresses that resolve to private ranges are refused.</p>
           <pre class="code">POST /v1/accounts/:id/attachments/preview   <span class="c"># { url } → { card, manifest }</span>
-POST /v1/accounts/:id/attachments           <span class="c"># { url, label?, exposedSkills?, visibility?, rateCredits? }</span>
+POST /v1/accounts/:id/attachments           <span class="c"># { url, label?, exposedOfferings?, visibility?, rateCredits? }</span>
 GET  /v1/accounts/:id/attachments           <span class="c"># records: state, agentId, policy, usage</span>
 PATCH /v1/accounts/:id/attachments/:aid     <span class="c"># { visibility? , rateCredits? } only</span>
 POST /v1/accounts/:id/attachments/:aid/approve  <span class="c"># accept a changed card</span>

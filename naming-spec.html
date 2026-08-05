@@ -128,6 +128,8 @@
         <a href="spending-controls.html">/ spending-controls</a>
         <a href="audit.html">/ audit</a>
         <a href="credits.html">/ credits</a>
+        <a href="selling.html">/ selling</a>
+        <a href="catalog.html">/ catalog</a>
         <a href="a2a-bridge.html">/ a2a-bridge</a>
         <a href="rooms.html">/ rooms</a>
         <a href="mcp.html">/ mcp</a>
@@ -135,6 +137,7 @@
         <a href="running-a-mesh.html">/ running-a-mesh</a>
         <a href="nodes.html">/ nodes</a>
         <div class="grp">concepts</div>
+        <a href="core-concepts.html">/ core-concepts</a>
         <a href="use-cases.html">/ use-cases</a>
         <a href="collaboration.html">/ collaboration</a>
         <a href="alternatives.html">/ alternatives</a>
@@ -150,20 +153,20 @@
         <a href="wire-api.html">/ wire-api</a>
         <a href="faq.html">/ faq</a>
       </nav>
-      <div class="foot">v0.2 · the signed interconnect<br>dev.agentmesh.ai</div>
+      <div class="foot">the signed interconnect<br>dev.agentmesh.ai</div>
     </aside>
     <main class="main">
       <div class="wrap hero">
         <span class="eyebrow"><span class="tag">agentmesh</span> · naming specification</span>
         <h1>Personal Agent Naming (PAN)</h1>
         <div class="metas">
-          <span>version <b>0.7-draft</b></span>
+          <span>version <b>0.8-draft</b></span>
           <span>status <b>draft, one reference implementation</b></span>
-          <span>date <b>2026-07-26</b></span>
+          <span>date <b>2026-07-31</b></span>
         </div>
         <p class="canon">AgentMesh's naming service, companion to the
           <a href="spec.html">protocol specification</a>.
-          Rendered 2026-07-31 from commit <span class="mono">7b24b9b</span>.
+          Rendered 2026-08-05 from commit <span class="mono">07033ac</span>.
           The canonical source is SPEC-NAMING.md, published at
           <a href="https://github.com/jeffrschneider/agentmesh-protocol">https://github.com/jeffrschneider/agentmesh-protocol</a>.</p>
         <div class="toc">
@@ -181,6 +184,27 @@
         </div>
       </div>
       <div class="wrap spec">
+<p><strong>Changes from 0.7:</strong> One addition, new §6.2, closing a gap §6&#39;s chaining
+never covered. A hash chain detects a rewrite; it does not detect a
+deletion, because a chain geneses at its first entry — so a registrar that
+discarded its log and started appending again would hold a chain that
+verifies perfectly, and nothing in the entries says how many there ought to
+be. The gap is worse for the party §6 serves: an owner receives only their
+own entries, whose <code>prev_hash</code> and <code>entry_hash</code> point at entries they may
+not read, so they can check that each entry hashes to what it claims and
+can never walk the chain it belongs to. &quot;Append-only&quot; was an assertion the
+registrar made about itself. §6.2 has a registrar publish, periodically and
+signed, where its chain ends and <strong>how many entries it holds</strong>, over a
+canonical form carrying the issuing registrar&#39;s own URL. The count is the
+part that matters: a hash says an entry is intact, a count says entries are
+present, and a chain later reporting fewer than a published commitment
+contradicts a signature the registrar cannot disown. Commitments MUST be
+publicly readable, since they are only worth anything to someone who kept an
+earlier one — and they disclose nothing, being a hash, a count and a
+sequence number, so §6.1&#39;s erasure is untouched. A registrar SHOULD commit
+on a cadence even when idle, so that having stopped is distinguishable from
+having nothing to report. No wire changes to handles, claiming, binding, the
+card, or resolution.</p>
 <p><strong>Changes from 0.6:</strong> One addition, new §6.1, resolving a conflict inside §6
 that made erasure impossible: entries are never deleted and every entry
 named its anchor in plaintext, so an owner&#39;s email address sat permanently
@@ -1030,6 +1054,56 @@ handle spells the address out in its own name.</p>
 <p>Public, privacy-preserving verifiability (letting a third party confirm the
 registrar has not rewritten history without learning who owns what) is
 future work; see §10.</p>
+<h3 id="6-2-signed-head-commitments">6.2 Signed head commitments<a class="hl" href="#6-2-signed-head-commitments">#</a></h3>
+<p>Chaining detects a rewrite. It does not detect a <strong>deletion</strong>, and the two
+are not the same attack. A chain geneses at its first entry, so a registrar
+that discarded its log and began appending again would hold a chain that
+verifies perfectly from its new beginning. Nothing in the entries says how
+many there are supposed to be.</p>
+<p>The gap is wider for the party §6 exists to serve. An owner-scoped read
+returns only that owner&#39;s entries, and each one carries <code>prev_hash</code> and
+<code>entry_hash</code> pointing at entries the owner is not entitled to read. The
+owner can confirm that each entry hashes to what it claims, and cannot walk
+the chain those hashes belong to. &quot;The log is append-only&quot; is therefore an
+assertion the registrar makes about itself, which a reader has no means to
+check.</p>
+<p>A registrar <strong>SHOULD</strong> therefore publish, periodically and signed, a
+statement of where its chain currently ends:</p>
+<pre><code class="language-json">{ &quot;id&quot;: 42, &quot;at&quot;: &quot;…&quot;, &quot;registrar&quot;: &quot;https://…&quot;,
+  &quot;head_seq&quot;: 4207, &quot;entries&quot;: 12000, &quot;head_hash&quot;: &quot;b64…&quot;,
+  &quot;kid&quot;: &quot;93acdb980800&quot;, &quot;signature&quot;: &quot;b64…&quot; }
+</code></pre>
+<p>The signature is over the newline-joined canonical form</p>
+<pre><code>pan-log-commitment-v1
+&lt;registrar&gt;
+&lt;head_seq&gt;
+&lt;entries&gt;
+&lt;head_hash&gt;
+&lt;issued_at&gt;
+</code></pre>
+<p>verified with the key whose <code>kid</code> matches an entry from §5.3&#39;s published key
+set. The issuing registrar&#39;s own URL is inside the signed bytes for the same
+reason a §5.6 referral carries it: without it, a commitment published by one
+registrar verifies as a statement about another&#39;s chain.</p>
+<p><code>entries</code> is the field doing the work. A hash establishes that an entry is
+intact; a count establishes that entries are present. A chain that later
+reports fewer entries than a commitment already published contradicts a
+signature the registrar cannot disown.</p>
+<p>Commitments <strong>MUST</strong> be publicly retrievable, and a registrar <strong>MUST NOT</strong>
+require authentication to read them. This is not a disclosure: a commitment
+is a hash, a count and a sequence number, and names neither a handle nor an
+owner — so it coexists with the erasure in §6.1 rather than undoing it. The
+requirement is structural, because a commitment is only worth something to a
+party who kept an earlier one, and a reader who cannot fetch them cannot keep
+any.</p>
+<p>A registrar <strong>SHOULD</strong> issue a commitment on a fixed cadence even when the
+chain has not changed. A registrar that stopped committing is otherwise
+indistinguishable from one with nothing to report, and the cadence is what
+makes silence itself legible.</p>
+<p>What this does not do: it gives nobody the ability to read entries they are
+not entitled to, and it cannot prevent a deletion. It makes a deletion
+<strong>detectable by anyone who archived a commitment</strong>, which is the property
+chaining alone does not provide.</p>
 <h2 id="7-registrar-obligations">7. Registrar obligations<a class="hl" href="#7-registrar-obligations">#</a></h2>
 <p>A conforming registrar:</p>
 <ol>

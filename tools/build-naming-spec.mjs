@@ -187,6 +187,8 @@ const page = `<!DOCTYPE html>
         <a href="spending-controls.html">/ spending-controls</a>
         <a href="audit.html">/ audit</a>
         <a href="credits.html">/ credits</a>
+        <a href="selling.html">/ selling</a>
+        <a href="catalog.html">/ catalog</a>
         <a href="a2a-bridge.html">/ a2a-bridge</a>
         <a href="rooms.html">/ rooms</a>
         <a href="mcp.html">/ mcp</a>
@@ -194,6 +196,7 @@ const page = `<!DOCTYPE html>
         <a href="running-a-mesh.html">/ running-a-mesh</a>
         <a href="nodes.html">/ nodes</a>
         <div class="grp">concepts</div>
+        <a href="core-concepts.html">/ core-concepts</a>
         <a href="use-cases.html">/ use-cases</a>
         <a href="collaboration.html">/ collaboration</a>
         <a href="alternatives.html">/ alternatives</a>
@@ -209,7 +212,7 @@ const page = `<!DOCTYPE html>
         <a href="wire-api.html">/ wire-api</a>
         <a href="faq.html">/ faq</a>
       </nav>
-      <div class="foot">v0.2 · the signed interconnect<br>dev.agentmesh.ai</div>
+      <div class="foot">the signed interconnect<br>dev.agentmesh.ai</div>
     </aside>
     <main class="main">
       <div class="wrap hero">

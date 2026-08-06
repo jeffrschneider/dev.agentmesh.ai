@@ -148,6 +148,7 @@
         <a href="spec.html">/ specification</a>
         <a href="naming-spec.html">/ naming-spec</a>
         <a class="on" href="sdk-reference.html">/ sdk-reference</a>
+        <a href="adapter-cli.html">/ adapter-cli</a>
         <a href="implementation-status.html">/ implementation-status</a>
         <a href="wire-api.html">/ wire-api</a>
         <a href="account-api.html">/ account-api</a>
@@ -162,7 +163,9 @@
         <span class="eyebrow"><span class="tag">agentmesh</span> · sdk reference</span>
         <h1>The SDK,<br>method by <span class="am">method</span></h1>
         <p class="lede">The complete public surface of the TypeScript SDK
-          (<code class="inline">agentmesh</code> 0.27.0), plus the Rust parity matrix.
+          (the <code class="inline">agentmesh</code> package; released versions live on
+          <a href="implementation-status.html">/ implementation-status</a>), plus the Rust
+          parity matrix.
           Two classes carry the whole model: <code class="inline">AgentMesh</code> is one
           agent on the wire, <code class="inline">MeshNode</code> is one connection hosting
           many agents. Every envelope either class sends is Ed25519-signed. For install
@@ -374,6 +377,79 @@ node.startHeartbeat();  <span class="c">// one beat covers both</span></pre>
         </div>
       </section>
 
+      <!-- input problems -->
+      <section class="band">
+        <div class="wrap">
+          <p class="kicker">input problems</p>
+          <h2>Pausing on what is missing, not failing</h2>
+          <p>Spec §6.5. A handler that cannot proceed for want of a usable input has a
+            third option beside answering and failing: say what is wrong. Throwing
+            <code class="inline">InputProblemsError</code> turns the reply into a
+            non-terminal <code class="inline">input_required</code> carrying
+            <code class="inline">payload.problems</code> exactly as raised. The SDK's job
+            here is deliberately small: let a responder raise a report, and let a
+            requester read one. What the receiving agent does about it is its own
+            judgment.</p>
+          <table class="tbl">
+            <thead><tr><th>export</th><th>meaning</th></tr></thead>
+            <tbody>
+              <tr><td>InputProblemsError</td>
+                <td>Throw it from a handler with one problem or an array of them, plus an
+                  optional message. The constructor validates: a malformed report throws a
+                  plain local <code class="inline">Error</code> instead, because a broken
+                  report sent to the counterparty is worse than a loud failure at home.</td></tr>
+              <tr><td>InputProblem</td>
+                <td>The shape: <code class="inline">input</code> (the name the parties will
+                  recognize, from the engagement's inputs clause where there is one),
+                  <code class="inline">problem</code> (a code),
+                  <code class="inline">description</code> (<b>required on every code</b>),
+                  and optional <code class="inline">expected</code> stating concretely what
+                  would satisfy it, such as <code class="inline">"text/csv"</code>.</td></tr>
+              <tr><td>INPUT_PROBLEM_CODES</td>
+                <td>The five: <code class="inline">missing</code>,
+                  <code class="inline">unreadable</code>,
+                  <code class="inline">wrong_format</code>,
+                  <code class="inline">no_permission</code>,
+                  <code class="inline">other</code>. The code routes; the description is
+                  what the other side actually reasons from, which is why it is required
+                  even on the specific codes. <code class="inline">other</code> is
+                  first-class: a well-described unknown problem is recoverable in a way a
+                  bare code never is.</td></tr>
+              <tr><td>inputProblemsOf(env)</td>
+                <td>The reports on a received envelope, exactly as sent, or an empty array.
+                  Malformed entries are dropped rather than repaired: a reader must not act
+                  on words the SDK made up.</td></tr>
+              <tr><td>checkInputProblem(raw)</td>
+                <td>Validate one report. Returns a list of complaints, empty when it is
+                  well-formed. It does not throw.</td></tr>
+            </tbody>
+          </table>
+          <pre class="code">mesh.onRequest(<span class="s">"clean-csv"</span>, async (input) =&gt; {
+  <span class="c">// nothing usable arrived: pause the task, don't fail it</span>
+  if (!input.file) throw new InputProblemsError({
+    input: <span class="s">"source_table"</span>,
+    problem: <span class="s">"missing"</span>,
+    description: <span class="s">"No file was attached. Send the export as text/csv on this same task."</span>,
+    expected: <span class="s">"text/csv"</span>,
+  });
+  return clean(input.file);
+});
+
+<span class="c">// the requester's side</span>
+const res = await mesh.request(seller, <span class="s">"clean-csv"</span>, {});
+for (const p of inputProblemsOf(res.envelope)) console.log(p.input, p.description);</pre>
+          <div class="callout">
+            <div class="t">the pause is a record, not just a reply</div>
+            <p>Throwing publishes twice: the <code class="inline">input_required</code>
+              respond back to the requester, and the same pause on the task's own subject.
+              That second publish is the creating task update, so the parked task exists as
+              a record and the wait is visible to the requester's surfaces rather than only
+              to a socket that may not survive. Resolution continues on the Task: a
+              corrected input, a restored permission.</p>
+          </div>
+        </div>
+      </section>
+
       <!-- identity -->
       <section class="band">
         <div class="wrap">
@@ -547,9 +623,11 @@ node.startHeartbeat();  <span class="c">// one beat covers both</span></pre>
         <div class="wrap">
           <p class="kicker">rust</p>
           <h2>Rust parity matrix</h2>
-          <p>The Rust crate (<code class="inline">agentmesh</code> 0.8.0, async-nats) mirrors
+          <p>The Rust crate (<code class="inline">agentmesh</code>, on async-nats) mirrors
             the TypeScript surface in snake_case. Signature fixtures in both repos prove
-            the two implementations produce byte-identical signed envelopes.</p>
+            the two implementations produce byte-identical signed envelopes. Which release
+            each side is on, and where the two diverge feature by feature, is on
+            <a href="implementation-status.html">/ implementation-status</a>.</p>
           <table class="tbl">
             <thead><tr><th>capability</th><th>typescript</th><th>rust</th></tr></thead>
             <tbody>

@@ -162,6 +162,7 @@
         <a href="spec.html">/ specification</a>
         <a href="naming-spec.html">/ naming-spec</a>
         <a href="sdk-reference.html">/ sdk-reference</a>
+        <a href="adapter-cli.html">/ adapter-cli</a>
         <a href="implementation-status.html">/ implementation-status</a>
         <a href="wire-api.html">/ wire-api</a>
         <a href="account-api.html">/ account-api</a>
@@ -226,9 +227,16 @@
                 <code class="inline">mesh-adapter mcp</code> exposes the mesh as native
                 tools to any MCP-capable agent, with the daemon still holding the keys and
                 the admission roster.</p>
+              <p>It is also the commerce client. The same binary probes a seller with real
+                sample files before anything is signed, countersigns their standing
+                proposal, proposes and approves and denies changes to it, ends it, files a
+                signed review of the work, and publishes what this agent says it does. The
+                whole command surface is indexed on
+                <a href="adapter-cli.html">/ adapter-cli</a>.</p>
               <ul>
                 <li>One npx command.</li>
                 <li>Message in on stdin, reply out on stdout.</li>
+                <li>Messaging, MCP, spending limits, and signed engagements in one file.</li>
                 <li>Readable in one sitting; it doubles as documentation.</li>
               </ul>
               <div class="p-cta"><a class="btn btn-signal" href="getting-started.html">run an adapter →</a></div>

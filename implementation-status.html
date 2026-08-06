@@ -148,6 +148,7 @@
         <a href="spec.html">/ specification</a>
         <a href="naming-spec.html">/ naming-spec</a>
         <a href="sdk-reference.html">/ sdk-reference</a>
+        <a href="adapter-cli.html">/ adapter-cli</a>
         <a class="on" href="implementation-status.html">/ implementation-status</a>
         <a href="wire-api.html">/ wire-api</a>
         <a href="account-api.html">/ account-api</a>
@@ -185,7 +186,7 @@
           </table>
           <div class="callout">
             <div class="t">last verified</div>
-            <p>2026-07-28, by reading the code rather than the claims. This page exists
+            <p>2026-08-06, by reading the code rather than the claims. This page exists
               because the docs were wrong.</p>
           </div>
         </div>
@@ -213,8 +214,19 @@
               <tr><td>Presence, subscribe-before-snapshot (&sect;9.6)</td><td class="ok">yes</td><td class="ok">yes</td><td>partial: heartbeat only</td></tr>
               <tr><td>Tagged signatures, RFC 8785 (&sect;5.3)</td><td class="ok">yes</td><td class="ok">yes</td><td>inherited</td></tr>
               <tr><td>Manifest key claim (&sect;8.3)</td><td class="ok">yes</td><td class="ok">yes</td><td>inherited</td></tr>
+              <tr><td>Input problem reports (&sect;6.5)</td><td class="ok">yes</td><td>no</td><td class="ok">yes</td></tr>
             </tbody>
           </table>
+          <p>Input problem reports are the newest of these and divide unevenly. TypeScript
+            has the whole shape (<code class="inline">src/problems.ts</code>: raise one from
+            a handler, read one off an envelope, validate one) and the dispatcher turns a
+            raised report into a non-terminal <code class="inline">input_required</code>
+            plus a task update, so the parked task exists as a record. Rust has none of it:
+            no problems module, no reader, nothing. The adapter is a "yes" on its own
+            merits rather than by inheritance, because it wires up the door check that
+            decides a report is warranted: it reads its owner's signed terms, compares the
+            attached files against the inputs named there, and parks before spawning a
+            brain.</p>
           <p>Where the two SDKs are mirror-image incomplete, it is worth knowing which
             half you get. TypeScript has the full local task state machine but no
             <code class="inline">mesh.task.get</code> subject at all, so a TypeScript
@@ -273,6 +285,36 @@
               agent, closing the gap that used to refuse them with "acl rooms require a
               standalone agent."</p>
           </div>
+        </div>
+      </section>
+
+      <section class="band">
+        <div class="wrap">
+          <p class="kicker">agent sow</p>
+          <h2>Commerce: who implements the contract lifecycle</h2>
+          <p>The <a href="https://agentsow.com">Agent SoW</a> is a separate specification
+            from the protocol, and it lands in a different place: the platform holds and
+            validates the documents, the reference adapter is the client seat that acts on
+            them, and the SDKs carry none of it. That asymmetry is the story of this table.
+            The section numbers are the SoW's, not the protocol spec's.</p>
+          <table class="tbl">
+            <thead><tr><th>feature</th><th>typescript</th><th>rust</th><th>adapter</th></tr></thead>
+            <tbody>
+              <tr><td>Standing proposals and formation</td><td>no: platform-side</td><td>no</td><td class="ok">yes: <code class="inline">engage</code></td></tr>
+              <tr><td>Change requests (&sect;5.8)</td><td>no</td><td>no</td><td class="ok">yes: amend, approve, deny, withdraw, pending</td></tr>
+              <tr><td>Pre-engagement validation (&sect;13)</td><td>no</td><td>no</td><td class="ok">yes: both sides</td></tr>
+              <tr><td>Reviews (&sect;15)</td><td>no</td><td>no</td><td class="ok">yes: <code class="inline">review</code></td></tr>
+            </tbody>
+          </table>
+          <p>"No: platform-side" is not a gap in the SDK. A standing proposal is signed,
+            stored and served by the account platform, and countersigning it is an HTTPS
+            call, so there is nothing for a transport library to do. The adapter's rows are
+            all its own code, not inheritance: it builds and signs the documents, checks
+            the diffs before signing, and calls the doors on
+            <a href="account-api.html">/ account-api</a>. Validation probes are the one
+            row that is true in both directions: the adapter answers
+            <code class="inline">sow.probe</code> as a seller and sends one as a client.
+            The commands are indexed on <a href="adapter-cli.html">/ adapter-cli</a>.</p>
         </div>
       </section>
 

@@ -152,6 +152,7 @@
         <a href="spec.html">/ specification</a>
         <a href="naming-spec.html">/ naming-spec</a>
         <a href="sdk-reference.html">/ sdk-reference</a>
+        <a href="adapter-cli.html">/ adapter-cli</a>
         <a href="implementation-status.html">/ implementation-status</a>
         <a href="wire-api.html">/ wire-api</a>
         <a href="account-api.html">/ account-api</a>
@@ -218,10 +219,16 @@
           <p class="kicker">trust</p>
           <h2>Listings assert nothing they cannot show</h2>
           <p>Today a listing shows what is signed and what is public, nothing
-            more. As the reputation pipeline arrives (feedback from real
-            engagements, audit evidence, attestations), listings will carry
-            trust signals backed by that evidence rather than by
-            self-description.</p>
+            more. The first evidence beside it exists: <b>signed reviews</b>. A
+            client who formed an engagement can file a verdict on the work,
+            accepted or rejected, signed by their own key. Reviews are
+            relationship-gated, so only a party to the engagement can file one,
+            and append-only, so a changed mind is a second review rather than a
+            rewritten first one. A rejection without a stated reason is
+            refused. They are served with the engagement they judge.</p>
+          <p>The rest of the reputation pipeline is still ahead: folding audit
+            evidence and attestations in, and deciding what a listing may show
+            from all of it. Until that lands, listings carry no trust signal.</p>
         </div>
       </section>
       <footer>

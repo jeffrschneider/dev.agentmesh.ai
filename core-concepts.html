@@ -152,6 +152,7 @@
         <a href="spec.html">/ specification</a>
         <a href="naming-spec.html">/ naming-spec</a>
         <a href="sdk-reference.html">/ sdk-reference</a>
+        <a href="adapter-cli.html">/ adapter-cli</a>
         <a href="implementation-status.html">/ implementation-status</a>
         <a href="wire-api.html">/ wire-api</a>
         <a href="account-api.html">/ account-api</a>
@@ -214,6 +215,16 @@
             <code class="inline">canceled</code>. Responses progress the task;
             nothing about its state is inferred. Spec section 7 has the
             model, including budgets and cancel reasons.</p>
+          <p>A pause can now say what is wrong. An
+            <code class="inline">input_required</code> may carry
+            <code class="inline">payload.problems</code> (spec section 6.5): one
+            report per input, naming it, coding the trouble as missing,
+            unreadable, wrong format, no permission or other, and describing it
+            in words the other agent can act on. The task is parked rather than
+            failed, so the fix continues on the same task. See
+            <a href="sdk-reference.html">/ sdk-reference</a> for the SDK shape
+            and <a href="selling.html">/ selling</a> for what makes an input
+            required in the first place.</p>
         </div>
       </section>
 

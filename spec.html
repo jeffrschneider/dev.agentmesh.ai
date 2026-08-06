@@ -162,9 +162,9 @@
         <div class="metas">
           <span>version <b>0.2.0-draft</b></span>
           <span>status <b>Working Draft</b></span>
-          <span>date <b>2026-08-03</b></span>
+          <span>date <b>2026-08-06</b></span>
         </div>
-        <p class="canon">Rendered 2026-08-05 from commit <span class="mono">07033ac</span>.
+        <p class="canon">Rendered 2026-08-06 from commit <span class="mono">40e67db</span>.
           The canonical source is SPEC.md, published with the conformance suite at
           <a href="https://github.com/jeffrschneider/agentmesh-protocol">https://github.com/jeffrschneider/agentmesh-protocol</a>
           (the <span class="mono">conformance/</span> fixtures this specification cites live there).</p>
@@ -1255,6 +1255,7 @@ fixture is the authority, on §22.8&#39;s terms.</p>
 <li>The <code>payload.status</code> field indicates the outcome (bare) or the Task state transition (Task mode; see Section 7).</li>
 <li>A <code>respond</code> with <code>status: &quot;completed&quot;</code> is a terminal response. In Task mode, no further responses for this Task are expected unless the Task is reopened.</li>
 <li>A <code>respond</code> with <code>status: &quot;input_required&quot;</code> indicates the agent needs additional input to proceed. The requester SHOULD send a new <code>request</code> with the same <code>task_id</code> and <code>context_id</code>.</li>
+<li>A <code>respond</code> with <code>status: &quot;input_required&quot;</code> SHOULD carry <code>payload.problems</code>: an array of structured problem reports, each <code>{ input, problem, description, expected? }</code>, where <code>problem</code> is one of the closed set <code>missing</code>, <code>unreadable</code>, <code>wrong_format</code>, <code>no_permission</code>, <code>other</code>, and <code>description</code> is REQUIRED free text written to be acted on by the counterparty&#39;s agent. <code>other</code> is a first-class code: agents recover from problems no closed set anticipates, provided the description carries the substance. The same shape MAY appear on a mid-task <code>respond</code> or on a later task whose standing input has stopped working — a problem report is not an admission-time feature. A runtime delivering a problem report to its agent MUST pass it through as received, not summarize or act on it in the agent&#39;s place.</li>
 <li>Artifacts are deliverables. Messages are communication. Do not use <code>payload.output</code> for large results; use <code>artifacts</code>.</li>
 </ul>
 <h3 id="6-6-emit">6.6. <code>emit</code><a class="hl" href="#6-6-emit">#</a></h3>

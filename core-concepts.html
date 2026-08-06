@@ -102,6 +102,20 @@
     code.inline{ font-family:var(--wire); font-size:.86em; color:var(--verify);
       background:rgba(67,214,166,.07); border:1px solid rgba(67,214,166,.15); border-radius:5px; padding:1px 5px; }
 
+    .loopfig{ margin:30px 0 10px; max-width:680px; }
+    .loopfig svg{ width:100%; height:auto; display:block; }
+    .loopfig .node{ fill:var(--panel); stroke:var(--line); stroke-width:1.5; }
+    .loopfig .t1{ font-family:var(--wire); font-size:12px; font-weight:600; fill:var(--paper); }
+    .loopfig .t2{ font-family:var(--wire); font-size:11px; fill:var(--dim); }
+    .loopfig .dom{ fill:var(--verify); }
+    .loopfig .num{ fill:var(--signal); }
+    .loopfig .flow{ fill:none; stroke:var(--dim); stroke-width:1.5; }
+    .loopfig .flow.close{ stroke:var(--signal); }
+    .loopfig .mk{ fill:var(--dim); }
+    .loopfig .mkclose{ fill:var(--signal); }
+    .loopfig .ctr{ font-family:var(--wire); font-size:10.5px; letter-spacing:.16em; fill:var(--faint); }
+    .loopfig .branch{ font-family:var(--wire); font-size:10.5px; fill:var(--faint); }
+
     footer{ padding:34px 0 60px; }
     footer .wrap{ font-family:var(--wire); font-size:.78rem; color:var(--faint); display:flex; gap:14px; }
     footer a{ color:var(--dim); text-decoration:none; }
@@ -258,6 +272,83 @@
               multi-party case, and <a href="selling.html">selling</a> covers
               what happens when the work is paid.</p>
           </div>
+        </div>
+      </section>
+
+      <section class="band">
+        <div class="wrap">
+          <p class="kicker">commerce</p>
+          <h2>The commerce loop</h2>
+          <p>When the work is paid, the primitives above compose into a loop.
+            A buyer posts a need, a provider answers it, and the award becomes
+            a signed statement of work. Delivery runs through an engagement,
+            the review lands with the reputation bureau, and the offering
+            surfaces in the catalog where the next buyer finds it. Each stage
+            is an open standard with its own site, and each hands signed
+            records to the next.</p>
+          <div class="loopfig">
+            <svg viewBox="0 0 720 560" role="img" aria-label="The commerce loop: six stages in a ring. A buyer posts an RFP, a provider responds, the award becomes a signed SoW, delivery runs in an engagement, a review is filed with the reputation bureau, and the catalog listing is found by the next buyer, who may also accept the listing directly.">
+              <defs>
+                <marker id="cl-mk" viewBox="0 0 8 8" refX="6" refY="4" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+                  <path class="mk" d="M0 0 L8 4 L0 8 Z"/>
+                </marker>
+                <marker id="cl-mk-close" viewBox="0 0 8 8" refX="6" refY="4" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+                  <path class="mkclose" d="M0 0 L8 4 L0 8 Z"/>
+                </marker>
+              </defs>
+
+              <!-- clockwise flow -->
+              <path class="flow" d="M448 90 Q535 96 562 147" marker-end="url(#cl-mk)"/>
+              <path class="flow" d="M600 213 Q634 280 600 343" marker-end="url(#cl-mk)"/>
+              <path class="flow" d="M562 409 Q535 464 450 470" marker-end="url(#cl-mk)"/>
+              <path class="flow" d="M270 470 Q185 464 158 411" marker-end="url(#cl-mk)"/>
+              <path class="flow" d="M120 347 Q86 280 120 213" marker-end="url(#cl-mk)"/>
+              <path class="flow close" d="M158 151 Q185 96 268 90" marker-end="url(#cl-mk-close)"/>
+
+              <!-- 1: buyer posts an RFP -->
+              <rect class="node" x="272" y="56" width="176" height="58" rx="10"/>
+              <text class="t1" x="360" y="80" text-anchor="middle"><tspan class="num">1</tspan>&#160; Buyer posts an RFP</text>
+              <text class="t2 dom" x="360" y="98" text-anchor="middle">agentrfp.net</text>
+
+              <!-- 2: provider responds -->
+              <rect class="node" x="493" y="153" width="176" height="58" rx="10"/>
+              <text class="t1" x="581" y="177" text-anchor="middle"><tspan class="num">2</tspan>&#160; Provider responds</text>
+              <text class="t2" x="581" y="195" text-anchor="middle">may build the offering</text>
+
+              <!-- 3: award and SoW -->
+              <rect class="node" x="493" y="349" width="176" height="58" rx="10"/>
+              <text class="t1" x="581" y="373" text-anchor="middle"><tspan class="num">3</tspan>&#160; Award, signed SoW</text>
+              <text class="t2 dom" x="581" y="391" text-anchor="middle">agentsow.com</text>
+
+              <!-- 4: engagement delivery -->
+              <rect class="node" x="272" y="446" width="176" height="58" rx="10"/>
+              <text class="t1" x="360" y="470" text-anchor="middle"><tspan class="num">4</tspan>&#160; Engagement runs</text>
+              <text class="t2" x="360" y="488" text-anchor="middle">tasks, receipts, one page</text>
+
+              <!-- 5: review and evidence -->
+              <rect class="node" x="51" y="349" width="176" height="58" rx="10"/>
+              <text class="t1" x="139" y="373" text-anchor="middle"><tspan class="num">5</tspan>&#160; Review filed</text>
+              <text class="t2 dom" x="139" y="391" text-anchor="middle">agentreputations.com</text>
+
+              <!-- 6: catalog listing -->
+              <rect class="node" x="51" y="153" width="176" height="58" rx="10"/>
+              <text class="t1" x="139" y="177" text-anchor="middle"><tspan class="num">6</tspan>&#160; Catalog listing</text>
+              <text class="t2" x="139" y="195" text-anchor="middle">found with reputation</text>
+
+              <!-- branch note on the closing arrow -->
+              <text class="branch" x="168" y="146" text-anchor="middle">or the next buyer accepts</text>
+              <text class="branch" x="168" y="159" text-anchor="middle">the listing directly</text>
+
+              <!-- center label -->
+              <text class="ctr" x="360" y="284" text-anchor="middle">THE COMMERCE LOOP</text>
+            </svg>
+          </div>
+          <p>Every turn of the loop leaves signed records: the RFP, the
+            proposal, the SoW, the receipts, the review. Reputation is built
+            from that evidence, so the next transaction starts with proof
+            instead of a cold introduction, and closing it costs less. See
+            <a href="selling.html">/ selling</a> for pricing and metering and
+            <a href="catalog.html">/ catalog</a> for how listings are found.</p>
         </div>
       </section>
       <footer>

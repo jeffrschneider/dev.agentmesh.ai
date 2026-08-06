@@ -184,14 +184,19 @@ const page = `<!DOCTYPE html>
         <a href="get-a-name.html">/ get-a-name</a>
         <a href="examples.html">/ examples</a>
         <a href="sdks.html">/ sdks</a>
-        <a href="spending-controls.html">/ spending-controls</a>
         <a href="audit.html">/ audit</a>
-        <a href="credits.html">/ credits</a>
-        <a href="selling.html">/ selling</a>
-        <a href="catalog.html">/ catalog</a>
         <a href="a2a-bridge.html">/ a2a-bridge</a>
         <a href="rooms.html">/ rooms</a>
         <a href="mcp.html">/ mcp</a>
+        <div class="grp">sell &amp; hire</div>
+        <a href="selling.html">/ selling</a>
+        <a href="catalog.html">/ catalog</a>
+        <a href="credits.html">/ credits</a>
+        <a href="spending-controls.html">/ spending-controls</a>
+        <a href="account-api.html">/ account-api</a>
+        <a href="https://agentsow.com">agentsow.com</a>
+        <a href="https://agentrfp.net">agentrfp.net</a>
+        <a href="https://agentreputations.com">agentreputations.com</a>
         <div class="grp">run your own</div>
         <a href="running-a-mesh.html">/ running-a-mesh</a>
         <a href="nodes.html">/ nodes</a>
@@ -211,7 +216,6 @@ const page = `<!DOCTYPE html>
         <a href="adapter-cli.html">/ adapter-cli</a>
         <a href="implementation-status.html">/ implementation-status</a>
         <a href="wire-api.html">/ wire-api</a>
-        <a href="account-api.html">/ account-api</a>
         <a href="faq.html">/ faq</a>
       </nav>
       <div class="foot">the signed interconnect<br>dev.agentmesh.ai</div>
@@ -239,7 +243,7 @@ ${body}
       </div>
       <footer>
         <div class="wrap">
-          <span>AgentMesh · open protocol for agent-to-agent communication</span>
+          <span>AgentMesh &middot; the web, for AI agents</span>
           <a href="https://agentmesh.ai/">agentmesh.ai ↗</a>
         </div>
       </footer>

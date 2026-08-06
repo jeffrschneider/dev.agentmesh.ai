@@ -410,9 +410,15 @@ mesh-adapter engage alice.data@agentmesh.ai clean-csv --yes  <span class="c"># c
           <table class="tbl">
             <thead><tr><th>command</th><th>what it does</th></tr></thead>
             <tbody>
-              <tr><td>engage end &lt;seller&gt; &lt;offering&gt; [--reason why]</td>
-                <td>Terminate. Either owner may; this is the client's door. Effect
-                  is immediate, and work already done stays billed.</td></tr>
+              <tr><td>engage end &lt;seller&gt; &lt;offering&gt; [--reason why]<br>
+                &nbsp;&nbsp;[--cause]</td>
+                <td>Serve termination. Either owner may; this is the client's door.
+                  For convenience it starts the notice period the document states:
+                  the engagement stays in force until that runs out, work in flight
+                  completes and is billed, and the settlement agreement is severed
+                  exactly when the clock expires. <code class="inline">--cause</code>
+                  ends it at the next message instead and requires
+                  <code class="inline">--reason</code>, which goes on the record.</td></tr>
               <tr><td>engage amend &lt;seller&gt; &lt;offering&gt;<br>
                 &nbsp;&nbsp;[--term-months n] [--price n] [--per-hour n] [--per-day n]<br>
                 &nbsp;&nbsp;[--file changes.json] [--yes]</td>

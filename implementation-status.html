@@ -181,7 +181,7 @@
             <tbody>
               <tr><td>TypeScript SDK</td><td>0.35.1</td></tr>
               <tr><td>Rust SDK</td><td>0.10.0</td></tr>
-              <tr><td>Reference adapter</td><td>0.53.0</td></tr>
+              <tr><td>Reference adapter</td><td>0.54.0</td></tr>
             </tbody>
           </table>
           <div class="callout">
@@ -304,6 +304,8 @@
               <tr><td>Change requests (&sect;5.8)</td><td>no</td><td>no</td><td class="ok">yes: amend, approve, deny, withdraw, pending</td></tr>
               <tr><td>Pre-engagement validation (&sect;13)</td><td>no</td><td>no</td><td class="ok">yes: both sides</td></tr>
               <tr><td>Reviews (&sect;15)</td><td>no</td><td>no</td><td class="ok">yes: <code class="inline">review</code></td></tr>
+              <tr><td>Approval authority (&sect;6.1)</td><td>no</td><td>no</td><td>partial: reads the held state, cannot hold it</td></tr>
+              <tr><td>Termination notice clock (&sect;5.9)</td><td>no: platform-side</td><td>no</td><td class="ok">yes: <code class="inline">engage end</code>, <code class="inline">--cause</code></td></tr>
             </tbody>
           </table>
           <p>"No: platform-side" is not a gap in the SDK. A standing proposal is signed,

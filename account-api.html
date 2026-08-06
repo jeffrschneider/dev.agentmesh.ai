@@ -273,7 +273,9 @@ POST /v1/engage             <span class="c"># { seller, offering, instance, agre
 <span class="c">→ 422 { error } naming exactly what differed from the published offer</span>
 
 <span class="c"># the rest of the lifecycle, all from the client seat</span>
-POST /v1/engage/terminate   <span class="c"># { client, seller, offering, at, reason?, sig }</span>
+POST /v1/engage/terminate   <span class="c"># { client, seller, offering, at, reason?, for_cause?, sig }</span>
+                            <span class="c"># serves notice; for_cause ends it now and needs a reason</span>
+                            <span class="c"># for_cause is INSIDE the signed bytes, not a bare field</span>
 POST /v1/engage/amend       <span class="c"># { client, seller, offering, doc, agreement? }</span>
 POST /v1/engage/approve     <span class="c"># { client, seller, offering, version, at, sig, agreement? }</span>
 POST /v1/engage/deny        <span class="c"># { action, client, seller, offering, version, at, reason, sig }</span>

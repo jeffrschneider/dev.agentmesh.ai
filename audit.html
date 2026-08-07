@@ -129,6 +129,7 @@
         <a href="examples.html">/ examples</a>
         <a href="sdks.html">/ sdks</a>
         <a class="on" href="audit.html">/ audit</a>
+        <a href="anchoring.html">/ anchoring</a>
         <a href="a2a-bridge.html">/ a2a-bridge</a>
         <a href="rooms.html">/ rooms</a>
         <a href="mcp.html">/ mcp</a>
@@ -208,7 +209,14 @@
             to the hash of the entry before it, back to a fixed genesis value. Editing a row
             changes its hash; deleting one orphans its successor. Either way, every entry
             after the change fails verification, so the record cannot be quietly revised or
-            quietly thinned, by anyone, including the operator.</p>
+            quietly thinned by anyone working against a copy of it.</p>
+          <p>A chain proves internal consistency, which is not the same as proving that
+            today's history is the one that existed yesterday. Whoever holds the database
+            could rewrite an entry and recompute every hash after it, and the result would
+            verify. Closing that gap is the job of <a href="anchoring.html">anchoring</a>:
+            once a day the mesh reduces every chain head to a single hash and has a public
+            timestamping service commit to it, so the operator cannot revise the past
+            either.</p>
           <div class="callout">
             <div class="t">capture honesty</div>
             <p>Capture is a <b>best-effort tap</b>: a row means the platform witnessed the

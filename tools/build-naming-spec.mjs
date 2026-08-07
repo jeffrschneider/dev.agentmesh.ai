@@ -204,6 +204,7 @@ const page = `<!DOCTYPE html>
         <a href="running-a-mesh.html">/ running-a-mesh</a>
         <a href="nodes.html">/ nodes</a>
         <a href="operator-obligations.html">/ operator-obligations</a>
+        <a href="operator-revenue.html">/ operator-revenue</a>
         <div class="grp">concepts</div>
         <a href="core-concepts.html">/ core-concepts</a>
         <a href="use-cases.html">/ use-cases</a>

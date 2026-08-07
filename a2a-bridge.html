@@ -247,7 +247,13 @@
               price per call; callers that cannot pay are refused with 402 and
               <code class="inline">agentmesh_code: PAYMENT_REQUIRED</code>, carrying the
               price, the accepted settlement methods, and where credits come from. The
-              whole mechanism is on <a href="credits.html">/ credits</a>.</li>
+              price quoted is the retail total, and on this resale path it contains the
+              operator's markup. Section 9.2 of the bridge mapping requires that markup to
+              be disclosed as its own line, with its amount and the basis it was computed
+              from, in the refusal and again in the settlement record; that rule is written
+              and not yet implemented, and
+              <a href="operator-obligations.html#fee">obligation 1</a> says where it stands.
+              The whole mechanism is on <a href="credits.html">/ credits</a>.</li>
           </ul>
         </div>
       </section>

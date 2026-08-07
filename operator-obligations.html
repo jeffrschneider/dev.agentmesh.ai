@@ -243,20 +243,37 @@
             <code class="inline">markup_pct</code> without authentication. It is there to
             let a seller's console show an owner what they receive and what callers pay. A
             buyer can read it and work backwards, and nothing attaches it to a quote.</p>
-          <p>This is a decision rather than an unwritten feature, which is worth saying
-            because the two call for different fixes. The bridge specification currently
-            states that the rate an owner set is between the owner and the operator and is
-            not quoted to callers, and the runtime conforms to that exactly. Meeting the
-            duty above means changing that sentence and putting the rate and the markup into
-            payloads the buyer already receives. Both numbers are in hand at the point the
-            quote is built. Nothing published proposes the change yet.</p>
-          <div class="callout no">
-            <div class="t">status: not met on the resale path</div>
-            <p>The percentage is publicly readable and the seller is shown the whole
-              arithmetic. The buyer is quoted a single blended number and is not told an
-              operator sits inside it. The <b>total</b> is disclosed and its <b>split</b> is
-              not. Where an agent sells under its own SKU there is no operator cut, and
-              nothing to disclose.</p>
+          <p>That was a decision rather than an unwritten feature, and the decision has now
+            been made the other way. The bridge specification stated that the rate an owner
+            set is between the owner and the operator and is not quoted to callers. That
+            sentence is withdrawn. Section 9.2 of the bridge mapping now requires the
+            operator's fee to be disclosed as its own line, carrying its amount, the basis
+            it was computed from, and the base that basis was applied to, in the
+            payment-required refusal and again in the settlement record. The general rule it
+            follows is section 5.5.8 of the Agent SoW specification at
+            <a href="https://agentsow.com/spec.html#operator-fee">https://agentsow.com/spec.html#operator-fee</a>,
+            which puts an operator's cut on the same footing as the pass-through lines a
+            provider already has to itemise.</p>
+          <p>The specification states the consequence rather than leaving an implementer to
+            find it. Disclosing the operator's cut also discloses what the seller receives,
+            because the retail total minus the cut is the seller's net. That trade was made
+            deliberately, and it is a smaller one than it looks: <code class="inline">markup_pct</code>
+            is already public and the retail arithmetic already inverts, so the split was
+            recoverable before the rule changed. What the silence bought was not the seller's
+            privacy. It was that the buyer did not know a fee was in the number.</p>
+          <p>What remains is implementation. Both numbers are in hand at the point the quote
+            is built, and settlement already runs as two legs carrying the rate and the
+            retail price, so nothing new has to be computed. Until the refusal and the
+            receipt carry the line, the buyer still sees one blended number and this duty is
+            written down rather than met.</p>
+          <div class="callout part">
+            <div class="t">status: specified, not yet implemented</div>
+            <p>The rule now exists and binds: bridge mapping section 9.2 requires the
+              operator's fee on its own line, with its amount and its basis, in the quote
+              and in the settlement record. The runtime does not carry that line yet, so a
+              buyer on the resale path is still quoted a single blended number. The
+              <b>total</b> is disclosed and its <b>split</b> is not. Where an agent sells
+              under its own SKU there is no operator cut, and nothing to disclose.</p>
           </div>
         </div>
       </section>

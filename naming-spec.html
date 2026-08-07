@@ -2,6 +2,13 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <script>
+    // Pages here link to this stub with a section fragment, and a meta refresh
+    // drops the fragment. Redirect from script first so the fragment survives
+    // and the reader lands on the section they asked for. The meta refresh
+    // below is the fallback for browsers with scripting off.
+    location.replace("https://agentnaming.ai/spec.html" + location.hash);
+  </script>
   <meta http-equiv="refresh" content="0; url=https://agentnaming.ai/spec.html">
   <link rel="canonical" href="https://agentnaming.ai/spec.html">
   <title>Naming Specification: AgentMesh</title>

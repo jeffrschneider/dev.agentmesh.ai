@@ -29,24 +29,26 @@ grep -rnoE '&mdash;|&#8212;|&#x2014;|—' *.html
 ```
 Any hit outside a `<pre>`/`<code>` block should be reworded away.
 
-## spec.html and naming-spec.html are generated — never hand-edit them
+## spec.html is generated — never hand-edit it
 
 `spec.html` is rendered from the canonical spec at
-`C:\Users\jeffr\Desktop\AgentMesh\SPEC.md` by `tools/build-spec.mjs`, and
-`naming-spec.html` from `C:\Users\jeffr\Desktop\AgentMesh\SPEC-NAMING.md` by
-`tools/build-naming-spec.mjs`. To fix spec content, edit the source spec in
-the AgentMesh repo, then regenerate:
+`C:\Users\jeffr\Desktop\AgentMesh\SPEC.md` by `tools/build-spec.mjs`. To fix
+spec content, edit the source spec in the AgentMesh repo, then regenerate:
 
 ```bash
 node tools/build-spec.mjs          # from the repo root
-node tools/build-naming-spec.mjs
 ```
 
-Commit the regenerated pages. They reproduce the specs verbatim, so the
-no-em-dash rule does not apply to them (a spec is a quoted document, not site
-prose). The em-dash grep above should skip `spec.html` and `naming-spec.html`.
-The two builders share their page template (rail nav, hero, styles); if you
-change the nav in one, change it in the other and regenerate both.
+Commit the regenerated page. It reproduces the spec verbatim, so the
+no-em-dash rule does not apply to it (a spec is a quoted document, not site
+prose). The em-dash grep above should skip `spec.html`.
+
+The naming specification is not published here. It lives on its own site at
+https://agentnaming.ai/spec.html, rendered from
+`C:\Users\jeffr\Desktop\AgentMesh\SPEC-NAMING.md` by
+`C:\Users\jeffr\Desktop\AgentMesh\naming\tools\build-spec.mjs`, which the
+naming site owns. `naming-spec.html` here is a redirect stub. Do not add a
+second builder for it.
 
 ## Split
 

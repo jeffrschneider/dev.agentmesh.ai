@@ -351,13 +351,8 @@
           <p>A binding MUST answer a capability read. The wire form is
             <code class="inline">GET /internal/clearing/capabilities</code>. The capability
             read is REQUIRED of every binding and is not itself listed in
-            <code class="inline">operations</code>.</p>
-          <div class="callout">
-            <div class="t">honesty note</div>
-            <p>The first binding does not implement it. That is a <b>defect of the first
-              binding</b> and not a permitted degradation. The second binding implements it
-              in about thirty lines, which is what makes keeping it REQUIRED reasonable.</p>
-          </div>
+            <code class="inline">operations</code>. Both bindings implement it, in about
+            thirty lines each, which is what makes keeping it REQUIRED reasonable.</p>
           <p class="outlabel">the second binding's actual answer, as an example of the shape</p>
           <pre class="code">{
   <span class="s">"contract"</span>: <span class="s">"1"</span>,
@@ -524,7 +519,14 @@
             MUST stop counting as spend, and a reversed grant or allocation MUST stop
             counting as granted or allocated. A ledger where the balance nets correctly but
             the spend figure keeps quoting a refunded charge is a ledger a person checks a
-            refund against and does not believe.</p>
+            refund against and does not believe. In a binding with periods this rule holds
+            within a period. A correction nets against the period it lands in, which under
+            12.2 is the period that is open when it is made, and it does not reach back. An
+            earlier period's totals therefore continue to include a charge that has since
+            been reversed. That is a property of periodic books rather than an exemption
+            from this rule, and a binding with periods MUST NOT restate a closed period to
+            make a correction net against its original. A reader who needs the whole picture
+            reads both periods, which is what the correction's own record makes possible.</p>
           <p><code class="inline">statement</code> is a bounded list of recent entries,
             newest first. Both bindings default to 30 and clamp an explicit limit to 500.
             The shape of an entry is the binding's. The platform renders what it is given.</p>
@@ -540,9 +542,11 @@
     <span class="s">"reversed_by"</span>: <span class="s">"r1"</span> | null,
     <span class="s">"period"</span>: <span class="s">"2026-03"</span> }</pre>
           <p>REQUIRED of every binding, including immediate ones, because the platform must
-            be able to ask without knowing which kind it is talking to. <b>The first binding
-            does not implement it. That is a defect of the first binding and not a permitted
-            degradation.</b></p>
+            be able to ask without knowing which kind it is talking to. Both bindings
+            implement it. The first composes the record from its own postings rather than
+            keeping a second table beside them, and in doing so it puts a settlement it
+            still stores as two derived transactions back together into the one record this
+            operation describes.</p>
           <p>The single-account shape of the first draft could not describe a two-party
             settlement, which is what every settlement in this contract is. The fields are
             therefore defined as follows.</p>
@@ -566,16 +570,34 @@
           <p><code class="inline">unknown</code> means the binding has no record of this
             transaction identifier. It is not an error and MUST be answered with 200. The
             platform uses it to distinguish a call that never arrived from a call that
-            arrived and is working, which is exactly the question a timeout leaves open. An
-            immediate binding answers <code class="inline">settled</code> or
+            arrived and is working, which is exactly the question a timeout leaves open.</p>
+          <div class="callout">
+            <div class="t">an accepted operation that moved no value is not unknown</div>
+            <p>A binding MUST NOT answer <code class="inline">unknown</code> for an
+              identifier it has any record of, whatever that record says about value. The
+              case that forces this into the contract is a draw the cap clamped to nothing
+              (6.13): its lines are recorded at zero and marked capped, and nothing is
+              billed, so a binding that keys this read on value moved answers
+              <code class="inline">unknown</code> for a call it accepted. A caller that
+              timed out on that draw then reads the one answer that means "send it again".
+              Such a settlement is <code class="inline">settled</code>, with
+              <code class="inline">amount</code> of zero and an empty
+              <code class="inline">legs</code> array, which satisfies the requirement above
+              that the deltas sum to zero. No further state is needed and this contract does
+              not add one: accepted-and-moved-nothing is a terminal outcome, not a fifth
+              kind of in-flight.</p>
+          </div>
+          <p>An immediate binding answers <code class="inline">settled</code> or
             <code class="inline">unknown</code> and nothing else.</p>
 
           <h3><span class="n">6.5</span>list-reservations</h3>
           <pre class="code">GET /internal/ledger/reservations/{account}</pre>
           <p>OPTIONAL. Result: <code class="inline">account</code>,
             <code class="inline">balance</code>, <code class="inline">available</code>,
-            <code class="inline">reserved</code>, and
-            <code class="inline">reservations</code>, an array of reservation records.</p>
+            <code class="inline">reserved</code>, <code class="inline">reservations</code>,
+            an array of reservation records, and <code class="inline">period</code> under
+            the same rule as 6.2. This read carries a balance, so a binding whose balances
+            reset MUST say which period the figures are for here as well.</p>
           <p>A reservation record carries <code class="inline">hold_id</code>,
             <code class="inline">account</code>, <code class="inline">amount</code> (the cap
             it commits), <code class="inline">drawn</code> (billed against it so far),
@@ -585,11 +607,28 @@
             <code class="inline">expires_at</code>, <code class="inline">released_at</code>,
             <code class="inline">release_reason</code>. Expiry MUST be applied before this
             read answers.</p>
+          <p>A binding with periods MUST also carry, on the record itself:</p>
+          <ul class="plain">
+            <li><b>period</b>, naming the period this reservation draws against now, or null
+              once it is released, because a released hold commits nothing and there is no
+              month it is holding.</li>
+            <li><b>opened_in</b>, naming the period it was agreed in.</li>
+          </ul>
+          <p>A hold is not required to be scoped to a period, and neither of ours is: a cap
+            agreed in one period can run into the next and commit a budget nobody has
+            allocated yet, which drives <code class="inline">available</code> negative, and
+            invariant 11 permits exactly that. What a caller MUST be able to do is tell
+            which period's value a reservation is holding. The two fields differ exactly
+            when a cap has outlived the budget it was agreed against, and a binding SHOULD
+            derive them rather than storing them, since a stored period is wrong from the
+            first boundary the hold crosses. A binding without periods MUST NOT carry either
+            field, under the same rule as 6.2.</p>
 
           <h3><span class="n">6.6</span>read-reservation</h3>
           <pre class="code">GET /internal/ledger/reservation/{holdId}</pre>
           <p>OPTIONAL. The record from 6.5 plus a <code class="inline">draws</code> array,
-            oldest first. 404 with the code <code class="inline">no_such_object</code> when
+            oldest first, and <code class="inline">period</code> beside it under the same
+            rule as 6.5. 404 with the code <code class="inline">no_such_object</code> when
             there is no such hold.</p>
           <p>Each draw record carries <code class="inline">hold_id</code>,
             <code class="inline">txn_id</code>, <code class="inline">ts</code>,
@@ -1009,7 +1048,9 @@
               accumulate value.</li>
             <li><b>Totals are net of corrections.</b> A reversed charge stops counting as
               spend, and a reversed grant or allocation stops counting as granted or
-              allocated.</li>
+              allocated. In a binding with periods this holds within a period: a correction
+              nets against the period it lands in, and an earlier period's totals are not
+              restated.</li>
             <li><b>A settlement's final state is reached at most once.</b> A settlement that
               reported <code class="inline">settled</code> never becomes
               <code class="inline">failed</code>, and one that reported
@@ -1305,9 +1346,15 @@
               binding without periods MUST NOT declare the field.</li>
             <li>Carry <code class="inline">period</code> on every balance-bearing read:
               <code class="inline">read-balance</code>,
-              <code class="inline">read-summary</code> and
-              <code class="inline">read-settlement</code>. The value names the period the
+              <code class="inline">read-summary</code>,
+              <code class="inline">read-settlement</code> and the two reservation reads,
+              <code class="inline">list-reservations</code> and
+              <code class="inline">read-reservation</code>. The value names the period the
               figures are for.</li>
+            <li>Carry <code class="inline">period</code> and
+              <code class="inline">opened_in</code> on every reservation record, so that a
+              caller can tell which period's value a cap is holding and which period it was
+              agreed against.</li>
             <li>Carry <code class="inline">period</code> on the response to every accepted
               value-moving operation, naming the period the transaction landed in.</li>
             <li>Keep transaction identifiers unique across all periods.</li>
@@ -1321,7 +1368,8 @@
             produces a set of books that balances and cannot be believed. Landing the
             correction in the open period is also what it means in cash terms: budget comes
             back now, not last month. A binding MAY therefore refuse writes to a period it
-            has closed, with the code <code class="inline">closed</code>.</p>
+            has closed, with the code <code class="inline">closed</code>. This is also where
+            6.3's netting rule stops.</p>
 
           <h3><span class="n">12.3</span>What this contract does not have</h3>
           <p>Period close, the statements a close produces, and the reporting of an overrun
@@ -1475,8 +1523,10 @@
             <li>Double entry as the mechanism. The requirement is conservation.</li>
             <li>A mint or budget account that runs a deep negative balance. That is how both
               bindings make issued value and margins balance to zero.</li>
-            <li>Grants as a funding method, and their application during a balance read.
-              Entirely the first binding's.</li>
+            <li>Grants, and their application during a balance read. Entirely the first
+              binding's. A grant is not funding under section 5.1's reach rule, whatever it
+              puts in, so the first binding declares the purchase door as its funding and
+              reports the grant schedule under a field of its own.</li>
             <li>Allocation, period close, statements and overrun reporting. Entirely the
               second binding's.</li>
             <li>SQLite, and the five-minute sweep interval and cache lifetimes.</li>
@@ -1501,9 +1551,11 @@
               section 10 that are wrong, and that is expected.</li>
             <li><b>Neither binding emits the error codes of section 7.</b> Both answer prose
               only. Section 7.3 exists so callers behave consistently until they do.</li>
-            <li><b>The first binding does not implement read-settlement or the capability
-              read</b>, both of which this document requires of every binding. They are
-              cheap, the second binding implements both, and the first binding is behind.</li>
+            <li><b>The first binding still stores a settlement as two derived
+              transactions</b>, which 6.8 forbids.
+              <code class="inline">read-settlement</code> composes them into the one record
+              this document describes, so a caller reads the shape the contract states, but
+              undoing a settlement there is still two calls.</li>
             <li><b>The platform is not unit-agnostic.</b> Section 11.2 says where it still
               assumes XCR.</li>
             <li><b>The platform does not proxy the binding's capability document.</b> It

@@ -299,7 +299,8 @@
             and that is terminal: leaving it requires an explicit correction, not a state
             transition. <b>Failed</b> means the instruction will not complete, no value
             moved, and whatever it committed has been released. <b>Unknown</b> means the
-            binding has no record of the identifier at all.</p>
+            binding has no record of the identifier at all, which is why an operation the
+            binding accepted and that moved no value is not unknown.</p>
           <p>Three rules make that workable across bindings that behave very differently.
             <code class="inline">unknown</code> is an answer rather than an error and is
             returned with a 200, because it is how a caller tells a call that never arrived
@@ -385,8 +386,9 @@
               does not carry forward, and there is no lapse posting and no sweep: a balance
               is the sum of that period's own entries, so at the boundary last month's
               remainder simply stops being in the sum. Every balance-bearing read names the
-              period it is for, because a balance that resets in nine days is not the same
-              fact as one that does not.</li>
+              period it is for, the reservation reads included, and a reservation names the
+              month it draws against and the month it was agreed in, because a balance that
+              resets in nine days is not the same fact as one that does not.</li>
             <li><b>Overrun is refused before the work, never trued up after it.</b> A hold
               is refused when the period's remaining budget does not cover it, and a draw
               is clamped at the cap. Settling itself never refuses, because by then the
@@ -448,8 +450,11 @@
             taken in order and the last one may be cut short. A clamped line records what
             was actually billed and marks itself capped, and a line with nothing left for
             it is recorded at zero and marked capped rather than dropped, so the record
-            shows what the cap refused. Units a provider incurs after the cap is reached
-            are the provider's to bear, and that is enforced rather than described.</p>
+            shows what the cap refused. Asking about that draw's transaction answers a
+            settlement of zero rather than unknown, which is what keeps a caller that timed
+            out on it from sending it again. Units a provider incurs after the cap is
+            reached are the provider's to bear, and that is enforced rather than
+            described.</p>
           <p>The binding is the authority on how much has been drawn. The platform reads it
             back before rating a new batch of usage rather than rating against a remembered
             figure, so the cap is measured over the whole engagement rather than over one

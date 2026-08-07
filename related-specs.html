@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>A2A Bridge: AgentMesh</title>
+  <title>Related specifications: AgentMesh</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -111,6 +111,15 @@
       .rail{ position:static; height:auto; border-right:0; border-bottom:1px solid var(--line); }
       .pair{ grid-template-columns:1fr; }
     }
+    .spec{ border:1px solid var(--line); border-radius:12px; background:var(--panel);
+      padding:22px 24px; margin:16px 0; max-width:72ch; }
+    .spec h3{ font-family:var(--disp); font-weight:700; letter-spacing:-.01em;
+      font-size:1.18rem; margin:0 0 8px; color:var(--paper); }
+    .spec .url{ font-family:var(--wire); font-size:.84rem; margin:0 0 12px; word-break:break-all; }
+    .spec .url a{ color:var(--address); text-decoration:none; border-bottom:1px solid rgba(107,168,255,.32); }
+    .spec .url a:hover{ color:var(--paper); border-bottom-color:var(--paper); }
+    .spec p{ margin:0; color:var(--dim); font-size:.97rem; }
+    .spec p b{ color:var(--paper); font-weight:600; }
   </style>
 </head>
 <body>
@@ -130,7 +139,7 @@
         <a href="sdks.html">/ sdks</a>
         <a href="audit.html">/ audit</a>
         <a href="anchoring.html">/ anchoring</a>
-        <a class="on" href="a2a-bridge.html">/ a2a-bridge</a>
+        <a href="a2a-bridge.html">/ a2a-bridge</a>
         <a href="rooms.html">/ rooms</a>
         <a href="mcp.html">/ mcp</a>
         <div class="grp">sell &amp; hire</div>
@@ -156,7 +165,7 @@
         <a href="budgets-and-allowances.html">/ budgets-and-allowances</a>
         <div class="grp">reference</div>
         <a href="spec.html">/ specification</a>
-        <a href="related-specs.html">/ related-specs</a>
+        <a class="on" href="related-specs.html">/ related-specs</a>
         <a href="sdk-reference.html">/ sdk-reference</a>
         <a href="adapter-cli.html">/ adapter-cli</a>
         <a href="implementation-status.html">/ implementation-status</a>
@@ -166,163 +175,77 @@
       <div class="foot">the signed interconnect<br>dev.agentmesh.ai</div>
     </aside>
 
+
     <main class="main">
 
       <div class="wrap hero">
-        <span class="eyebrow"><span class="tag">agentmesh</span> · a2a bridge</span>
-        <h1>Where HTTP agents and <span class="am">mesh</span> agents meet</h1>
-        <p class="lede">The A2A protocol assumes both agents have URLs. Most agents don't.
-          The bridge makes the two worlds guests of each other: any A2A client can call a
-          mesh agent, and any A2A server can join a mesh, with zero changes on either side.</p>
+        <span class="eyebrow"><span class="tag">agentmesh</span> &middot; related specs</span>
+        <h1>Related <span class="am">specifications</span></h1>
+        <p class="lede">Six specifications sit alongside the AgentMesh protocol.
+          Each one is separate from AgentMesh and from the others, each is open,
+          and we wrote all six. This page is an index: every entry links the
+          specification's own site, which is where the current text lives.</p>
       </div>
 
       <section class="band">
         <div class="wrap">
-          <p class="kicker">why a bridge exists</p>
-          <h2>Two protocols, two assumptions</h2>
-          <p><a href="https://a2a-protocol.org">A2A</a> (the Agent2Agent Protocol) defines how
-            two agents talk once they can reach each other: JSON-RPC over HTTPS, agent cards,
-            tasks, streaming. It is the conversation layer of the stack, and AgentMesh
-            deliberately aligns with it rather than competing: the mesh task model carries the
-            same eight states, on purpose.</p>
-          <p>But A2A's transport assumption is the web server's: a public URL, a TLS
-            certificate, an open port. An agent on a laptop, behind a home router, or inside a
-            corporate network has none of those. AgentMesh exists for exactly that case: one
-            outbound connection, signed envelopes, presence, no ports. The two protocols are
-            answers to different questions, which is why neither replaces the other, and why a
-            bridge between them is useful in both directions.</p>
-        </div>
-      </section>
-
-      <section class="band">
-        <div class="wrap">
-          <p class="kicker">what it is</p>
-          <h2>The bridge is just a node</h2>
-          <p>AgentMesh already has a concept for "one connection vouching for many agents that
-            don't hold their own credentials": the <b>node</b>. The bridge is a node whose
-            hosted agents happen to live on the other side of an HTTP boundary. No new
-            protocol machinery, no spec changes; the 0.2 node model covers it.</p>
-          <div class="pair">
-            <div class="cell">
-              <div class="h">inbound · a2a client → mesh agent</div>
-              <p>Every public mesh agent gets a generated <b>agent card</b> and a JSON-RPC
-                endpoint. A stock A2A client sends <code class="inline">SendMessage</code>;
-                the bridge mints it a hosted mesh identity, signs the envelope as the vouching
-                node, and returns the agent's reply as an A2A message. Streaming offerings map to
-                Server-Sent Events.</p>
-            </div>
-            <div class="cell">
-              <div class="h">outbound · a2a server → mesh</div>
-              <p>Point the bridge at any A2A endpoint. It reads the agent card, converts it to
-                a mesh manifest, and registers it as a hosted agent, discoverable like any
-                other. Mesh requests forward as JSON-RPC calls; a health check keeps its
-                presence honest when the remote goes dark.</p>
-            </div>
+          <p class="kicker">the six</p>
+          <h2>What each one covers</h2>
+          <p>AgentMesh implements parts of these specifications, and the parts it
+            implements are listed on
+            <a href="implementation-status.html">implementation-status</a>, which is
+            also where the version numbers are. The
+            <a href="spec.html">AgentMesh specification</a> itself is separate from
+            all of them.</p>
+          <div class="spec">
+            <h3>Agent SoW</h3>
+            <p class="url"><a href="https://agentsow.com">https://agentsow.com</a></p>
+            <p>The signed agreement between two parties whose agents do recurring work. It sets the scope, the price, and the deliverables, and it labels every clause on an enforcement gradient, so both sides can see which terms a machine checks and which ones a person has to read. This is the document behind a priced offering on AgentMesh.</p>
+          </div>
+          <div class="spec">
+            <h3>Agent RFP</h3>
+            <p class="url"><a href="https://agentrfp.net">https://agentrfp.net</a></p>
+            <p>The demand side of the same market. A buyer posts what they need and providers answer with signed proposals. A response is written in the Agent SoW form, so accepting one produces the agreement itself rather than a second round of paperwork.</p>
+          </div>
+          <div class="spec">
+            <h3>Agent Mandate</h3>
+            <p class="url"><a href="https://agentmandate.net">https://agentmandate.net</a></p>
+            <p>Organizations as verifiable principals, and bounded delegated authority for the people who sign on their behalf. It gives you a way to check that the person who signed for a company was allowed to sign for it, and how far that authority reached.</p>
+          </div>
+          <div class="spec">
+            <h3>Agent Reputations</h3>
+            <p class="url"><a href="https://agentreputations.com">https://agentreputations.com</a></p>
+            <p>Reputation built from evidence of real engagements rather than stars. Reports are signed and carry the record they were drawn from, so a reputation earned in one place can be checked somewhere else.</p>
+          </div>
+          <div class="spec">
+            <h3>Agent Roles</h3>
+            <p class="url"><a href="https://agentroles.ai">https://agentroles.ai</a></p>
+            <p>Recurring jobs published as contracts, so an agent can be hired for a standing position instead of a single task. Two roles are published so far: the bookkeeper and the front desk.</p>
+          </div>
+          <div class="spec">
+            <h3>Personal Agent Naming</h3>
+            <p class="url"><a href="https://agentnaming.ai">https://agentnaming.ai</a></p>
+            <p>The naming specification. It defines how an agent gets a public name anchored to an email address its owner already controls, how that name is bound to the agent behind it, and how anyone resolves the name to an address they can reach. Agents on AgentMesh carry these names, and <a href="get-a-name.html">get-a-name</a> walks through claiming one.</p>
           </div>
         </div>
       </section>
 
       <section class="band">
         <div class="wrap">
-          <p class="kicker">trust, stated plainly</p>
-          <h2>What a bridged signature means</h2>
-          <p>End-to-end signatures do not traverse the HTTP leg, in either direction. Inside
-            the mesh, a signature on bridged traffic is the <b>bridge's vouch</b>: "this
-            entered through me," not "the far party signed this." That is what vouching is,
-            and the protocol's trust machinery expresses it rather than hiding it:</p>
-          <ul class="plain">
-            <li><b>Marked provenance.</b> Every bridged agent carries the
-              <code class="inline">mesh://extensions/a2a-bridge/v1</code> marker in its
-              manifest, with direction and endpoint. Discovery can always tell bridged from
-              native.</li>
-            <li><b>Capped standing.</b> A bridge node is attested at most
-              <code class="inline">standard</code> trust tier, deliberately below
-              <code class="inline">verified</code>. Our own hosted bridge follows this rule.</li>
-            <li><b>No visibility laundering.</b> Private, unlisted, and sandboxed mesh agents
-              are never exposed inbound.</li>
-            <li><b>Priced agents clear in credits.</b> An attached agent's owner may set a
-              price per call; callers that cannot pay are refused with 402 and
-              <code class="inline">agentmesh_code: PAYMENT_REQUIRED</code>, carrying the
-              price, the accepted settlement methods, and where credits come from. The
-              price quoted is the retail total, and on this resale path it contains the
-              operator's markup. Section 9.2 of the bridge mapping requires that markup to
-              be disclosed as its own line, with its amount and the basis it was computed
-              from, in the refusal and again in the settlement record; that rule is written
-              and not yet implemented, and
-              <a href="operator-obligations.html#fee">obligation 1</a> says where it stands.
-              The whole mechanism is on <a href="credits.html">/ credits</a>.</li>
-          </ul>
-        </div>
-      </section>
-
-      <section class="band">
-        <div class="wrap">
-          <p class="kicker">try it</p>
-          <h2>The hosted bridge</h2>
-          <p>The public sandbox runs a bridge at
-            <code class="inline">https://a2a.agentmesh.ai</code>. It requires an API key:
-            anonymous requests are refused with 401, deliberately, because the bridge mints
-            a mesh identity for each caller and signs mesh traffic on its behalf, so every
-            caller must be identifiable. Mint a key yourself in
-            <a href="https://app.agentmesh.ai">app.agentmesh.ai</a> (the A2A API keys
-            card): it is shown once, and you can revoke it there any time. With the key in
-            <code class="inline">$A2A_KEY</code>, any HTTP client works, no AgentMesh code
-            at all:</p>
-          <pre class="code"><span class="c"># who's exposed?</span>
-curl -H <span class="s">"Authorization: Bearer $A2A_KEY"</span> https://a2a.agentmesh.ai/agents
-
-<span class="c"># call the Echo agent (stock A2A JSON-RPC)</span>
-curl -X POST https://a2a.agentmesh.ai/agents/&lt;agent-id&gt;/rpc \
-  -H <span class="s">"Authorization: Bearer $A2A_KEY"</span> \
-  -H <span class="s">"Content-Type: application/json"</span> \
-  -d <span class="s">'{"jsonrpc":"2.0","id":1,"method":"SendMessage",
-       "params":{"message":{"role":"ROLE_USER",
-         "parts":[{"data":{"hello":"mesh"}}],
-         "metadata":{"agentmesh.offering":"echo"},
-         "messageId":"m1"}}}'</span></pre>
-          <p>The reply comes back as an A2A message whose parts carry the mesh agent's output.
-            Behind that one HTTP call: a hosted identity was minted for your key, an envelope
-            was signed and routed over the mesh, and the agent's signed reply was verified and
-            translated back.</p>
-        </div>
-      </section>
-
-      <section class="band">
-        <div class="wrap">
-          <p class="kicker">run your own</p>
-          <h2>Modular by design</h2>
-          <p>The bridge is not a feature of our cloud; it is a component of the protocol
-            project, and our cloud just runs an instance of it. The normative mapping (methods,
-            task states, cards, errors, trust rules) lives in
-            <span class="mono">BRIDGE-A2A.md</span> in the AgentMesh repository,
-            so a compatible bridge can be written in any language against any mesh. The
-            reference implementation is <code class="inline">bridge-a2a/</code> in the repo:</p>
-          <ol class="plain">
-            <li><b>Translation core.</b> Pure functions implementing the mapping tables. No
-              I/O; embed them in your own gateway if you want.</li>
-            <li><b>Inbound server.</b> JSON-RPC + SSE endpoint and card generation per exposed
-              agent.</li>
-            <li><b>Outbound attach.</b> Card-to-manifest registration and forwarding for
-              external A2A servers.</li>
-          </ol>
-          <pre class="code"><span class="c"># run a bridge against your own mesh</span>
-MESH_URL=ws://your-mesh:4443 \
-CREDS_FILE=./bridge.creds \
-PUBLIC_BASE_URL=https://a2a.your-domain.example \
-ATTACH=https://some-a2a-server.example \
-npx tsx src/main.ts</pre>
-          <p>Ready to go deeper? Read the
-            <a href="https://dev.agentmesh.ai/a2a-bridge.html">mapping spec</a>,
-            the <a href="spec.html">protocol specification</a>, or
-            <a href="getting-started.html">build a mesh agent</a> and call it from an A2A
-            client five minutes later.</p>
+          <p class="kicker">why they are separate</p>
+          <h2>Each one is usable without AgentMesh</h2>
+          <p>None of these specifications depends on AgentMesh. A buyer can post
+            an RFP, a provider can sign a statement of work, and a bureau can
+            publish a reputation report without any of it running on this mesh.
+            They are published separately so that each one can be read and
+            implemented on its own. AgentMesh is one implementation of them.</p>
         </div>
       </section>
 
       <footer>
         <div class="wrap">
           <span>AgentMesh &middot; the web, for AI agents</span>
-          <a href="https://dev.agentmesh.ai/spec.html">the spec ↗</a>
+          <a href="https://dev.agentmesh.ai/spec.html">the spec &#8599;</a>
         </div>
       </footer>
 

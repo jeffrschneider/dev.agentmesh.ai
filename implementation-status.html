@@ -304,7 +304,8 @@
           <p>The <a href="https://agentsow.com">Agent SoW</a> is a separate specification
             from the protocol, and it lands in a different place: the platform holds and
             validates the documents, the reference adapter is the client seat that acts on
-            them, and the SDKs carry none of it. That asymmetry is the story of this table.
+            them, and the SDKs carry almost none of it. That asymmetry is the story of
+            this table, and the last row is its one exception.
             The section numbers are the SoW's, not the protocol spec's.</p>
           <table class="tbl">
             <thead><tr><th>feature</th><th>typescript</th><th>rust</th><th>adapter</th></tr></thead>
@@ -315,6 +316,7 @@
               <tr><td>Reviews (&sect;15)</td><td>no</td><td>no</td><td class="ok">yes: <code class="inline">review</code></td></tr>
               <tr><td>Approval authority (&sect;6.1)</td><td>no</td><td>no</td><td>partial: reads the held state, cannot hold it</td></tr>
               <tr><td>Termination notice clock (&sect;5.9)</td><td>no: platform-side</td><td>no</td><td class="ok">yes: <code class="inline">engage end</code>, <code class="inline">--cause</code></td></tr>
+              <tr><td>No-charge pricing arrangement (&sect;5.5.7)</td><td class="ok">yes</td><td class="ok">yes</td><td class="ok">yes: <code class="inline">engage free</code></td></tr>
             </tbody>
           </table>
           <p>"No: platform-side" is not a gap in the SDK. A standing proposal is signed,
@@ -326,6 +328,57 @@
             row that is true in both directions: the adapter answers
             <code class="inline">sow.probe</code> as a seller and sends one as a client.
             The commands are indexed on <a href="adapter-cli.html">/ adapter-cli</a>.</p>
+          <p>The no-charge arrangement is the exception because it is a typed shape
+            rather than a document workflow. Both SDKs declare it so that a price field
+            cannot be set on it at all, which the compiler checks rather than a validator
+            at runtime. The platform refuses to rate, settle or draw against a no-charge
+            engagement. Strict mode is still off on the platform side: engagements signed
+            before the arrangement existed name no arrangement at all, and that count
+            falls as agents re-sign and not before.</p>
+        </div>
+      </section>
+
+      <section class="band">
+        <div class="wrap">
+          <p class="kicker">platform services</p>
+          <h2>What the platform runs, and what it only holds</h2>
+          <p>The tables above are about the three implementations. These rows are about
+            platform subsystems, which have no SDK column to fill in. What matters for
+            these is whether the code exists, whether anything starts it, and whether an
+            operator can reach it.</p>
+          <table class="tbl">
+            <thead><tr><th>subsystem</th><th>built</th><th>runs in our deployment</th><th>operator surface</th></tr></thead>
+            <tbody>
+              <tr><td>Ledger anchoring</td><td class="ok">yes</td><td class="ok">yes: a job inside the api process</td><td>partial: a public read API, no console page</td></tr>
+              <tr><td>Charter and mandate registry</td><td class="ok">yes</td><td>partial: configured, not confirmed on the host</td><td>partial: proxied through the API, no CLI and no console page</td></tr>
+              <tr><td>Internal chargeback</td><td class="ok">yes</td><td>no: nothing starts it</td><td>no</td></tr>
+            </tbody>
+          </table>
+          <p>Ledger anchoring publishes the audit chain heads to a public timestamp once
+            an hour, and it is the one subsystem here that is live. It has no process of
+            its own by design: it registers as a job in the process that already holds
+            the scheduler and already serves the anchor read API, so the one writer and
+            the one reader of the anchor database are the same process. The verification
+            steps are on <a href="anchoring.html">/ anchoring</a>. Three test files cover
+            it, 35 tests.</p>
+          <p>The charter and mandate registry holds the documents of
+            <a href="https://agentmandate.net">agentmandate.net</a> and answers authority
+            checks against them. It runs as its own process, and the API proxies its
+            public doors and refuses plainly when no registry is configured. The check
+            door is deliberately not reachable that way. Three test files cover it, 96
+            tests. Being in the deployment configuration is not the same claim as running
+            on the host, and the list of what runs on our host does not name it yet.</p>
+          <p>Internal chargeback is a second implementation of the settlement interface,
+            for a company that settles in an internal unit with no external value. It is
+            built and tested, two test files and 50 tests, and it is not deployed.
+            Nothing starts it, and there is no command line and no console surface for it
+            anywhere. A mesh would select it by pointing the settlement URL at it instead
+            of at the clearing service, which is the whole switch, but a settlement
+            binding other than the default one is not yet a documented supported
+            configuration. What it has been worth so far is a second reader of the
+            settlement interface: writing it found five settlement defects in the first
+            binding. The shape is described on
+            <a href="operator-revenue.html">/ operator-revenue</a>.</p>
         </div>
       </section>
 

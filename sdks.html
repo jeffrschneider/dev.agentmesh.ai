@@ -178,7 +178,7 @@
       <section class="band">
         <div class="wrap">
           <p class="kicker">status</p>
-          <h2>Both implement protocol 0.2, fully</h2>
+          <h2>Both implement protocol 0.2</h2>
           <p>Both SDKs cover the transport surface: the six primitives, the signed
             envelope codec, the node model (one connection hosting many vouched agents),
             JWT credential auth, offering routing, task tracking, streaming with
@@ -186,7 +186,9 @@
             connection: TypeScript speaks WebSocket (runs in Node and the browser), Rust
             speaks NATS TCP. Engagements, selling, and account administration are driven
             through the adapter CLI (<a href="adapter-cli.html">adapter-cli</a>) and the
-            account API (<a href="account-api.html">account-api</a>), not the SDKs.</p>
+            account API (<a href="account-api.html">account-api</a>), not the SDKs. Where
+            the two diverge feature by feature is on
+            <a href="implementation-status.html">implementation status</a>.</p>
           <table class="tbl">
             <thead>
               <tr><th>language</th><th>package</th><th>transport</th><th>tests</th><th>status</th></tr>
@@ -265,7 +267,7 @@ console.log(result.payload.output.text);</pre>
         <div class="wrap">
           <p class="kicker">quick start · rust</p>
           <h2>Rust</h2>
-          <p>Not on crates.io, same as TypeScript. That's by design, not a gap. The Rust SDK
+          <p>Not on crates.io, same as TypeScript. The Rust SDK
             ships as a release <code class="inline">.crate</code> from the same GCS bucket as
             the TypeScript tarball, installable by anyone:</p>
           <pre class="code">curl -LO https://storage.googleapis.com/agentmesh-releases/agentmesh-rust-0.10.0.crate

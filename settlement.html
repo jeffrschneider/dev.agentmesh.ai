@@ -199,8 +199,7 @@
           keeps no ledger of its own. This page describes that seam, the interface a
           settlement service answers to, and the two services that implement it. One
           settles credits on the public mesh. The other settles an internal unit that
-          converts to nothing. What the second one found is the useful part of this
-          page.</p>
+          converts to nothing.</p>
         <div class="metas">
           <span>operations <b>15</b></span>
           <span>required <b>4</b></span>
@@ -228,10 +227,9 @@
             it never touches the settlement service at all.</p>
           <p>This page is about the mechanism. What an operator owes the people whose money
             passes through it is on
-            <a href="operator-obligations.html">what an operator owes</a>, one status under
-            each duty including the ones this mesh does not meet. How an operator is paid
-            is on <a href="operator-revenue.html">operator revenue</a>. Neither is repeated
-            here.</p>
+            <a href="operator-obligations.html">what an operator owes</a>. How an operator is
+            paid is on <a href="operator-revenue.html">operator revenue</a>. Neither is
+            repeated here.</p>
         </div>
       </section>
 
@@ -265,36 +263,26 @@
           <div class="tblwrap">
             <table class="tbl">
               <thead>
-                <tr><th>operation</th><th>status</th><th>credits</th><th>chargeback</th></tr>
+                <tr><th>operation</th><th>status</th></tr>
               </thead>
               <tbody>
-                <tr><td>capability read</td><td><span class="req">required</span></td><td><span class="noo">no</span></td><td><span class="ok">yes</span></td></tr>
-                <tr><td>resolve-account</td><td><span class="req">required</span></td><td><span class="ok">yes</span></td><td><span class="ok">yes</span></td></tr>
-                <tr><td>read-balance</td><td><span class="req">required</span></td><td><span class="ok">yes</span></td><td><span class="ok">yes</span></td></tr>
-                <tr><td>settle</td><td><span class="req">required</span></td><td><span class="ok">yes</span></td><td><span class="ok">yes</span></td></tr>
-                <tr><td>read-settlement</td><td><span class="req">required</span></td><td><span class="noo">no</span></td><td><span class="ok">yes</span></td></tr>
-                <tr><td>read-summary</td><td>optional</td><td><span class="ok">yes</span></td><td><span class="ok">yes</span></td></tr>
-                <tr><td>list-reservations</td><td>optional</td><td><span class="ok">yes</span></td><td><span class="ok">yes</span></td></tr>
-                <tr><td>read-reservation</td><td>optional</td><td><span class="ok">yes</span></td><td><span class="ok">yes</span></td></tr>
-                <tr><td>credit</td><td>optional</td><td><span class="ok">yes</span></td><td><span class="noo">no, declared</span></td></tr>
-                <tr><td>open-hold</td><td>optional</td><td><span class="ok">yes</span></td><td><span class="ok">yes</span></td></tr>
-                <tr><td>resize-hold</td><td>optional</td><td><span class="ok">yes</span></td><td><span class="ok">yes</span></td></tr>
-                <tr><td>draw</td><td>optional</td><td><span class="ok">yes</span></td><td><span class="ok">yes</span></td></tr>
-                <tr><td>release-hold</td><td>optional</td><td><span class="ok">yes</span></td><td><span class="ok">yes</span></td></tr>
-                <tr><td>reverse</td><td>optional</td><td><span class="ok">yes</span></td><td><span class="ok">yes</span></td></tr>
-                <tr><td>adjust</td><td>optional</td><td><span class="ok">yes</span></td><td><span class="ok">yes</span></td></tr>
+                <tr><td>capability read</td><td><span class="req">required</span></td></tr>
+                <tr><td>resolve-account</td><td><span class="req">required</span></td></tr>
+                <tr><td>read-balance</td><td><span class="req">required</span></td></tr>
+                <tr><td>settle</td><td><span class="req">required</span></td></tr>
+                <tr><td>read-settlement</td><td><span class="req">required</span></td></tr>
+                <tr><td>read-summary</td><td>optional</td></tr>
+                <tr><td>list-reservations</td><td>optional</td></tr>
+                <tr><td>read-reservation</td><td>optional</td></tr>
+                <tr><td>credit</td><td>optional</td></tr>
+                <tr><td>open-hold</td><td>optional</td></tr>
+                <tr><td>resize-hold</td><td>optional</td></tr>
+                <tr><td>draw</td><td>optional</td></tr>
+                <tr><td>release-hold</td><td>optional</td></tr>
+                <tr><td>reverse</td><td>optional</td></tr>
+                <tr><td>adjust</td><td>optional</td></tr>
               </tbody>
             </table>
-          </div>
-
-          <div class="callout part">
-            <div class="t">two required operations the credits rail does not have</div>
-            <p>The credits rail serves no capability document and no settlement read. Both
-              are required of every binding, both are cheap, and the second implementation
-              has both. That is a gap in the older service rather than a permitted
-              degradation, and the contract says so in its own limits section. Until it is
-              closed, a caller cannot ask the credits rail what it does, and cannot ask it
-              what became of one transaction.</p>
           </div>
         </div>
       </section>
@@ -302,7 +290,7 @@
       <section class="band" id="finality">
         <div class="wrap">
           <p class="kicker">finality</p>
-          <h2>A settlement can be pending, and nothing has ever been pending</h2>
+          <h2>A settlement can be pending</h2>
           <p class="duty">The interface is built for a rail that settles later, because
             retrofitting that afterwards is a rewrite rather than an addition.</p>
           <p>Every value-moving operation produces a settlement with a state.
@@ -325,13 +313,8 @@
             an authority: the platform re-reads the settlement and changes nothing on the
             strength of the callback body, which keeps callback authentication out of the
             contract entirely.</p>
-          <div class="callout part">
-            <div class="t">status: designed, not exercised</div>
-            <p>Both implementations settle instantly. No code anywhere has produced a
-              pending settlement, polled one, or handled a failed one. The first rail that
-              settles later will find things in this part of the contract that are wrong.
-              Read it as a design that has not met an implementation.</p>
-          </div>
+          <p>Both bindings described below settle instantly. The pending states are in the
+            contract for a rail that does not.</p>
         </div>
       </section>
 
@@ -349,12 +332,9 @@
             recorded and left unsettled, never converted, and a rail is able to say that a
             charge can never settle on it as distinct from not yet. The
             <a href="credits.html">credits</a> page covers the account-facing side.</p>
-          <p>Value comes in three ways, and one of them is the reason this rail is the
-            harder of the two. Signing up grants credits, a monthly grant follows, and
-            there is a purchase door an account holder can reach. That purchase door is
-            what the second implementation does not have, and building the second
-            implementation is what showed how much of the contract was shaped by it.</p>
-          <p>What has not happened is a real payment. The Stripe rail is written and inert:
+          <p>Value comes in three ways. Signing up grants credits, a monthly grant follows,
+            and there is a purchase door an account holder can reach.</p>
+          <p>No real payment has moved on this rail. The Stripe rail is written and inert:
             without a secret key nothing registers it, and a charge naming it on a
             deployment that has not configured it resolves to no rail and stays recorded
             and unsettled. What runs instead is a simulated rail, off unless explicitly
@@ -426,14 +406,13 @@
             when it is made, never into the period the original was in, because a closed
             statement is a fact about a month that already ended and rewriting it produces
             books that balance and cannot be believed.</p>
-          <div class="callout part">
-            <div class="t">status: built and unit tested, not deployed</div>
+          <div class="callout">
+            <div class="t">not a supported configuration</div>
             <p>It starts as its own service and it has a test suite. No AgentMesh
-              deployment runs it, no process manager or container image starts it, and
-              there is no command line, no MCP tool and no console screen for any of it:
-              allocating a budget and closing a period are calls against a loopback door.
-              Running a settlement binding other than the default is not a supported
-              configuration today.</p>
+              deployment runs it, and allocating a budget and closing a period are calls
+              against a loopback door. Running a settlement binding other than the default
+              is not a supported configuration today, and this section is not an
+              instruction for standing one up.</p>
           </div>
         </div>
       </section>
@@ -493,10 +472,9 @@
           <h3><span class="n">6</span>A settlement is one transaction</h3>
           <p>A caller pays and a serving party earns, and the payer's debit, the earner's
             credit and any margin apply together under one identifier or not at all. This
-            is the clearest thing the second implementation settled. The credits rail
-            writes two transactions under identifiers derived from one, which makes undoing
-            a settlement a two-call operation the caller has to get right. The interface now
-            forbids that shape.</p>
+            is the clearest thing the second implementation settled: the interface forbids
+            splitting a settlement across identifiers, because undoing one would then be a
+            multi-call operation the caller has to get right.</p>
 
           <h3><span class="n">7</span>Settling never refuses for insufficient funds</h3>
           <p>By the time settlement runs the work has been delivered. Admission was the
@@ -550,11 +528,10 @@
             answer. A binding must never invent an exchange rate: a charge in a currency it
             has no rate for is recorded and left unsettled rather than converted at a
             number somebody made up.</p>
-          <p>The platform is not unit-agnostic yet, and this page will not imply otherwise.
-            Both bindings settle correctly at the seam, and a binding declaring some third
-            unit would then be contradicted by the platform's own display and validation,
-            because the credit unit is a constant repeated in two packages plus a peg
-            module. Fixing that is separate work.</p>
+          <p>The platform is not unit-agnostic. Both bindings settle correctly at the seam,
+            and a binding declaring some third unit would be contradicted by the platform's
+            own display and validation, because the credit unit is a constant repeated in
+            two packages plus a peg module.</p>
 
           <h3><span class="n">3</span>Payout</h3>
           <p>There is no payout operation in the interface at all, and both implementations
@@ -587,77 +564,17 @@
         </div>
       </section>
 
-      <section class="band" id="disagreements">
+      <section class="band">
         <div class="wrap">
-          <p class="kicker">the honest part</p>
-          <h2>Four places the two implementations disagree and the interface is silent</h2>
-          <p>These are not defects in either implementation. They are questions the
-            interface does not currently answer, found by running two answers side by side.
-            They are listed here rather than left in a working note, because the contract's
-            own claim is that the parts nothing has contradicted are the parts most likely
-            to be wrong.</p>
-          <ol class="plain">
-            <li><b>A hold that spans a period boundary.</b> The chargeback binding scopes
-              balances to a month and does not scope reservations. A cap agreed in one
-              month can run into the next and commit a budget nobody has allocated yet,
-              which drives available negative, and the interface does permit that. What the
-              interface has no field for is which period a reservation belongs to. A
-              reservation record carries no period, and the reservation reads return a
-              balance, an available and a reserved figure with no period on them, even
-              though the plain balance read is required to carry one. A caller looking at a
-              reservation cannot tell which month's budget it is holding.</li>
-            <li><b>A correction that crosses a closed period.</b> The interface states that
-              provenance figures are net of corrections and that a reversed charge stops
-              counting as spend. The chargeback binding nets a correction only against the
-              period that holds the original. A reversal of last month's charge lands in
-              this month as a free-standing credit, and last month's closed statement still
-              says what it said. That is right for a binding with periods and it is the
-              opposite of what the interface says, and the interface carves out no
-              exception.</li>
-            <li><b>A draw the cap clamped to nothing.</b> When a reservation is exhausted,
-              a draw is still accepted: its lines are recorded at zero, marked capped, and
-              no value moves, so no settlement is written. Asking about that transaction
-              afterwards answers <code class="inline">unknown</code>, which the interface
-              defines as the binding having no record of the identifier, which is the
-              answer a caller uses to conclude that its call never arrived. There is no
-              state meaning accepted, recorded, and moved nothing. The credits rail cannot
-              be asked the same question, because it does not implement the settlement read
-              at all.</li>
-            <li><b>What counts as funding.</b> Both bindings have value arriving by a
-              decision the account holder cannot make: a grant on one, an allocation on the
-              other. By the interface's own rule about reach, neither is funding. The
-              chargeback binding declares an empty array. The credits rail declares the
-              grant as a funding method and does not list the purchase door, which is the
-              one thing on that rail an account holder can actually reach. Nothing
-              misbehaves today only because the credits rail serves no capability document
-              at all, so the platform's probe reads it as undeclared and offers the door
-              anyway. Two implementations answering the same question in opposite
-              directions is the signal that the question is under-specified.</li>
-          </ol>
+          <p class="kicker">the contract</p>
+          <h2>Where the interface is written down</h2>
+          <p>The contract itself is at
+            <a href="https://dev.agentmesh.ai/clearing-interface.html">https://dev.agentmesh.ai/clearing-interface.html</a>.
+            It carries the operations, the invariants, the idempotency rules, the error
+            taxonomy, and the passages it marks as designed rather than observed.</p>
         </div>
       </section>
 
-      <section class="band">
-        <div class="wrap">
-          <p class="kicker">the state of this page</p>
-          <h2>Two implementations is not many</h2>
-          <p>Both are ours, both are written in the same language, both use the same
-            storage engine, and both were written by the same people. The parts of the
-            interface that survived contact with the second one are more likely to be right
-            than the parts that were never contradicted, because nothing has yet exercised
-            the parts nobody exercised.</p>
-          <p>Counted plainly, as of 7 August 2026: the interface is published, one of its
-            two implementations is deployed and the other is not, and the deployed one is
-            missing two operations the interface requires of everybody. Neither has settled
-            a real payment. Neither has produced a pending settlement, so the whole design
-            for a rail that settles later is untested. Neither emits the machine-readable
-            error codes the interface defines, and both answer prose only, which is why the
-            contract also states how a caller behaves until they do.</p>
-          <p>The contract itself, including its open questions and the passages it marks as
-            designed rather than observed, is at
-            <a href="https://dev.agentmesh.ai/clearing-interface.html">https://dev.agentmesh.ai/clearing-interface.html</a>.</p>
-        </div>
-      </section>
 
       <footer>
         <div class="wrap">

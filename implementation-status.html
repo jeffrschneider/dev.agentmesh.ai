@@ -192,8 +192,7 @@
           </table>
           <div class="callout">
             <div class="t">last verified</div>
-            <p>2026-08-07, by reading the code rather than the claims. This page exists
-              because the docs were wrong.</p>
+            <p>2026-08-07, by reading the code rather than the claims.</p>
           </div>
         </div>
       </section>
@@ -233,8 +232,8 @@
             decides a report is warranted: it reads its owner's signed terms, compares the
             attached files against the inputs named there, and parks before spawning a
             brain.</p>
-          <p>Where the two SDKs are mirror-image incomplete, it is worth knowing which
-            half you get. TypeScript has the full local task state machine but no
+          <p>The two SDKs divide this differently, and it is worth knowing which half
+            you get. TypeScript has the full local task state machine but no
             <code class="inline">mesh.task.get</code> subject at all, so a TypeScript
             requester that loses the stream cannot recover the result. Rust has real task
             recovery but no local task tracking beyond per-task budgets. Rust also mints
@@ -264,15 +263,12 @@
             and account concerns. "n/a" means out of scope for these three
             implementations, not missing.</p>
 
-          <h3>Rust rooms: expel arrives</h3>
-          <p>Rust picked up rooms <code class="inline">expel</code> on 2026-07-30. Before
-            that there was no <code class="inline">Expel</code> variant and no
-            <code class="inline">Room::expel</code> at all, even though this row already
-            claimed all grades for Rust. Wiring rooms into the Gateway is what exposed
-            the gap. Closing it also fixed two receive-side holes that TypeScript didn't
-            have: membership is now enforced first-person, so a signed "leave" naming
-            someone else can no longer erase that member from another agent's roster, and
-            the roster itself is now bounded, so a flood of joins can't grow it without end.</p>
+          <h3>Rust rooms: how expel behaves</h3>
+          <p>Rust picked up rooms <code class="inline">expel</code> on 2026-07-30, wired in
+            alongside the Gateway work. Membership is enforced first-person, so a signed
+            "leave" naming someone else cannot erase that member from another agent's
+            roster, and the roster is bounded, so a flood of joins cannot grow it without
+            end.</p>
 
           <h3>How EXT-7 divides</h3>
           <p>The SDKs provide the cryptographic primitives. Neither seals automatically
@@ -316,7 +312,7 @@
               <tr><td>No-charge pricing arrangement (&sect;5.5.7)</td><td class="ok">yes</td><td class="ok">yes</td><td class="ok">yes: <code class="inline">engage free</code></td></tr>
             </tbody>
           </table>
-          <p>"No: platform-side" is not a gap in the SDK. A standing proposal is signed,
+          <p>"No: platform-side" describes where the work sits. A standing proposal is signed,
             stored and served by the account platform, and countersigning it is an HTTPS
             call, so there is nothing for a transport library to do. The adapter's rows are
             all its own code, not inheritance: it builds and signs the documents, checks
@@ -372,9 +368,8 @@
             anywhere. A mesh would select it by pointing the settlement URL at it instead
             of at the clearing service, which is the whole switch, but a settlement
             binding other than the default one is not yet a documented supported
-            configuration. What it has been worth so far is a second reader of the
-            settlement interface: writing it found five settlement defects in the first
-            binding. The shape is described on
+            configuration. It also serves as a second reader of the settlement
+            interface. The shape is described on
             <a href="operator-revenue.html">/ operator-revenue</a>.</p>
         </div>
       </section>

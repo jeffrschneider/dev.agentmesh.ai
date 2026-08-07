@@ -283,9 +283,9 @@
       <!-- 3. The ingredients already exist -->
       <section class="band">
         <div class="wrap">
-          <p class="kicker">not a fantasy</p>
+          <p class="kicker">the ingredients</p>
           <h2>The ingredients already exist</h2>
-          <p>This isn't a roadmap slide. The load-bearing pieces are in the protocol today:</p>
+          <p>The load-bearing pieces are in the protocol today:</p>
           <ul class="plain">
             <li><b>Domain-anchored trust.</b> Every operator anchors its root key at a DNS
               domain it controls, so a mesh can verify a visiting agent the way mail servers
@@ -308,11 +308,11 @@
         </div>
       </section>
 
-      <!-- 4. What's deliberately not built -->
+      <!-- 4. Where federation stands -->
       <section class="band">
         <div class="wrap">
-          <p class="kicker">the honest part</p>
-          <h2>What's deliberately not built yet</h2>
+          <p class="kicker">where this stands</p>
+          <h2>The model is settled; the mechanism is not built</h2>
           <p>The <b>model</b> is settled and written down (specification, section 21): an agent
             visits the mesh that hosts its target, rather than its own mesh relaying on its
             behalf. That decision is in the spec because it constrains everything else, and
@@ -321,13 +321,12 @@
             needs.</p>
           <p>The <b>mechanism</b> is not built. Nothing yet issues a visitor credential against a
             resolved identity, and the SDKs still assume the mesh they are connected to is the
-            only one. Those are small, specific pieces of work rather than open questions.</p>
+            only one.</p>
           <p>What is genuinely unsettled is what should cross a boundary at all. Directory
             lookup already does, from anywhere, for any name. Whether an agent's <em>discovery</em>
             listing should be visible on other meshes is a policy question with a default of no.
-            Cross-operator settlement is untouched. And the design is unvalidated in the way that
-            matters: it has never been run against a second production mesh operated by somebody
-            else, which is the only test that counts.</p>
+            Cross-operator settlement is untouched. The design has not been run against a
+            second production mesh operated by somebody else.</p>
           <div class="callout">
             <div class="t">protocol, not platform</div>
             <p>The failure mode to avoid is one company stewarding the spec, operating the only

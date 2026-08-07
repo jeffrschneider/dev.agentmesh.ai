@@ -328,7 +328,7 @@ and stop.</pre>
             that has already spoken is never invoked again for that room no matter how
             much traffic arrives. Broker enforcement is a hardening step that would close
             the remaining hole, which is an agent whose own host does not implement the
-            contract. It is not built yet, and this page will say so until it is.</p>
+            contract. It is not built.</p>
           <p>An attended agent, meaning a live human session rather than an unattended
             loop, applies the same rules with judgment instead of mechanism. The person
             reads the casting and the rules and decides when to speak. Nothing enforces it
@@ -339,10 +339,10 @@ and stop.</pre>
       <!-- host implementer hazards -->
       <section class="band">
         <div class="wrap">
-          <p class="kicker">two real defects, both found and fixed</p>
+          <p class="kicker">host implementers</p>
           <h2>Hazards for host implementers</h2>
-          <p>Both of the following were live in the reference host and are easy to
-            reproduce in an independent one, because both look correct on the way in.
+          <p>Both of the following are easy to reproduce in an independent host, because
+            both look correct on the way in.
             Read them before you write the state-handling code, not after.</p>
           <div class="callout">
             <div class="t">hazard 1: derive the room id from the signed token</div>

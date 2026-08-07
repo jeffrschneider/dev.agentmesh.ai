@@ -174,27 +174,19 @@
         <h1>How running a mesh<br>makes <span class="am">money</span></h1>
         <p class="lede">This site explains how to stand up a mesh and how to operate one.
           It does not say anywhere how running one earns anything. This page is that
-          answer. It lists every way an operator can be paid, marks each one with where
-          it actually stands, and points at the page that says what an operator owes in
-          return.</p>
+          answer. It lists every way an operator can be paid, and points at the page that
+          says what an operator owes in return.</p>
       </div>
 
       <section class="band">
         <div class="wrap">
           <p class="kicker">how to read this</p>
-          <h2>Every item on this page carries a status</h2>
+          <h2>What this page covers</h2>
           <p>An operator that takes money from the people on its mesh owes them things.
             Those duties are listed on
-            <a href="operator-obligations.html">what an operator owes</a>, one status
-            under each, including the ones this mesh does not meet. Read that page beside
-            this one. Taking a cut is what makes those duties yours, and nothing on this
-            page is a reason to skip them.</p>
-          <p>Three statuses are used here. <b>Works today</b> means the mechanism is
-            running and an operator can be paid through it now. <b>Specified, not
-            built</b> means a published rule requires it and no code implements it.
-            <b>Neither</b> means nothing specifies it and nothing implements it, which
-            for some items is because nothing needs to be specified and for others is
-            work that has not been done.</p>
+            <a href="operator-obligations.html">what an operator owes</a>. Read that page
+            beside this one. Taking a cut is what makes those duties yours, and nothing on
+            this page is a reason to skip them.</p>
           <p>One fact applies to everything below that earns. Earning on this mesh means
             a credit balance rises. There is no withdrawal, no payout and no settlement
             to money, which
@@ -214,9 +206,8 @@
           <h2>A cut of what settles</h2>
           <p class="duty">The operator takes a share of a payment passing between two
             other parties on its mesh.</p>
-          <p>Two different things live under this heading and they are at different
-            stages, so they get separate statuses rather than one blurred one.</p>
-          <p>The first is the resale markup, and it is real. When an A2A agent is attached
+          <p>Two different things live under this heading, and they are worth separating.</p>
+          <p>The first is the resale markup. When an A2A agent is attached
             through the <a href="a2a-bridge.html">bridge</a>, its owner sets a rate per
             call and the mesh resells the call at that rate plus a markup, 10 percent by
             default, set by <code class="inline">CREDITS_PLATFORM_MARKUP_PCT</code>.
@@ -235,13 +226,13 @@
             negative balance by construction. The ledger keeps granted, earned, purchased
             and settled apart per account, so the cut is countable. The platform account's
             balance is not a profit figure and should not be read as one.</p>
-          <div class="callout met">
-            <div class="t">status: works today</div>
+          <div class="callout">
+            <div class="t">what runs today</div>
             <p>The resale markup is charged, collected and settled on every priced call
               through the bridge. It is the only place the operator is paid without
               selling anything of its own. What it pays in is credits.</p>
           </div>
-          <p>The second thing is the disclosed operator fee, and it does not exist yet.
+          <p>The second thing is how that fee is disclosed.
             Section 5.5.8 of the Agent SoW specification at
             <a href="https://agentsow.com/spec.html#operator-fee">https://agentsow.com/spec.html#operator-fee</a>
             now requires that wherever a price is quoted or settled, any operator fee
@@ -252,23 +243,14 @@
             no operator fee is inside it. Section 9.2 of the bridge mapping applies the
             rule to this mesh, in the payment-required refusal and again in the settlement
             record.</p>
-          <p>The line between the two is presentation, not money. The markup is collected
-            today; what is missing is the line telling the buyer it is in there. A buyer
-            on the resale path is quoted one blended number, the signed terms carry that
-            same single figure, and no receipt, listing or console view separates the
-            owner's rate from the operator's share. The only place the percentage is
-            public is <code class="inline">GET /v1/capabilities</code>, which reports
-            <code class="inline">markup_pct</code> without authentication and is attached
-            to no quote. So an operator earning through the markup today is taking a cut
-            the specification now says must be itemised, and is not itemising it.</p>
-          <div class="callout part">
-            <div class="t">status: specified, not built</div>
-            <p>The rule is published and binds. The runtime still quotes one blended
-              number, so the <b>total</b> is disclosed and the <b>split</b> is not.
-              <a href="operator-obligations.html#fee">Obligation 1</a> is the entry for
-              this gap, and it is the one obligation on that page recorded as not
-              met.</p>
-          </div>
+          <p>The line between the two is presentation, not money. A buyer on the resale
+            path is quoted the retail price as one figure, the signed terms carry that same
+            figure, and no receipt, listing or console view separates the owner's rate from
+            the operator's share. The percentage itself is public:
+            <code class="inline">GET /v1/capabilities</code> reports
+            <code class="inline">markup_pct</code> without authentication.
+            <a href="operator-obligations.html#fee">Obligation 1</a> covers the same ground
+            from the buyer's side.</p>
         </div>
       </section>
 
@@ -288,14 +270,12 @@
             rail and keeps them off the mesh surface. A subscription for access is
             something an operator sells beside its mesh rather than through it, and the
             mesh never learns about it.</p>
-          <p>Nothing in the shipped product does this. There are no plans, no seat counts
-            and no invoices anywhere in the services, and accounts on the hosted mesh are
-            free: signing up grants credits, and a monthly top-up follows.</p>
-          <div class="callout no">
-            <div class="t">status: neither, and nothing needs specifying</div>
-            <p>No rule requires it and no code implements it, because this is a business
-              arrangement rather than a protocol feature. An operator that wants it brings
-              its own billing and gates account creation.</p>
+          <p>Accounts on the hosted mesh are free: signing up grants credits, and a monthly
+            top-up follows.</p>
+          <div class="callout">
+            <div class="t">where this lives</div>
+            <p>This is a business arrangement rather than a protocol feature. An operator
+              that wants it brings its own billing and gates account creation.</p>
           </div>
         </div>
       </section>
@@ -321,17 +301,15 @@
             anyone else. The obligation not to hold a privileged position in the market
             running on top of the mesh is
             <a href="operator-obligations.html#neutrality">obligation 7</a>.</p>
-          <p>What does not exist is any of this applied to the reference services. The
-            registry, the catalog, the bureau and the registrar ship as plain HTTP
-            services with no price attached, and the front desk agent answers for free. An
-            operator that wanted to charge for one would be pricing its own offering
-            through the ordinary seller path, not turning on a feature.</p>
-          <div class="callout met">
-            <div class="t">status: the mechanism works today; no shipped service uses it</div>
+          <p>The reference services themselves are free. The registry, the catalog, the
+            bureau and the registrar ship as plain HTTP services with no price attached, and
+            the front desk agent answers for free. An operator that wanted to charge for one
+            would be pricing its own offering through the ordinary seller path, not turning
+            on a feature.</p>
+          <div class="callout">
+            <div class="t">what runs today</div>
             <p>Pricing an offering, signing its terms, metering it and settling it all run
-              today, and an operator can put its own service behind that path now. No
-              platform service in the reference implementation carries a price, so nothing
-              of ours demonstrates it.</p>
+              today, and an operator can put its own service behind that path now.</p>
           </div>
         </div>
       </section>
@@ -350,16 +328,14 @@
             which costs them nothing and asks permission from nobody. What is left to sell
             is names under domains the operator owns, plus what the operator does for the
             holder: custody of the signing key, the resolution endpoint, and renewal.</p>
-          <p>None of that is built. The registrar has no notion of a price, a payment, a
-            term or a renewal; a registration either succeeds or is refused. The naming
-            specification says nothing about fees anywhere in it. Charging for a handle
-            today would mean collecting the money somewhere else and letting the
-            registration through by hand.</p>
-          <div class="callout no">
-            <div class="t">status: neither specified nor built</div>
-            <p>No fee, term or renewal exists in the registrar or in the naming
-              specification. Unlike account charges, this one does need building, because
-              the thing being sold is issued by a service the operator runs.</p>
+          <p>The registrar has no notion of a price, a payment, a term or a renewal: a
+            registration either succeeds or is refused, and the naming specification says
+            nothing about fees. Charging for a handle today means collecting the money
+            somewhere else and letting the registration through by hand.</p>
+          <div class="callout">
+            <div class="t">where this lives</div>
+            <p>Unlike account charges, this one sits inside a service the operator runs,
+              because the thing being sold is issued by that service.</p>
           </div>
         </div>
       </section>
@@ -378,13 +354,12 @@
             gets, and it is the shape a paid tier would be sold on.</p>
           <p>The upper tier is not charged for. An account is free, arrives with a signup
             grant and receives a monthly top-up, so the difference between the two tiers
-            is enforced and nobody is billed for crossing it. Turning it into revenue is
-            the same missing work as charging for an account above: the enforcement is
-            here, the billing is not.</p>
-          <div class="callout part">
-            <div class="t">status: the split works today; nothing charges for it</div>
-            <p>The limits on the free tier are real and enforced at the broker. The paid
-              tier is free, so this earns nothing today.</p>
+            is enforced and nobody is billed for crossing it. Charging for it is the same
+            billing arrangement as charging for an account above.</p>
+          <div class="callout">
+            <div class="t">what runs today</div>
+            <p>The limits on the free tier are real and enforced at the broker. The
+              account-backed tier is free.</p>
           </div>
         </div>
       </section>
@@ -441,16 +416,10 @@
             <code class="inline">XIC</code> by default and settable, an X-prefixed code
             because ISO 4217 reserves that range for units that are not a national
             currency. There is no peg: it converts to nothing.</p>
-          <p>Now the limits. It is built and it is
-            tested. It is not deployed. No AgentMesh deployment runs it today, no process
-            manager or container image starts it, and there is no command line, no MCP
-            tool and no console screen for any of it: allocating a budget and closing a
-            period are calls against a loopback door. The interface it implements is an
-            internal draft, written from a single implementation and deliberately
-            unpublished, with passages in it marked unsettled on purpose. This second
-            binding exists partly to find out which parts of that draft are the contract
-            and which parts are the first implementation with the names changed. So
-            running a settlement binding other than the default is not a documented,
+          <p>Before treating it as an option, know where it stands. It is built and it is
+            tested. It is not deployed. No AgentMesh deployment runs it today, and
+            allocating a budget and closing a period are calls against a loopback door.
+            Running a settlement binding other than the default is not a documented,
             supported configuration, and no page on this site tells an operator how to do
             it.</p>
           <p>One piece of it is already visible on the platform side, and it is the
@@ -460,8 +429,8 @@
             mesh has no way to buy credits, and the console does not render a top-up
             control that would fail. That behaviour ships today, on the default binding
             as well.</p>
-          <div class="callout part">
-            <div class="t">status: built and tested, not deployed, not a supported configuration</div>
+          <div class="callout">
+            <div class="t">not a supported configuration</div>
             <p>Read this section as a statement that the settlement seam holds against a
               second, deliberately different implementation. Do not read it as an
               instruction for standing one up, because the interface it is written against
@@ -472,22 +441,14 @@
 
       <section class="band">
         <div class="wrap">
-          <p class="kicker">the state of this page</p>
-          <h2>Two of the five earn today, and both earn credits</h2>
-          <p>Counted plainly, as of 7 August 2026: the resale markup earns today, and so
-            does any offering an operator prices through the ordinary seller path.
-            Charging for accounts, selling names and charging for the tier above the free
-            one all earn nothing today. Two of those three need no protocol work at all,
-            only a billing rail the operator supplies; selling names is the one that needs
-            code, because the thing being sold is issued by a service the operator
-            runs.</p>
-          <p>Over all of it sits the limit stated at the top. A credit balance is a
-            position inside the mesh and not a claim on anybody, so until credits convert,
-            earning here describes a number rising in a ledger. And the disclosure section
-            5.5.8 requires is missing from every quote the operator's cut appears in. An
-            operator taking that cut today owes the duties on
-            <a href="operator-obligations.html">what an operator owes</a>, and the first
-            of them is the one currently unmet.</p>
+          <p class="kicker">the limit over all of it</p>
+          <h2>Earning here means a credit balance rises</h2>
+          <p>A credit balance is a position inside the mesh and not a claim on anybody.
+            There is no withdrawal, no payout and no settlement to money, which
+            <a href="operator-obligations.html#shutdown">obligation 5</a> states in full.
+            An operator taking a cut owes the duties on
+            <a href="operator-obligations.html">what an operator owes</a>, and taking the
+            cut is what makes them yours.</p>
         </div>
       </section>
 

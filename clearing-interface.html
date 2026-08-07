@@ -198,7 +198,7 @@
         <p class="lede">A mesh operator can point AgentMesh at a settlement service. This is
           the contract that service answers: the operations, the invariants, the
           idempotency rules and the error taxonomy. Written from two
-          implementations, and honest about what neither of them has exercised.</p>
+          implementations.</p>
         <div class="metas">
           <span>version <b>1.0.0</b></span>
           <span>revised <b>2026-08-07</b></span>
@@ -216,12 +216,10 @@
             seam are operated by the same operator, and there is no negotiation across it.
             It has no domain of its own and asks nothing of anybody outside a single
             deployment.</p>
-          <p>The first version of this document was written from one implementation and was
-            deliberately not published, because an interface written from one
-            implementation is that implementation with the names changed. A second binding,
-            an internal chargeback ledger, was then built against it. This version folds in
-            what that binding found. Where the second binding disagreed with the first, the
-            disagreement is recorded rather than smoothed over.</p>
+          <p>This document is written from two bindings. The first is the credits rail. The
+            second, an internal chargeback ledger, was built against the first version of
+            the contract, and this version folds in what that binding found. Where the two
+            disagreed, the disagreement is recorded rather than smoothed over.</p>
           <div class="callout">
             <div class="t">read this first</div>
             <p>Both bindings settle instantly. <b>Section 10, asynchronous finality, is
@@ -1114,9 +1112,7 @@
             <code class="inline">settled</code>. This is what makes an immediate binding,
             including both of ours, conformant without changing a line.</p>
           <p><b>A refusal is not an accepted response.</b> A 4xx carries no state, and a
-            caller MUST NOT read the absence of state on a refusal as a settlement. This
-            scoping was missing from the first draft, where the rule read as though any
-            response without a state field described settled value.</p>
+            caller MUST NOT read the absence of state on a refusal as a settlement.</p>
           <p>A deferred binding MUST carry <code class="inline">state</code> explicitly on
             every accepted value-moving response.</p>
 
@@ -1487,10 +1483,10 @@
             <li>The exact composition of the summary response and of
               <code class="inline">totals</code>.</li>
           </ul>
-          <p>Two things previously listed here have moved out, because the second binding
-            showed they were wrong rather than incidental: storing a settlement as two
-            independently identified legs, now forbidden by 6.8, and returning 200 with
-            <code class="inline">ok: false</code> on a refusal, now forbidden by 7.4.</p>
+          <p>Two shapes are normative rather than incidental: a settlement is never stored
+            as two independently identified legs, which 6.8 forbids, and a refusal is never
+            returned as 200 with <code class="inline">ok: false</code>, which 7.4
+            forbids.</p>
         </div>
       </section>
 
@@ -1517,11 +1513,9 @@
             <li><b>Neither binding has been driven under concurrency.</b> Both serialise
               inside one storage transaction per operation. This document states no ordering
               requirement, and a distributed binding will need one.</li>
-            <li><b>Two implementations is not many.</b> Both are ours, both are TypeScript,
-              both are SQLite, and both were written by the same people. The parts of this
-              document that survived contact are more likely to be right than the parts that
-              were never contradicted, because nothing has yet contradicted the parts nobody
-              exercised.</li>
+            <li><b>Both bindings share a lineage.</b> Both are ours, both are TypeScript
+              and both are SQLite, so a binding built on a different stack may find
+              assumptions here that neither of them tested.</li>
           </ul>
         </div>
       </section>

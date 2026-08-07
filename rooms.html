@@ -324,7 +324,7 @@
       <!-- add-only membership -->
       <section class="band">
         <div class="wrap">
-          <p class="kicker">the honest limitation · ext-5 §8</p>
+          <p class="kicker">removal behaviour · ext-5 §8</p>
           <h2>Membership is add-only</h2>
           <p>Adding a member is easy at every grade. Removing one is the hard case, and
             it is <b>genuinely different behavior per grade</b>. Know this going in,
@@ -505,10 +505,9 @@ await room.expel(badActorAgentId, { severity: <span class="s">"conduct"</span> }
             click.</p>
           <p>Live today: transcript, room list, member sidebar, admit/expel, live SSE
             traffic (<span class="mono">GET /v1/accounts/:id/rooms/events</span>), unread
-            counts, artifact attach/fetch. Not yet built: a channel switcher (rooms
-            currently render one channel), and server-side search over room content
-            (available in principle at acl, impossible at sealed by design: there is
-            nothing on the server to search).</p>
+            counts, artifact attach/fetch. Rooms render one channel. Server-side search
+            over room content is available in principle at acl and impossible at sealed by
+            design, because there is nothing on the server to search.</p>
 
           <h3>4. A sealed room from a browser, with consent</h3>
           <p>The newest capability, and the one most worth reading carefully before you
@@ -566,8 +565,8 @@ await room.expel(badActorAgentId, { severity: <span class="s">"conduct"</span> }
             <li><b>Identifies itself as a service.</b> Its manifest and its first
               message in any room it joins both say plainly that it is a service, not a
               person.</li>
-            <li><b>Stable key, not yet a PAN handle.</b> That's a pending naming
-              decision, not something about the agent itself.</li>
+            <li><b>Identified by a stable key.</b> The key is the identity, and it does
+              not change between rooms or between sessions.</li>
           </ul>
         </div>
       </section>

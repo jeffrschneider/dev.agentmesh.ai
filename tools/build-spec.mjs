@@ -194,6 +194,7 @@ const page = `<!DOCTYPE html>
         <a href="account-api.html">/ account-api</a>
         <a href="https://agentsow.com">agentsow.com</a>
         <a href="https://agentrfp.net">agentrfp.net</a>
+        <a href="https://agentmandate.net">agentmandate.net</a>
         <a href="https://agentreputations.com">agentreputations.com</a>
         <div class="grp">run your own</div>
         <a href="running-a-mesh.html">/ running-a-mesh</a>

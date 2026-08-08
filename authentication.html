@@ -205,10 +205,12 @@
       <section class="band" id="planes">
         <div class="wrap">
           <p class="kicker">the whole surface</p>
-          <h2>Six planes, and what proves identity on each</h2>
+          <h2>Seven planes, and what proves identity on each</h2>
           <p>There is no one answer here, because there is no one kind of caller. A person
             at a browser, a script holding a token, an agent on the mesh and a foreign A2A
-            client each authenticate differently.</p>
+            client each authenticate differently. The last row is the platform calling out
+            to its own settlement binding, and it is the one plane with no credential on it
+            at all.</p>
           <div class="cmp-wrap">
             <table class="mtx">
               <thead>
@@ -255,6 +257,13 @@
                   <td>Static headers you supply with the attachment</td>
                   <td>Whatever the remote endpoint checks</td>
                   <td>Whatever the remote endpoint sets</td>
+                </tr>
+                <tr>
+                  <td>Platform to a settlement binding</td>
+                  <td>None. The call carries a content type and nothing else</td>
+                  <td>Where the call came from: a loopback peer address, and no
+                    <code class="inline">X-Forwarded-For</code> header</td>
+                  <td>Not applicable. There is no credential to expire</td>
                 </tr>
               </tbody>
             </table>
@@ -396,15 +405,75 @@
             a constant-time comparison, and a successful sign-in mints a session that lasts
             twelve hours.</p>
           <p>That is the least protected human door in the system, and it reaches the most,
-            because the console observes and administers every account on the mesh. There is
-            no second factor and no passkey on it, so a leaked operator password is a full
-            operator session for as long as twelve hours. Operators should treat that
-            password as a root credential: unique, long, held in a manager, and rotated when
-            anyone with access leaves.</p>
+            because the console observes and administers every account on the mesh.</p>
+
+          <h3>What that password reaches</h3>
+          <p>Operators are told to treat it as a root credential, so this is what root means
+            here. Each of these is one call behind that one password.</p>
+          <ul class="plain">
+            <li><b>Accounts.</b> Disable or re-enable any account on the mesh. A disabled
+              account cannot sign in, cannot connect and cannot redeem a bootstrap token.
+              There is no lesser suspension; disable is the whole lever.</li>
+            <li><b>The ledger.</b> Reverse any transaction, and adjust any account's balance
+              by any signed integer. The adjustment has no ceiling, no second approver and
+              no approval step, and it balances against the platform account, which is the
+              mint. A reason is required and nothing validates it.</li>
+            <li><b>Names.</b> Release any PAN handle, which stops it resolving and returns
+              it to the pool. This one reaches past the mesh, because the registrar's
+              release door takes a handle down regardless of who owns it. Claiming a handle
+              is not included: that stays with the owner.</li>
+            <li><b>The sandbox.</b> Ban or unban an IP address from guest access. Bans are
+              held in memory and are lost on restart.</li>
+            <li><b>The RFP board.</b> Withhold a posting, so the public board stops serving
+              it and its page answers 404, and restore it later. A reason is required and
+              recorded, and a withheld posting is deliberately not presented as the poster's
+              own withdrawal.</li>
+            <li><b>Rooms.</b> Reclaim any durable room, which deletes its record stream and
+              its metadata. That one is irreversible.</li>
+            <li><b>Abuse reports.</b> Read every report ever filed, including the reporter's
+              email address and their account when they were signed in, and mark one
+              reviewed with a note the reporter never sees.</li>
+            <li><b>The fleet host, at the operating system.</b> Mint a ticket that opens an
+              interactive shell on the fleet host as a given agent's Unix user, and a ticket
+              into any fleet agent's own web interface. That is not an AgentMesh permission
+              at all; it is a shell.</li>
+            <li><b>The compliance record.</b> Post a CI result, which is what grades the
+              aging rows on the obligations page, including the last verified keystore
+              restore.</li>
+          </ul>
+          <p>The reads are as wide as that list implies, and they are worth naming
+            separately because they are member data rather than mesh plumbing: every
+            account's email address and linked agent keys, one account's contact list, which
+            is other people's email addresses, every stored task, room and artifact
+            metadata, and daily traffic detail that includes IP addresses. Handles under a
+            member's email are listed independently of the discoverability choice that
+            member made, so the console shows handles they kept unlisted. Room contents,
+            artifact bytes and message bodies are not reachable this way.</p>
+          <p>Four things bound the list. The operator credential cannot mint, list or revoke
+            a member's API tokens. It cannot deregister an agent or expel one from a room. It
+            cannot reset a member's second factor. Those last two are open only to a caller
+            on the machine itself. And no catalog listing takedown exists anywhere in the
+            product.</p>
+
+          <h3>All of it sits behind one id and one password</h3>
+          <p>One id and one password for the whole mesh, not one per person, so the record
+            of who acted names the shared id rather than a human. The session lasts twelve
+            hours. There is no second factor and no passkey. There is no way to list or
+            revoke a session that is already open, and changing the password does not end
+            one: a leaked password is a full operator session for as long as twelve hours,
+            and a stolen session token runs its twelve hours out. Operators should treat
+            that password as a root credential: unique, long, held in a manager, and rotated
+            when anyone with access leaves.</p>
+          <p>One qualifier belongs in the same breath, because an id and a password are not
+            the whole surface. The same gate also accepts a shared automation key supplied
+            through the environment. It grants every power above with no login, no session
+            and no expiry, and actions taken with it are attributed to the key rather than
+            to a person. A mesh that sets one has a second root credential, and rotating the
+            password does not touch it.</p>
           <div class="callout ahead">
             <div class="t">direction</div>
             <p>A second factor on the operator console is planned. Until it ships, the
-              twelve hour session is the entire blast radius of that password.</p>
+              twelve hour session is the only bound on a leaked password.</p>
           </div>
         </div>
       </section>
@@ -512,6 +581,74 @@
             it works. If it requires an OAuth 2.0 client-credentials exchange, it cannot be
             attached today, and that is not on the roadmap. It is named again in the closing
             section so nobody has to infer it.</p>
+        </div>
+      </section>
+
+      <!-- ────────────────────────── settlement binding ────────────────────────── -->
+      <section class="band" id="settlement-binding">
+        <div class="wrap">
+          <p class="kicker">platform to a settlement binding</p>
+          <h2>A settlement binding is trusted by position, not by a credential</h2>
+          <p>Money on a mesh lives behind a settlement binding: a separate service holding
+            the ledger, which answers the platform's calls to fund an account, charge one,
+            open and draw against a reservation, reverse a transaction and read a balance.
+            The interface it implements is published at
+            <a href="https://dev.agentmesh.ai/clearing-interface.html">https://dev.agentmesh.ai/clearing-interface.html</a>.</p>
+          <p>The platform sends no credential when it calls one. Every call carries a
+            content type and nothing else: no bearer token, no signature, no shared secret.
+            What stands in for authentication is a check the binding makes on where the call
+            came from, and it requires two things together. The peer address must be a
+            loopback address, and no <code class="inline">X-Forwarded-For</code> header may
+            be present. The second condition exists because a reverse proxy also connects
+            from loopback, and the header it adds is what gives away a request that arrived
+            off the internet. A request failing either check is refused with 403. The
+            liveness check sits outside the gate by requirement and answers before it.</p>
+
+          <h3>The contract does not call this authentication</h3>
+          <p>That assessment is the published interface's own, in its own words: "This is a
+            co-location assumption, not an authentication scheme. A binding that is not
+            co-located with the platform MUST authenticate its callers by some other means."
+            It specifies no such means. The requirement the gate stands in for is that only
+            the platform may call the binding, and the contract states the consequence just
+            as plainly: a binding whose correction, funding or allocation doors are reachable
+            from the network is a mint.</p>
+          <p>That is not a figure of speech. Behind the gate sit the funding door that
+            creates credits, the doors that reverse a transaction or post an arbitrary
+            signed adjustment to any account, the door that draws real value against a held
+            reservation, and reads that return any account's balance and statement. None of
+            them asks who is calling. The <code class="inline">actor</code> recorded on a
+            correction is free text taken from the request body: it is stored, and it is
+            never verified.</p>
+
+          <h3>The gate is a check on each request, not a restriction on the socket</h3>
+          <p>These are easy to confuse and the difference matters to anyone deploying one. A
+            binding does not bind its listener to the loopback interface. It listens on all
+            interfaces and then compares the peer address on every request, so the
+            protection is an application-layer comparison rather than anything the kernel
+            enforces. Whether the port can be reached at all is a question for the host's
+            firewall, and the binding will neither check that nor complain about it.</p>
+
+          <h3>What runs today</h3>
+          <p>Both bindings that exist are ours, and both are written for co-location. The
+            hosted mesh runs its binding as a separate process on the same host and reaches
+            it over loopback, which is the arrangement the gate was designed for and the one
+            in which it is sufficient. <b>No binding that is not co-located runs anywhere
+            today</b>, so nothing in production currently rests on the missing scheme. The
+            second binding, the internal chargeback shape, is built and carries its own test
+            suite, and no process manager starts it. It is not a deployed or supported
+            configuration, which is stated at
+            <a href="https://dev.agentmesh.ai/settlement.html">https://dev.agentmesh.ai/settlement.html</a>.</p>
+          <div class="callout">
+            <div class="t">unsolved, not scheduled</div>
+            <p>Authenticating a binding that is not co-located is an open question on the
+              interface rather than a planned piece of work, and the contract gives its
+              reason for still being open: neither implementation needed it, so anything
+              written would be a guess. There is no roadmap item for it.</p>
+            <p><b>If you run a settlement binding anywhere other than the platform's own
+              host, you are running it with no authentication on it, and the protection has
+              to come from you at the network layer.</b> Nothing in the binding will tell
+              you it is missing.</p>
+          </div>
         </div>
       </section>
 

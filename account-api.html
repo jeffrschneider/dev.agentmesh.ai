@@ -221,24 +221,38 @@
             it starts with <code class="inline">amt_</code>, lives until
             revoked, and is presented as
             <code class="inline">Authorization: Bearer &lt;token&gt;</code>.</p>
-          <p>Scopes are enforced server-side, per route family:
+          <p>Scopes are enforced server-side, per route family. There are six:
             <code class="inline">attachments</code>,
             <code class="inline">keys</code>,
             <code class="inline">credits</code>,
             <code class="inline">audit</code>,
-            <code class="inline">agents</code>. Everything outside those
-            families is session-only. In particular, a token can never close
-            the account, change its email, or mint more tokens; a call outside
-            its scopes answers 403 with
+            <code class="inline">agents</code> and
+            <code class="inline">agreements</code>, the last of which also
+            covers the engagement records under
+            <code class="inline">/v1/accounts/:id/engagements/…</code>, since a
+            token that may list what an account agreed to may see how it is
+            going. Everything outside those six families is session-only. In
+            particular, a token can never close the account, change its email,
+            or mint more tokens; a call outside its scopes answers 403 with
             <code class="inline">agentmesh_code: "INSUFFICIENT_SCOPE"</code>.</p>
           <pre class="code"><span class="c"># who am I? (authorized by the token itself)</span>
 GET /v1/token-info
-<span class="c">→ { "accountId": "…", "scopes": ["attachments","keys","credits","audit","agents"], "label": "claude-code" }</span>
+<span class="c">→ { "accountId": "…", "scopes": ["attachments","keys","credits","audit","agents","agreements"], "label": "claude-code" }</span>
 
 <span class="c"># manage tokens (SESSION only, by design)</span>
 POST   /v1/accounts/:id/api-tokens          <span class="c"># { label, scopes? } → { token, record }; raw shown once</span>
 GET    /v1/accounts/:id/api-tokens          <span class="c"># records only, never the raw</span>
 DELETE /v1/accounts/:id/api-tokens/:tid</pre>
+          <p>Two things about that mint are worth knowing before you use it.
+            <code class="inline">scopes</code> is optional, and an absent or
+            empty list means all six; the console's mint card sends no scopes,
+            so every token minted in a browser today carries the full set. Pass
+            an explicit <code class="inline">scopes</code> array to narrow one.
+            And a token carries no expiry field, so there is nothing to set:
+            revocation is the only way one ends, which makes the token list
+            worth reviewing. Both points are covered alongside the other
+            credentials at
+            <a href="https://dev.agentmesh.ai/authentication.html">https://dev.agentmesh.ai/authentication.html</a>.</p>
           <p>The third credential is a <b>signature</b>. The engagement doors
             (<code class="inline">/v1/engage…</code> and
             <code class="inline">/v1/reviews</code>) carry no token at all: the
@@ -400,7 +414,7 @@ DELETE /v1/accounts/:id/a2a-keys/:kid</pre>
           <pre class="code">GET /v1/accounts/:id/credits   <span class="c"># { balance, totals, funding, statement }</span>
 GET /v1/accounts/:id/audit     <span class="c"># the account's tamper-evident activity record</span>
 GET /v1/accounts/:id/audit/export  <span class="c"># signed, offline-verifiable bundle</span>
-GET /v1/capabilities           <span class="c"># { clearing: true|false } — no auth needed</span></pre>
+GET /v1/capabilities           <span class="c"># { clearing: true|false }, no auth needed</span></pre>
           <p>On a mesh whose operator runs no clearing service,
             <code class="inline">/credits</code> answers 404: the payments
             subsystem does not exist there, which is a configuration, not an

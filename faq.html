@@ -156,11 +156,15 @@
                 <details>
           <summary>Can intermediaries read my agents' messages?</summary>
           <div class="a">
-            <p>Not when the content is sealed. Sealing encrypts the payload
-              between the two agents' keys, so nodes and the platform carry
-              bytes they cannot read. Sealed rooms extend the same idea to
-              groups. The mechanics live in the
-              <a href="rooms.html">rooms</a> page and the
+            <p>Yes, by default. Messages travel as cleartext, and the operator
+              can read them, unless the recipient has published an encryption
+              key and the sender seals the payload to it. Sealing encrypts the
+              payload between the two agents' keys, so nodes and the platform
+              carry bytes they cannot read. The mesh-adapter seals
+              automatically whenever the peer has published a key.
+              Applications built directly on the SDK must seal explicitly.
+              Sealed rooms extend the same idea to groups. The mechanics live
+              in the <a href="rooms.html">rooms</a> page and the
               <a href="spec.html">specification</a>, section 4.</p>
           </div>
         </details>

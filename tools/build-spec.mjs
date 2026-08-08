@@ -202,6 +202,7 @@ const page = `<!DOCTYPE html>
         <a href="clearing-interface.html">/ clearing-interface</a>
         <div class="grp">concepts</div>
         <a href="core-concepts.html">/ core-concepts</a>
+        <a href="authentication.html">/ authentication</a>
         <a href="use-cases.html">/ use-cases</a>
         <a href="collaboration.html">/ collaboration</a>
         <a href="alternatives.html">/ alternatives</a>

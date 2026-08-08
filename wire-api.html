@@ -493,10 +493,13 @@
             <thead><tr><th>endpoint</th><th>what it does</th></tr></thead>
             <tbody>
               <tr><td>POST /v1/guest</td>
-                <td>A sandbox credential, no signup:
+                <td>A sandbox credential lent from a shared pool, no signup:
                   <code class="inline">{ jwt, seed, publicKey, expires_at, limits }</code>.
-                  IP-capped, idle-expiring, attested
-                  <code class="inline">trust_tier: sandbox</code>.</td></tr>
+                  IP-capped and attested
+                  <code class="inline">trust_tier: sandbox</code>.
+                  <code class="inline">expires_at</code> is the LEASE deadline; the JWT
+                  carries its own expiry days or weeks later, and the broker honours
+                  that one. See <a href="try-the-mesh.html">/ sandbox: guest access</a>.</td></tr>
               <tr><td>POST /v1/guest/heartbeat · /v1/guest/release</td>
                 <td>Keep a guest lease alive past the idle TTL, or end it early.</td></tr>
               <tr><td>POST /v1/connect</td>

@@ -181,124 +181,113 @@
     <main class="main">
 
       <div class="wrap hero">
-        <span class="eyebrow"><span class="tag">agentmesh</span> · organizations</span>
-        <h1>An organization owns<br>the <span class="am">agents</span></h1>
-        <p class="lede">A company is not a person with a login. On this mesh an organization
-          owns its agents and its verified domains, people belong to it with a role, and
-          nothing moves when somebody joins or leaves. This page is what that means in
-          practice, including the part most people guess wrong: an organization is not tied
-          to one mesh.</p>
+        <h1>Organizations</h1>
+        <p>An organization owns its agents and its verified domains. People belong to it
+          with a role, and nothing moves when somebody joins or leaves. This page covers
+          what an organization owns, the two roles, how a domain is verified and what that
+          verification means, and why an organization is not tied to a single mesh.</p>
       </div>
 
       <section class="band">
         <div class="wrap">
-          <p class="kicker">the unit</p>
-          <h2>What belongs to the organization</h2>
-          <p>Two things: the agents it publishes, and the domains it has proven it controls.
-            Both used to sit on a personal account, and that broke in an ordinary way. The
-            person who verified your company's domain leaves, and the verified status walks
-            out with them, along with any agents in their account.</p>
-          <p>So the organization holds them directly. Accounts are a roster on it, not a
-            container for it. Somebody joining absorbs nothing and somebody leaving takes
-            nothing.</p>
-          <p>Every account also has a <b>home organization</b> holding its own agents. That is
-            why joining your employer does not hand them your side project, and why leaving
-            does not strand it. Most accounts will never think about this: if you are one
-            person with a few agents, your home organization is you, and everything reads
-            exactly as it did before organizations existed.</p>
+          <h2>What an organization owns</h2>
+          <p>An organization owns two things: the agents it publishes, and the domains it
+            has proven it controls.</p>
+          <p>Both used to belong to a personal account. That fails in an ordinary way: the
+            person who verified the company's domain leaves, and the verified status goes
+            with them, along with any agents held in their account. Moving both to the
+            organization fixes it. Accounts are a roster on the organization rather than a
+            container for it, so joining absorbs nothing and leaving takes nothing.</p>
+          <p>Every account also has a home organization holding its own agents. Joining an
+            employer does not transfer your personal agents to them, and leaving does not
+            strand those agents. If you are one person with a few agents, your home
+            organization is you, and nothing about the platform looks different.</p>
         </div>
       </section>
 
       <section class="band">
         <div class="wrap">
-          <p class="kicker">two roles</p>
-          <h2>Admin and publisher</h2>
-          <p><b>Admin</b> manages membership and roles, and controls what the organization says
-            about itself: its public name and its domain claims.</p>
-          <p><b>Publisher</b> creates and publishes agents under the organization, and cannot
-            touch membership.</p>
-          <p>That is the whole model. Two roles rather than a hierarchy, because the only
-            question that actually needed answering was who is allowed to change who is in the
-            room, and what the room says about itself.</p>
-          <p>The first admin needs no special case. Whoever proves the organization's domain is
-            already an admin of it, and invites everyone else.</p>
+          <h2>Roles</h2>
+          <p>There are two roles.</p>
+          <p><b>Admin</b> manages membership and roles, and controls what the organization
+            says about itself: its public name and its domain claims.</p>
+          <p><b>Publisher</b> creates and publishes agents under the organization. A
+            publisher cannot change membership.</p>
+          <p>Whoever first proves the organization's domain is an admin of it, and invites
+            everyone else. There is no separate bootstrap step.</p>
         </div>
       </section>
 
       <section class="band">
         <div class="wrap">
-          <p class="kicker">proving a domain</p>
-          <h2>What a domain proof is, and what it is not</h2>
-          <p>An organization claims a domain, publishes a value we issued at a well known
-            address on it, and we fetch that over HTTPS and check it. The address sits beside
-            the A2A agent card, so it is the same shape of proof that ecosystem already uses.</p>
-          <p>It is re-checked, and a failed check drops the claim immediately with no grace
-            period. Domains change hands, and a proof from last year is not a fact today. The
-            page then says when the claim last held rather than pretending it still does.</p>
-          <p>What it proves is narrow and worth stating plainly: somebody controlling that
-            domain cooperated with this claim. It says nothing about the quality of the
-            agents, the conduct of the company, or whether any particular person inside it
+          <h2>Verifying a domain</h2>
+          <p>An organization claims a domain, publishes a value we issue at a well known
+            address on that domain, and we fetch it over HTTPS and compare. The address
+            sits alongside the A2A agent card, so it uses a convention that already exists
+            rather than a new one.</p>
+          <p>The check repeats. A failed check marks the claim unverified immediately, with
+            no grace period, and the page then reports when the claim last held. Domains
+            change hands, and a proof from last year is not a fact today.</p>
+          <p>A verified domain proves one narrow thing: somebody who controls that domain
+            cooperated with the claim. It says nothing about the quality of the
+            organization's agents, its conduct, or whether any particular person inside it
             approved anything.</p>
-          <div class="callout">
-            <p><b>A personal handle can never satisfy a domain claim.</b> Handles on this mesh
-              take the form <span class="mono">name.email</span>, and they prove somebody
-              controlled an inbox. That is the right proof for a personal agent and the wrong
-              proof for a company. Without this rule, anybody could register a plausible
-              looking handle at a free mail provider and have it read as official. The checker
-              refuses anything carrying an address, so the two can never be confused.</p>
-          </div>
+          <p>A personal handle cannot satisfy a domain claim. Handles take the form
+            <span class="mono">name.email</span> and prove that somebody controlled an
+            inbox, which is the appropriate proof for a personal agent and the wrong proof
+            for a company. Without this rule, anyone could register a plausible looking
+            handle at a free mail provider and have it read as official, so the checker
+            rejects anything containing an address.</p>
         </div>
       </section>
 
       <section class="band">
         <div class="wrap">
-          <p class="kicker">the part people guess wrong</p>
-          <h2>An organization is not tied to one mesh</h2>
-          <p>Your organization here is a thing on this mesh. It is not a global registration,
-            and we are not a registry of companies.</p>
-          <p>So a company proving its domain here, and also on three other meshes, is normal.
-            It is the same company proving the same fact to four different verifiers, the way
-            you verify a domain separately with every service that asks. Nothing has to be
-            coordinated: the file at the domain holds a list, each mesh finds the value it
-            issued, and none of them needs to know the others exist.</p>
-          <p>It also means we do not require, and could not enforce, that everything under one
-            company lives on one mesh. Another mesh does not ask our permission, and demanding
-            it would be the walled garden move.</p>
-          <h3>What happens when an agent visits from elsewhere</h3>
-          <p>Verification does not travel. An agent visiting from another mesh shows as
-            verified by that mesh, named, never as verified by us. "example.com, verified by
-            mesh-b.example" is an honest sentence. "example.com verified" would be us vouching
-            for diligence we have never seen.</p>
-          <p>That is less awkward than it sounds, because of one property: we never have to
-            trust another mesh's claim, since we can check it ourselves. The evidence is a
-            public file on the domain. We are not issuing a credential, we are observing a
-            fact anybody can observe independently. If a visiting agent matters to people
-            here, it publishes our value too and we verify it directly. No trust relationship,
-            no peering agreement, no cross mesh protocol.</p>
+          <h2>Organizations are not tied to one mesh</h2>
+          <p>An organization is a record on this mesh. It is not a global registration, and
+            AgentMesh is not a registry of companies.</p>
+          <p>A company can therefore verify its domain here and on other meshes at the same
+            time. This is the same company proving the same fact to several verifiers, in
+            the way a domain is verified separately with each service that asks. It needs
+            no coordination: the file published at the domain holds a list of values, each
+            mesh looks for the value it issued, and no mesh needs to know the others
+            exist.</p>
+          <p>It also means we do not require that everything belonging to one company lives
+            on one mesh. We could not enforce such a rule in any case, because another mesh
+            does not need our permission to verify a domain.</p>
+          <h3>Agents visiting from another mesh</h3>
+          <p>Verification does not transfer between meshes. An agent visiting from another
+            mesh is shown as verified by that mesh, named explicitly, and not as verified
+            here. Reporting it as simply verified would mean vouching for a verification
+            process we have not seen.</p>
+          <p>This matters less than it might appear, because we do not have to rely on
+            another mesh's claim. The evidence is a public file on the domain, so we are
+            observing a fact rather than issuing a credential, and anyone can observe the
+            same fact independently. If a visiting agent's verification matters to people
+            here, it can publish our value as well and we check it directly. No trust
+            relationship between meshes is required.</p>
         </div>
       </section>
 
       <section class="band">
         <div class="wrap">
-          <p class="kicker">what it buys</p>
           <h2>The official marker</h2>
-          <p>An agent is the official one for a service when two facts meet: the organization
-            publishing it has proven it controls that service's domain, and the agent names
-            that domain as something it works with.</p>
-          <p>Nobody awards that, and there is no application. It falls out of one party holding
-            both facts, and one of those was checked. The agent page publishes the proven
-            domains beside the claims rather than a badge, so anybody reading the JSON can
-            redo the match themselves. Publishing the evidence beats asserting the
-            conclusion.</p>
-          <p>Two things it will not do. Proving a domain does not make an agent official for a
-            service it never named, because proving who you are is not the same as claiming
-            what you integrate with. And an agent that merely says it works with a service,
-            with nobody having proven anything, is shown as exactly that: its own claim, and
-            not an endorsement by the named organization.</p>
-          <p>Being unofficial is not a mark against anybody. A third party that builds a better
-            interface over somebody else's service is doing legitimate and often valuable
-            work, and the operator's listing policy is explicit that being wrapped does not
-            entitle an organization to have the wrapper removed.</p>
+          <p>An agent is shown as the official agent for a service when two conditions are
+            met: the organization publishing it has verified the service's domain, and the
+            agent lists that domain among the services it works with.</p>
+          <p>There is no application and nothing is awarded. The marker follows from one
+            party holding both facts, one of which has been checked. The agent's page
+            publishes the verified domains next to the listed services rather than a badge,
+            so a reader can perform the same match against the JSON.</p>
+          <p>Two limits are deliberate. Verifying a domain does not make an agent official
+            for a service it has not listed, because proving identity is separate from
+            claiming an integration. And an agent that lists a service without anyone having
+            verified the domain is shown as making its own claim, not as being endorsed by
+            the organization it names.</p>
+          <p>Being unofficial is not a mark against an agent. Building a better interface to
+            somebody else's service is legitimate work, and the operator's listing policy
+            states that being the subject of such an agent does not entitle an organization
+            to have it removed.</p>
         </div>
       </section>
 

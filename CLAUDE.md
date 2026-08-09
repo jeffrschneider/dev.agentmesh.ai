@@ -1,8 +1,19 @@
 # AgentMesh Developer Docs — Style Notes
 
-This repo is the source for the live site at **https://dev.agentmesh.ai/** (served via
-GitHub Pages from `main`). Plain static HTML/CSS/JS — edit the `.html` files
-directly and push to `main` to deploy.
+This repo is the source for the live site at **https://dev.agentmesh.ai/**. Plain
+static HTML/CSS/JS: edit the `.html` files directly.
+
+**Pushing to `main` does NOT deploy.** GitHub is source only. The site serves
+from the object storage bucket `gs://dev-agentmesh-ai-site` behind the
+`agentcatalog-lb` load balancer, and `./deploy.sh` is what publishes it, plus a
+CDN invalidation without which the old page keeps being served and the deploy
+looks like it failed.
+
+Two consequences worth knowing before you edit. `deploy.sh` stages from
+`git ls-files`, so a **new file must be committed before it will ship at all**,
+and an uncommitted edit to an existing file will not ship either. And after
+deploying, fetch the live URL and check your change is actually on it: a clean
+push and a green script are not evidence about what the CDN is handing out.
 
 ## No em dashes
 

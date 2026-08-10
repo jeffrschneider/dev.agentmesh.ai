@@ -235,10 +235,29 @@
             entered through me," not "the far party signed this." That is what vouching is,
             and the protocol's trust machinery expresses it rather than hiding it:</p>
           <ul class="plain">
-            <li><b>Marked provenance.</b> Every bridged agent carries the
+            <li><b>Marked provenance, on the manifest.</b> Every bridged agent carries the
               <code class="inline">mesh://extensions/a2a-bridge/v1</code> marker in its
               manifest, with direction and endpoint. Discovery can always tell bridged from
               native.</li>
+            <li><b>Marked provenance, on the traffic.</b> A manifest marker only helps
+              somebody who goes looking. Inbound envelopes also carry
+              <code class="inline">meta.a2a_bridge</code>, so a receiver holding one
+              message can tell it came through a bridge without resolving anything. It
+              names the direction, the vouching node, the A2A protocol version, and two
+              things about the caller: an opaque
+              <code class="inline">caller_ref</code>, and a
+              <code class="inline">caller_kind</code> saying whether they stand on an
+              account, on the operator's own key, or on nothing at all. The shape of the
+              accountability travels; the identity behind it does not.</li>
+            <li><b>A bridged caller keeps its name.</b> A credentialed caller is minted one
+              hosted mesh identity and keeps it: the same public key across restarts and
+              across eviction from the live pool. This is not cosmetic: before it was
+              written down, a caller appeared as a different agent from one day to the
+              next, and an audit or settlement row naming a hosted identity resolved to
+              nobody once the process that minted it had exited. The record survives; the
+              caller key itself is never stored, only a digest of it. An anonymous caller
+              gets the opposite by design: an ephemeral, sandbox-flagged identity per
+              session.</li>
             <li><b>Capped standing.</b> A bridge node is attested at most
               <code class="inline">standard</code> trust tier, deliberately below
               <code class="inline">verified</code>. Our own hosted bridge follows this rule.</li>

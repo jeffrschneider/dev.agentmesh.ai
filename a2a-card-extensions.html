@@ -168,17 +168,18 @@
 
       <div class="wrap hero">
         <span class="eyebrow"><span class="tag">agentmesh</span> · a2a card extensions</span>
-        <h1>From brochure to <span class="am">contract</span>, one card entry at a time</h1>
+        <h1>A2A card <span class="am">extensions</span></h1>
         <p class="lede">An A2A Agent Card says who an agent is and what it can do. Three small
-          extensions let it also say on what terms, prove the agent stands behind its own
-          card, and point at its track record. Each one is a separate spec on a neutral
-          standards site; this page is the map.</p>
+          extensions let it also state its commercial terms, let those claims be checked
+          against signed documents, and point at its track record. Each is a separate
+          specification on a neutral standards site. This page describes each one and how
+          they fit together.</p>
       </div>
 
       <section class="band">
         <div class="wrap">
           <p class="kicker">the card as it is</p>
-          <h2>A good, adopted answer to discovery</h2>
+          <h2>What the card already does</h2>
           <p>The <a href="https://a2a-protocol.org/latest/specification/">A2A protocol</a>
             gives every agent a self-description served at
             <code class="inline">/.well-known/agent-card.json</code>: identity fields
@@ -198,17 +199,17 @@
             holding a card knows what an agent claims to be and has no idea what dealing with
             it would mean.</p>
           <div class="callout">
-            <div class="t">the honest summary</div>
-            <p><b>A card is a brochure</b>: self-asserted, integrity-signed, behavior-unbound.
-              Good brochures are useful. Nobody signs a contract with one.</p>
+            <div class="t">the gap</div>
+            <p><b>A card is a brochure</b>: self-asserted, integrity-signed, and silent about
+              behavior. That is enough for discovery. It is not enough for commerce.</p>
           </div>
         </div>
       </section>
 
       <section class="band">
         <div class="wrap">
-          <p class="kicker">rung one · data-only</p>
-          <h2>Terms: the card states a deal</h2>
+          <p class="kicker">extension one · data-only</p>
+          <h2>Commercial terms: the card carries a signed offer</h2>
           <p><b>What it adds:</b> pointers to the agent's signed Agent SoW standing proposals,
             each committed by digest, so the card binds to one specific signed offer.</p>
           <p>A standing proposal is a complete statement of work the provider has signed with
@@ -234,10 +235,12 @@ https://agentsow.com/extensions/a2a-terms/v1</pre>
 
       <section class="band">
         <div class="wrap">
-          <p class="kicker">rung two · methods</p>
-          <h2>Interview: the deal becomes checkable</h2>
+          <p class="kicker">extension two · methods</p>
+          <h2>Verification: the card's claims can be checked</h2>
           <p><b>What it adds:</b> five operations a client can put to the running agent, each
-            answered by looking up declared documents, never by generating text.</p>
+            answered by looking up declared documents, never by generating text. On the wire
+            the operations keep their original naming; this page calls the capability
+            verification, which is what it does.</p>
           <p>The methods are <code class="inline">interview/identity</code>,
             <code class="inline">interview/capabilities</code>,
             <code class="inline">interview/usage</code>,
@@ -251,9 +254,9 @@ https://agentsow.com/extensions/a2a-terms/v1</pre>
             draws a standard refusal, produced mechanically.</p>
           <div class="callout">
             <div class="t">what keeps it honest</div>
-            <p>No free text in, no free text out: <b>nothing an interviewer sends can make
+            <p>No free text in, no free text out: <b>nothing a caller sends can make
               the agent think</b>, which is the security argument, not a limitation. And a
-              passed interview proves consistency, not quality: conformance is not
+              passed check proves consistency, not quality: conformance is not
               competence.</p>
           </div>
           <pre class="code"><span class="c"># extension URI</span>
@@ -266,13 +269,13 @@ https://agentsow.com/extensions/a2a-interview/v1</pre>
 
       <section class="band">
         <div class="wrap">
-          <p class="kicker">rung three · data-only</p>
+          <p class="kicker">extension three · data-only</p>
           <h2>Reputation: the card points at its record</h2>
           <p><b>What it adds:</b> a pointer to the agent's bureau report, which bureau and
             under what subject identifier, and never an embedded score.</p>
-          <p>A reputation embedded in a card would be a self-description wearing someone
-            else's clothes: stale the moment it was issued, and cherry-picked by the one
-            party who must not pick it. So the card names where to ask, and consumers fetch
+          <p>An embedded score would be stale the moment the card was cached, and it would
+            be selected by the one party with an interest in selecting it. So the card
+            names where to ask, and consumers fetch
             a fresh signed report from the bureau, verify it against the bureau's pinned
             key, and confirm the subject identifier actually denotes this card's agent
             before believing anything.</p>
@@ -293,14 +296,13 @@ https://agentreputations.com/extensions/a2a-reputation/v1</pre>
 
       <section class="band">
         <div class="wrap">
-          <p class="kicker">the rung above · future</p>
-          <h2>Formation, not yet</h2>
-          <p>The rung after these three is countersigning: turning a card's committed
-            standing proposal into a real engagement over A2A itself. It does not exist yet,
-            and this page says so plainly rather than sketching it. Formation follows the
-            Agent SoW rules wherever the parties conduct it today; carrying the request to
-            form over A2A is future work, and it becomes worth specifying when the first
-            three rungs have users.</p>
+          <p class="kicker">future</p>
+          <h2>Formation: future work</h2>
+          <p>The step after these three is countersigning: turning a card's committed
+            standing proposal into a real engagement over A2A itself. It does not exist
+            yet. Formation follows the Agent SoW rules wherever the parties conduct it
+            today; carrying the request to form over A2A is future work, worth specifying
+            when the first three extensions have users.</p>
         </div>
       </section>
 
@@ -324,11 +326,11 @@ https://agentreputations.com/extensions/a2a-reputation/v1</pre>
 
       <section class="band">
         <div class="wrap">
-          <p class="kicker">the ladder, drawn</p>
-          <h2>One card, four rungs</h2>
+          <p class="kicker">the diagram</p>
+          <h2>How the extensions stack</h2>
           <div class="fig">
-            <svg viewBox="0 0 760 470" role="img" aria-label="The extension ladder: an agent card at the base, marked brochure; a terms rung where the card states a deal; an interview rung where the deal becomes checkable; a reputation rung where the record is a lookup; and a dashed formation rung above, marked future.">
-              <title>The A2A card extension ladder</title>
+            <svg viewBox="0 0 760 470" role="img" aria-label="The extension stack: an agent card at the base, marked brochure; a commercial terms layer where the card carries a signed offer; a verification layer where the claims can be checked; a reputation layer where the record is fetched fresh; and a dashed formation layer above, marked future.">
+              <title>The A2A card extension stack</title>
               <!-- rails -->
               <line x1="150" y1="70" x2="150" y2="360" stroke="var(--line)" stroke-width="3"/>
               <line x1="290" y1="70" x2="290" y2="360" stroke="var(--line)" stroke-width="3"/>
@@ -336,7 +338,7 @@ https://agentreputations.com/extensions/a2a-reputation/v1</pre>
               <!-- base: the card -->
               <rect x="70" y="360" width="370" height="72" rx="12" fill="var(--ink)" stroke="var(--line)"/>
               <text x="92" y="390" font-family="IBM Plex Mono, monospace" font-size="16" fill="var(--paper)">agent card</text>
-              <text x="92" y="412" font-family="IBM Plex Mono, monospace" font-size="12.5" fill="var(--faint)">/.well-known/agent-card.json · JWS-signed</text>
+              <text x="92" y="412" font-family="IBM Plex Mono, monospace" font-size="12.5" fill="var(--faint)">/.well-known/agent-card.json</text>
               <!-- extension slots on the card -->
               <rect x="330" y="374" width="26" height="16" rx="3" fill="none" stroke="var(--signal)"/>
               <rect x="362" y="374" width="26" height="16" rx="3" fill="none" stroke="var(--verify)"/>
@@ -345,25 +347,25 @@ https://agentreputations.com/extensions/a2a-reputation/v1</pre>
 
               <!-- rung 1: terms -->
               <line x1="150" y1="300" x2="290" y2="300" stroke="var(--signal)" stroke-width="5" stroke-linecap="round"/>
-              <text x="316" y="296" font-family="IBM Plex Mono, monospace" font-size="16" fill="var(--signal)">terms</text>
-              <text x="316" y="315" font-family="IBM Plex Sans, sans-serif" font-size="13.5" fill="var(--dim)">the card states a deal, committed by digest</text>
+              <text x="316" y="296" font-family="IBM Plex Mono, monospace" font-size="16" fill="var(--signal)">commercial terms</text>
+              <text x="316" y="315" font-family="IBM Plex Sans, sans-serif" font-size="13.5" fill="var(--dim)">a signed offer, committed by digest</text>
 
               <!-- rung 2: interview -->
               <line x1="150" y1="225" x2="290" y2="225" stroke="var(--verify)" stroke-width="5" stroke-linecap="round"/>
-              <text x="316" y="221" font-family="IBM Plex Mono, monospace" font-size="16" fill="var(--verify)">interview</text>
-              <text x="316" y="240" font-family="IBM Plex Sans, sans-serif" font-size="13.5" fill="var(--dim)">the deal becomes checkable: ask, then diff</text>
+              <text x="316" y="221" font-family="IBM Plex Mono, monospace" font-size="16" fill="var(--verify)">verification</text>
+              <text x="316" y="240" font-family="IBM Plex Sans, sans-serif" font-size="13.5" fill="var(--dim)">answers checked against the signed documents</text>
 
               <!-- rung 3: reputation -->
               <line x1="150" y1="150" x2="290" y2="150" stroke="var(--address)" stroke-width="5" stroke-linecap="round"/>
               <text x="316" y="146" font-family="IBM Plex Mono, monospace" font-size="16" fill="var(--address)">reputation</text>
-              <text x="316" y="165" font-family="IBM Plex Sans, sans-serif" font-size="13.5" fill="var(--dim)">the record is a lookup, fetched fresh</text>
+              <text x="316" y="165" font-family="IBM Plex Sans, sans-serif" font-size="13.5" fill="var(--dim)">the record, fetched fresh from the bureau</text>
 
               <!-- rung 4: formation (future, dashed) -->
               <line x1="150" y1="75" x2="290" y2="75" stroke="var(--faint)" stroke-width="4" stroke-dasharray="10 8" stroke-linecap="round"/>
               <line x1="150" y1="70" x2="150" y2="45" stroke="var(--line)" stroke-width="3" stroke-dasharray="6 7"/>
               <line x1="290" y1="70" x2="290" y2="45" stroke="var(--line)" stroke-width="3" stroke-dasharray="6 7"/>
               <text x="316" y="71" font-family="IBM Plex Mono, monospace" font-size="16" fill="var(--faint)">formation · future</text>
-              <text x="316" y="90" font-family="IBM Plex Sans, sans-serif" font-size="13.5" fill="var(--faint)">countersign over A2A, after the rungs have users</text>
+              <text x="316" y="90" font-family="IBM Plex Sans, sans-serif" font-size="13.5" fill="var(--faint)">countersign over A2A; not built yet</text>
 
               <!-- left ascent labels -->
               <text x="70" y="342" font-family="IBM Plex Mono, monospace" font-size="12.5" fill="var(--faint)">brochure</text>
@@ -374,20 +376,21 @@ https://agentreputations.com/extensions/a2a-reputation/v1</pre>
                 </marker>
               </defs>
             </svg>
-            <div class="cap">each rung is one card entry; the ladder is climbed a rung at a time, and a card on no rungs is still a card</div>
+            <div class="cap">each extension is one card entry; they adopt independently, and a card carrying none of them is still a valid card</div>
           </div>
         </div>
       </section>
 
       <section class="band">
         <div class="wrap">
-          <p class="kicker">the point</p>
-          <h2>Brochure, contract, enforcement</h2>
-          <p>A2A solved the brochure. These extensions add the contract. The mesh is where
-            both are enforced rather than merely declared: signed envelopes, admission
-            gates, metering, and settlement are what a graded clause is graded against, and
-            <a href="a2a-bridge.html">the bridge</a> is where a card-carrying agent meets
-            them.</p>
+          <p class="kicker">summary</p>
+          <h2>Description, terms, enforcement</h2>
+          <p>A2A standardized how an agent describes itself. These extensions add the
+            commercial terms and the checks. The mesh is where both are enforced rather
+            than only declared: signed envelopes, admission gates, metering, and settlement
+            are what a graded clause is graded against, and
+            <a href="a2a-bridge.html">the A2A bridge</a> is how an agent with a card
+            reaches them.</p>
         </div>
       </section>
 

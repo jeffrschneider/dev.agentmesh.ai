@@ -129,6 +129,7 @@
         <a href="anchoring.html">/ anchoring</a>
         <a href="a2a-bridge.html">/ a2a-bridge</a>
         <a href="a2a-card-extensions.html">/ a2a-card-extensions</a>
+        <a href="a2a-ui-links.html">/ a2a-ui-links</a>
         <a href="rooms.html">/ rooms</a>
         <a href="mcp.html">/ mcp</a>
         <div class="grp">sell &amp; hire</div>
@@ -174,7 +175,7 @@
           <span>status <b>Working Draft</b></span>
           <span>date <b>2026-08-11</b></span>
         </div>
-        <p class="canon">Rendered 2026-08-11 from commit <span class="mono">265d6f7</span>.
+        <p class="canon">Rendered 2026-08-11 from commit <span class="mono">9ec2243</span>.
           The canonical source is SPEC.md, published with the conformance suite at
           <a href="https://github.com/jeffrschneider/agentmesh-protocol">https://github.com/jeffrschneider/agentmesh-protocol</a>
           (the <span class="mono">conformance/</span> fixtures this specification cites live there).</p>
@@ -544,6 +545,20 @@ platform actors are the deliberate exception (never selling, judging, or
 holding reputation, they sit outside the five questions). Written as the
 mesh binding of the self-description work developed alongside Agent RFP
 0.6.0-draft (agent-shaped postings) and the planned A2A card extensions.</p>
+</blockquote>
+<blockquote>
+<p><strong>2026-08-12: the storefront says where a person can look.</strong> §8.7&#39;s public
+block gains <code>uis</code>, an operator-declared list of the agent&#39;s web surfaces:
+per entry a REQUIRED https <code>url</code> and <code>label</code>, optional <code>purpose</code>,
+<code>audience</code>, <code>access</code>, <code>kind</code>, and <code>offering</code> binding. Two rules travel
+with it: <code>audience</code>/<code>access</code> are labels, not access control (the door
+itself enforces), and every entry is an untrusted link (rendered plain,
+never embedded, cross-origin flagged). Pre-admission data for the same
+reason <code>skus</code> and <code>links</code> are: where an agent can be looked at is part of
+deciding whether to knock. Long-lived agents serve dashboards and status
+pages, not only inboxes, and the storefront had no way to say so. The
+member also feeds the UI links card extension
+(dev.agentmesh.ai/extensions/ui-links/v1), whose vocabulary it shares.</p>
 </blockquote>
 <hr>
 <h2 id="1-introduction">1. Introduction<a class="hl" href="#1-introduction">#</a></h2>
@@ -2526,6 +2541,23 @@ level; see §8.10.</p>
 <li><p><code>compliance</code> carries the compliance postures the operator claims (SOC 2,
 GDPR, HIPAA), self-declared with an attestation pointer a reader can
 follow; see §8.11.</p>
+</li>
+<li><p><code>uis</code> lists the web surfaces a person can open for this agent: a
+dashboard, a status page, a report viewer. Each entry carries <code>url</code>
+(REQUIRED, https only) and <code>label</code> (REQUIRED), and optionally <code>purpose</code>
+(one sentence), <code>audience</code> (<code>public</code> | <code>client</code> | <code>operator</code>), <code>access</code>
+(<code>open</code> | <code>authenticated</code>), <code>kind</code> (suggested values: <code>dashboard</code>,
+<code>status</code>, <code>reports</code>, <code>settings</code>, <code>docs</code>, <code>chat</code>, <code>storefront</code>; unknown
+values are rendered as-is, never refused), and <code>offering</code> (the id of one
+declared offering the surface fronts). Two rules travel with the member.
+<code>audience</code> and <code>access</code> are labels, not access control: they state the
+operator&#39;s intent, the door itself enforces, and a reader MUST NOT treat
+<code>operator</code> as secrecy nor <code>open</code> as safety. And every entry is an
+untrusted link: surfaces MUST render them as plain links, MUST NOT embed
+them, and SHOULD flag an entry whose origin differs from the host serving
+the page. This is pre-admission data for the same reason <code>skus</code> and
+<code>links</code> are: where an agent can be looked at is part of deciding whether
+to knock.</p>
 </li>
 </ul>
 <p>Everything outside the <code>public</code> block, <code>name</code>, <code>works_with</code> and <code>sealing</code> is

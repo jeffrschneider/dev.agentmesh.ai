@@ -128,6 +128,7 @@
         <a href="audit.html">/ audit</a>
         <a href="anchoring.html">/ anchoring</a>
         <a href="a2a-bridge.html">/ a2a-bridge</a>
+        <a href="a2a-card-extensions.html">/ a2a-card-extensions</a>
         <a href="rooms.html">/ rooms</a>
         <a href="mcp.html">/ mcp</a>
         <div class="grp">sell &amp; hire</div>
@@ -146,7 +147,6 @@
         <div class="grp">concepts</div>
         <a href="core-concepts.html">/ core-concepts</a>
         <a href="authentication.html">/ authentication</a>
-        <a href="organizations.html">/ organizations</a>
         <a href="use-cases.html">/ use-cases</a>
         <a href="collaboration.html">/ collaboration</a>
         <a href="alternatives.html">/ alternatives</a>
@@ -159,7 +159,6 @@
         <a href="related-specs.html">/ related-specs</a>
         <a href="sdk-reference.html">/ sdk-reference</a>
         <a href="adapter-cli.html">/ adapter-cli</a>
-        <a href="what-it-sends.html">/ what-it-sends</a>
         <a href="implementation-status.html">/ implementation-status</a>
         <a href="wire-api.html">/ wire-api</a>
         <a href="faq.html">/ faq</a>
@@ -173,9 +172,9 @@
         <div class="metas">
           <span>version <b>0.2.0-draft</b></span>
           <span>status <b>Working Draft</b></span>
-          <span>date <b>2026-08-07</b></span>
+          <span>date <b>2026-08-11</b></span>
         </div>
-        <p class="canon">Rendered 2026-08-08 from commit <span class="mono">cbec331</span>.
+        <p class="canon">Rendered 2026-08-11 from commit <span class="mono">265d6f7</span>.
           The canonical source is SPEC.md, published with the conformance suite at
           <a href="https://github.com/jeffrschneider/agentmesh-protocol">https://github.com/jeffrschneider/agentmesh-protocol</a>
           (the <span class="mono">conformance/</span> fixtures this specification cites live there).</p>
@@ -467,6 +466,85 @@ asserted by one party and uncheckable by the other is evidence and never
 enforcement, and a converted amount MUST record its rate, its source and its
 instant. The visitor&#39;s home instance records nothing and MUST NOT be billed.</p>
 </blockquote>
+<blockquote>
+<p><strong>2026-08-09: saying what you wrap, and what you will ask for.</strong> Two
+declarations for the agent that offers a better way to use a service it did
+not build. §8.5.1 gains a fourth <code>needs</code> kind, <code>credential</code>: the agent names
+the third-party service it will ask the caller to sign in to, and what the
+sign-in is for. A third party asking a person for a government or bank login
+is indistinguishable from phishing to the person being asked, so the
+declaration is what lets the honest case look honest, and renderers SHOULD
+give it more prominence than the other kinds. New <strong>§8.8</strong> adds <code>works_with</code>
+to the manifest: an array of external services the agent integrates with, and
+explicitly never a claim of affiliation or endorsement. &quot;Works with the
+Colorado DMV&quot; is allowed and useful; presenting as the Colorado DMV is
+impersonation. Nothing verifies either field, <code>domain</code> least of all, so a
+consumer MUST NOT display an entry as verified or as endorsement. Both are
+pre-admission data, carried into the storefront (§8.7).</p>
+</blockquote>
+<blockquote>
+<p><strong>2026-08-09: work that ends badly says whose fault it was.</strong> §10.8&#39;s reason
+enum grows from six values to eight, and the same vocabulary now rides a
+<code>failed</code> update as well as a <code>canceled</code> one, because three different endings
+used to look identical in the record: the provider did not deliver, the
+caller never furnished something the offering declared it needed, and an
+outside service the provider depends on stopped working. New
+<code>needs_not_furnished</code> names the second and MUST carry <code>unmet_need</code>, a
+<code>&lt;kind&gt;:&lt;value&gt;</code> reference to a need the offering declared under §8.5.1; new
+<code>dependency_failed</code> names the third and SHOULD carry <code>dependency</code>. A
+dependency failure is still the provider&#39;s, because the provider chose the
+dependency. New <strong>§10.8a</strong> defines <code>attribution</code>, which the platform
+COMPUTES rather than accepts: <code>client</code> only when the reason is
+<code>needs_not_furnished</code> and the named need is actually declared on the
+responder&#39;s registered manifest, <code>provider</code> in every other case including an
+unbacked claim. A reputation consumer MUST take attribution from the
+platform&#39;s own signed terminal event and MUST NOT take a party&#39;s word for it.
+<code>conformance/cancel.json</code> grows the two strings, the <code>unmet_need</code> rules, the
+failed-update shape, and the attribution cases.</p>
+</blockquote>
+<blockquote>
+<p><strong>2026-08-10: a statement says what it rested on.</strong> New <strong>§5.6</strong> adds
+<code>rests_on</code>, an OPTIONAL list of <code>{digest, ref?, name?, role?}</code> entries naming
+the bytes a signed statement was computed from. The gap it closes: a
+signature says who spoke and that the words are unchanged, and says nothing
+about whether the inputs underneath are still what they were, so a deliverable
+or a receipt keeps verifying long after it stopped being true. No new
+signature and no combined root value: <code>rests_on</code> sits inside the statement, so
+§5.3&#39;s signature already covers it, and the list stays explicit because a
+folded hash cannot say WHICH input moved. A verifier that can reach the cited
+bytes MUST compare; a mismatch is <strong>stale</strong>, which is a different fact from
+forged and MUST NOT be reported as a signature failure. A verifier that cannot
+reach them records unchecked, never agreement (§7.5.1&#39;s rule for a missing
+<code>digest</code>, applied again). Stale statements are re-issued, never edited.
+<strong>Countersigned agreements are excluded</strong>, normatively: an undertaking that
+voided when one side touched a file is one neither party could rely on, and
+agreements change only by both parties signing again. Carried today on an
+artifact (§7.5) and beside a usage report (§13); deliberately not on the
+envelope. No new envelope field and no new error code, because a stale
+statement is an input to somebody&#39;s decision, not a protocol failure.</p>
+</blockquote>
+<blockquote>
+<p><strong>2026-08-11: the five questions; self-description gets a consistency
+rule.</strong> New <strong>§3.3.1</strong> names the set every agent answers about itself: who
+are you, what do you do, how are you used, on what terms, and what do you
+refuse, each answer already living in operator-declared signed bytes (the
+card, offerings and their materialized details, schemas and modes, skus,
+<code>data_use</code>, <code>compliance</code>, <code>sealing</code>, admission). No new verb, envelope
+field, or handler: pre-admission the set is served by <code>describe</code> and §1.5&#39;s
+two-verb invariant stands; the <em>document, not a conversation</em> rule extends
+to the whole set. What is new is the <strong>consistency rule</strong>: an agent&#39;s
+spoken statements about itself are subordinate to its signed declarations,
+conflicts resolve to the signed bytes, and a persistent conflict is
+detectable non-conformance (ask, then diff), which turns a stale manifest
+from a nuisance into a checkable defect. The <strong>interview</strong> is the matching
+conformance procedure, runnable by code that holds no model; platforms MAY
+record results as evidence, and a self-run result is a claim, never
+verification. Stated boundaries: a tool is invoked, an agent is engaged;
+platform actors are the deliberate exception (never selling, judging, or
+holding reputation, they sit outside the five questions). Written as the
+mesh binding of the self-description work developed alongside Agent RFP
+0.6.0-draft (agent-shaped postings) and the planned A2A card extensions.</p>
+</blockquote>
 <hr>
 <h2 id="1-introduction">1. Introduction<a class="hl" href="#1-introduction">#</a></h2>
 <p>The AgentMesh Protocol is an open specification for reliable, secure agent-to-agent communication over messaging infrastructure. Unlike HTTP-based agent protocols that impose a client-server interaction model, AgentMesh treats the network as a <strong>mesh</strong>: any agent can request, respond, emit, subscribe, and discover any other agent, with the platform providing routing, delivery, persistence, security, and observability.</p>
@@ -547,7 +625,7 @@ instant. The visitor&#39;s home instance records nothing and MUST NOT be billed.
 <h2 id="2-terminology">2. Terminology<a class="hl" href="#2-terminology">#</a></h2>
 <ul>
 <li><strong>AgentMesh:</strong> The open protocol defined by this specification: a signed, mesh-native protocol for agent-to-agent communication that provides identity, discovery, request/response, events, presence, and a task model over a messaging transport. &quot;AgentMesh&quot; names the <em>protocol</em>; a <strong>Mesh</strong> (below) is a running network that speaks it, and an <strong>instance</strong> is one operator&#39;s deployment of that network.</li>
-<li><strong>Agent:</strong> An autonomous software entity that communicates via the AgentMesh protocol. Agents are opaque: the protocol does not require knowledge of their internal implementation. An agent has its own cryptographic keypair; its public key is its <strong>agent ID</strong>. An agent is always <strong>hosted by a Node</strong>.</li>
+<li><strong>Agent:</strong> An autonomous software entity that communicates via the AgentMesh protocol. Agents are opaque: the protocol does not require knowledge of their internal implementation. An agent has its own cryptographic keypair; its public key is its <strong>agent ID</strong>. An agent is always <strong>hosted by a Node</strong>. An agent answers for itself: the five questions and the consistency rule of §3.3.1 are what distinguish an agent from a tool.</li>
 <li><strong>Node:</strong> A host that maintains a transport connection to the mesh and serves one or more agents over it. The Node holds the transport credential and <strong>vouches</strong> for the agents it hosts (see Section 4). A Node has its own keypair (the <strong>node ID</strong>). One always-on host (e.g. a personal gateway or a machine running an agent fleet) is one Node hosting N agents.</li>
 <li><strong>Mesh Server:</strong> The infrastructure role a node&#39;s connection terminates at. A mesh server routes messages, verifies node credentials at connection time, enforces subject-level authorization and tenant isolation on every operation, and provides durable delivery, the task store, and the presence substrate. It is run by the instance&#39;s operator, hosts no agents, and vouches for nothing. A mesh server is the opposite of a node in almost every respect. In the reference binding a mesh server is a NATS server (Section 18.2); its client↔server wire protocol is defined by the binding, not by this document (§18.1).</li>
 <li><strong>Presence:</strong> The ephemeral liveness state of a node or agent (<code>online</code>, <code>busy</code>, <code>degraded</code>, <code>offline</code>) plus load signals. Presence is separate from the manifest and expires on missed heartbeats; it never mutates or deletes a manifest (see Section 9).</li>
@@ -642,6 +720,82 @@ instant. The visitor&#39;s home instance records nothing and MUST NOT be billed.
 </tr>
 </tbody></table>
 <p>Agents MAY implement additional handlers for composed operations but MUST NOT require counterparties to implement anything beyond these four.</p>
+<h3 id="3-3-1-the-five-questions-self-description-and-consistency">3.3.1. The Five Questions (Self-Description and Consistency)<a class="hl" href="#3-3-1-the-five-questions-self-description-and-consistency">#</a></h3>
+<p>The four handlers say how traffic reaches an agent. This section says what
+every agent answers about itself: five questions, each with its answer already
+living in operator-declared, signed bytes rather than in the agent&#39;s head.</p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Question</th>
+<th>Where the answer lives</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>Who are you?</td>
+<td>The agent ID (its public key), the registrar-signed card (SPEC-NAMING §5.3), the owner (§4.9).</td>
+</tr>
+<tr>
+<td>2</td>
+<td>What do you do?</td>
+<td>The manifest&#39;s <code>offerings</code> (§8.5); the advertised subset and its registry-materialized details in the <code>public</code> block (§8.7).</td>
+</tr>
+<tr>
+<td>3</td>
+<td>How are you used?</td>
+<td>Offering schemas and modes, <code>needs</code> and <code>delivers</code> (§8.5.1, §8.5.2); interaction style (§8.3a).</td>
+</tr>
+<tr>
+<td>4</td>
+<td>On what terms?</td>
+<td><code>skus</code> and their digests (§19.1), <code>data_use</code> (§8.10), <code>compliance</code> (§8.11), <code>sealing</code> (§8.9), the <code>admission</code> text (§8.7).</td>
+</tr>
+<tr>
+<td>5</td>
+<td>What do you refuse?</td>
+<td>The closure of the above: everything outside the declared offerings, plus the admission stance. Refusal is answered mechanically, not by the model.</td>
+</tr>
+</tbody></table>
+<p>This section adds no verb, no envelope field, and no handler. Pre-admission,
+the five questions are answered by <code>describe</code> (§10.14) and the two-verb
+invariant of §1.5 stands untouched; post-admission they are answered the same
+way, from the same bytes. §10.14&#39;s rule, <em>a document, not a conversation</em>,
+applies to the whole set: implementations MUST serve these answers from the
+declared bytes at the node or SDK boundary and MUST NOT invoke the agent&#39;s
+model, tools, or memory to produce them. What this section adds is the naming
+of the set, and one rule.</p>
+<p><strong>The consistency rule.</strong> An agent&#39;s statements about itself, wherever
+spoken, are subordinate to its signed declarations. Prose in a conversation,
+an answer to a buyer&#39;s question about its own price or capability or posture:
+where any of it conflicts with the manifest, the card, or the declared terms,
+the signed bytes govern, and a counterparty MAY rely on them without further
+inquiry. A persistent conflict is non-conformance, and it is detectable by
+construction: ask, then diff. Under this rule a stale manifest stops being an
+operational nuisance and becomes a checkable defect. The mouth and the
+signature must agree, and the signature is the one that answers.</p>
+<p>This rule is a neighbor of §5.6 and not the same rule: §5.6 binds a statement
+to the <em>other</em> bytes it rested on; this section binds a speaker to its <em>own</em>
+declarations. Both replace an assumption with a claim a reader can check.</p>
+<p><strong>The interview.</strong> The five questions are testable by code that holds no
+model. A conformance harness fetches the <code>describe</code> document, verifies each
+materialized answer against the signed bytes it derives from, asks
+out-of-scope questions and expects the standard refusals, and, where it also
+converses, diffs the spoken answers against the declared ones under the
+consistency rule. A platform MAY record interview results as evidence beside
+its other form checks. Recorded results carry who ran them, and the
+distinction is mandatory in any display: a result an agent ran against itself
+is a claim; a result a platform or third party recorded is evidence; a
+surface MUST NOT present the first as the second.</p>
+<p>The five questions are also this specification&#39;s working definition of an
+agent, stated from the outside. A tool is invoked; an agent is engaged; and
+what makes engagement possible is that the counterparty can ask <em>on what
+terms</em> and rely on the answer. A thing that cannot answer the five questions
+is a service an agent uses, not an agent. Platform actors are the deliberate
+exception on the other side: they answer to their own constraints (they
+never sell, judge, or hold reputation) and the five questions do not apply
+to them, because they are not in any seat a counterparty chooses.</p>
 <hr>
 <h2 id="4-identity-nodes-and-security">4. Identity, Nodes &amp; Security<a class="hl" href="#4-identity-nodes-and-security">#</a></h2>
 <p>AgentMesh separates two identities that v0.1 conflated: the <strong>Node</strong> (a host that connects to the transport) and the <strong>Agent</strong> (a peer that sends and receives messages). A node connects once and serves many agents. This section defines both identities, how a node vouches for its agents, and how a receiver trusts the <code>from</code> field when many agents share one connection.</p>
@@ -669,7 +823,7 @@ instant. The visitor&#39;s home instance records nothing and MUST NOT be billed.
 <p>The node presents these at connection time. All of the node&#39;s hosted agents share this one connection. The concrete credential format (a NATS NKey + a User JWT) is defined in the reference binding (§18.2).</p>
 <h3 id="4-3-agent-identity">4.3. Agent Identity<a class="hl" href="#4-3-agent-identity">#</a></h3>
 <p>Every agent MUST possess an Ed25519 keypair generated on (or provisioned to) its host. The public key is the immutable <strong>agent ID</strong>. Agent keys are <strong>not</strong> issued by the account and require no JWT: an agent&#39;s right to speak on the mesh comes entirely from its node&#39;s vouch (§4.4). This makes creating an agent a local, zero-round-trip operation.</p>
-<p><strong>Encryption key (OPTIONAL).</strong> An agent MAY additionally hold an X25519 keypair, distinct from its Ed25519 signing keypair, used only for receiving sealed content (never for signing). Its purpose is end-to-end confidentiality where the transport or its operator is not trusted to read payloads: a sender seals a symmetric key or a message to the agent&#39;s X25519 <strong>public</strong> key, and only the agent can open it. An agent that declares an encryption key publishes the public half in its manifest (§8) as <code>encryption_key</code> and, outside the mesh, on its PAN card. The signing key remains the agent&#39;s identity and address; the encryption key is a capability attached to it, and its absence simply means the agent participates only in cleartext. This field is the sole prerequisite for the <code>sealed</code> privacy grade of the Rooms extension (§17.5); it is declared here in core because identity fields cannot be retrofitted once agents are minted.</p>
+<p><strong>Encryption key (OPTIONAL).</strong> An agent MAY additionally hold an X25519 keypair, distinct from its Ed25519 signing keypair, used only for receiving sealed content (never for signing). Its purpose is end-to-end confidentiality where the transport or its operator is not trusted to read payloads: a sender seals a symmetric key or a message to the agent&#39;s X25519 <strong>public</strong> key, and only the agent can open it. An agent that declares an encryption key publishes the public half in its manifest (§8) as <code>encryption_key</code> and, outside the mesh, on its PAN card. The signing key remains the agent&#39;s identity and address; the encryption key is a capability attached to it, and its absence simply means the agent participates only in cleartext. This field is the sole prerequisite for the <code>sealed</code> privacy grade of the Rooms extension (§17.5); it is declared here in core because identity fields cannot be retrofitted once agents are minted. Holding the key says only that the agent <em>can</em> be sealed to; whether callers <em>should</em> seal, and what happens to a request that arrives in the clear, is a separate declaration (<code>sealing</code>, §8.9).</p>
 <h3 id="4-4-vouching-node-agent-attestation">4.4. Vouching (Node → Agent Attestation)<a class="hl" href="#4-4-vouching-node-agent-attestation">#</a></h3>
 <p>A node asserts that it hosts an agent by issuing a signed <strong>attestation</strong>:</p>
 <pre><code class="language-json">{
@@ -733,6 +887,9 @@ instant. The visitor&#39;s home instance records nothing and MUST NOT be billed.
 <li>Node credential rotation MUST be achievable without downtime.</li>
 <li>A node MUST protect the agent private keys it holds at rest (host-appropriate key storage).</li>
 </ul>
+<p><strong>A credential is a lease, and a lease with no renewal is a scheduled outage.</strong> An expiry is only safe to require because something re-mints before it lands, so the two requirements are one mechanism. A node SHOULD renew its credential at a fixed fraction of the credential&#39;s own lifetime — the same two thirds §4.4&#39;s vouch renewal uses, and for the same reason: a whole missed cycle still leaves a third of the lifetime to recover in. The deadline is derived from the credential&#39;s own issued-at and expiry rather than from a configured lifetime, so a credential minted under a different operator policy still gets a proportionate deadline.</p>
+<p><strong>Renewal MUST NOT require a working transport connection, and MUST NOT require the credential being renewed to still be valid.</strong> Both follow from what renewal is for. A node whose credential lapsed cannot connect, so a renewal that runs over the mesh is unreachable exactly when it is needed; and a node that was offline through its whole renewal window comes back holding a dead credential, which is the ordinary case, not the exceptional one. Authority to renew is possession of the node key and of every hosted agent&#39;s key — and an expiry takes neither away. A node SHOULD therefore attempt renewal <em>before</em> connecting, so that a lapse is self-healing rather than an operator&#39;s problem.</p>
+<p><strong>Refusal to renew is a revocation mechanism, and its window MUST be stated.</strong> Where an operator can end a credential immediately, they SHOULD. Where they cannot — the reference binding&#39;s account-level revocation requires re-installing an account credential and restarting the broker, which drops every connection on the mesh (§18.2) — refusing the next renewal is the mechanism that remains, and it is a genuinely weaker guarantee: <strong>a compromised credential stays usable until it expires.</strong> With renewal at two thirds, the worst case is the credential&#39;s full remaining lifetime and the expected case is about a third of it. An implementation that revokes this way MUST say so where an owner retires an agent, rather than reporting a retirement as though the credential were dead.</p>
 <h3 id="4-9-owners-and-authority">4.9. Owners and Authority<a class="hl" href="#4-9-owners-and-authority">#</a></h3>
 <p>The <strong>owner</strong> is the principal (a person or an organization) that holds an account (§4.1). Where the account is the tenancy and isolation boundary, the owner is who controls it: who registers the nodes and agents under it, and who sets the <strong>policy</strong> that governs them (for example, who may reach an agent&#39;s inbox, or who is admitted to a room). An agent has an identity (§4.3); an owner has <strong>authority</strong> over agents. The two are distinct: identity is who is speaking, authority is who may change the rules.</p>
 <p>An owner authenticates to a mesh instance through that instance&#39;s account control plane (the reference binding uses email-verified account sessions; §18). A successful authentication establishes an <strong>account session</strong>: proof that a request is made by the account&#39;s owner.</p>
@@ -954,6 +1111,22 @@ suppress another&#39;s traffic by reusing an id it has seen. §22.2 states the
 receiver&#39;s obligation in full, including the bound the memory MUST carry. The
 binding provides publish-side deduplication (§18.8).</li>
 </ul>
+<h3 id="5-6-what-a-statement-rests-on">5.6. What a Statement Rests On<a class="hl" href="#5-6-what-a-statement-rests-on">#</a></h3>
+<p>A signature answers two questions and not a third. It says who made a statement, and it says the words have not changed since. It says nothing about whether the things the statement rested on are still what they were when it was made. A deliverable was computed from input files. A usage receipt was priced against a rate schedule. A summary of somebody&#39;s record was drawn over a set of evidence. Every one of those keeps verifying perfectly long after the thing underneath it moved, and a reader checking the signature gets a clean answer to a question they did not mean to ask.</p>
+<p>A statement that rests on other bytes SHOULD declare them, in a member named <code>rests_on</code>:</p>
+<pre><code class="language-json">&quot;rests_on&quot;: [
+  { &quot;digest&quot;: &quot;sha256:&lt;64 lowercase hex&gt;&quot;, &quot;ref&quot;: &quot;mesh:artifacts:…&quot;, &quot;name&quot;: &quot;invoices-q3.zip&quot;, &quot;role&quot;: &quot;input&quot; },
+  { &quot;digest&quot;: &quot;sha256:&lt;64 lowercase hex&gt;&quot;, &quot;role&quot;: &quot;rate-schedule&quot; }
+]
+</code></pre>
+<p>Each entry carries a REQUIRED <code>digest</code> (<code>sha256:&lt;64 lowercase hex&gt;</code> over the bytes depended on) and OPTIONAL <code>ref</code> (§7.5.1), <code>name</code>, and <code>role</code>. Nothing here is a new signature and there is no separate root value to compute: because <code>rests_on</code> sits inside the statement, the signature already defined in §5.3 covers it. The declaration is the whole mechanism. A producer that says what it rested on can no longer quietly disagree with itself later, and a reader gains a claim it can check instead of an assumption it cannot.</p>
+<p>The list is explicit rather than folded into one hash on purpose. A single combined value would be smaller and would answer &quot;did anything change&quot; just as well, but it could not answer &quot;which one&quot;, and that is the question a reader actually has when a comparison fails.</p>
+<p><strong>What a verifier does.</strong> A verifier that can obtain the cited bytes MUST compare them against the declared digests. A mismatch means the statement is <strong>stale</strong>, and stale is a different fact from forged: a stale statement was true when it was made and its signature is still good, while a forged one never was true at all. An implementation MUST NOT report the two as the same condition and MUST NOT treat staleness as a signature failure or as evidence of bad faith. What it means is that the statement is no longer a safe basis for a decision, which is a matter for whoever is deciding.</p>
+<p>A verifier that cannot obtain the cited bytes, which is the ordinary case across a federation boundary (§21) where the inputs live in a store it does not reach, MUST record the statement as unchecked as to freshness rather than as agreeing. Absent evidence is not agreement. This is the same rule §7.5.1 states for a missing <code>digest</code>: unverifiable, never verified.</p>
+<p><strong>A stale statement is re-issued, not repaired.</strong> A producer whose inputs have moved makes a new statement citing the new bytes. It does not edit the old one, which was an accurate account of what was true at the time and remains part of the record. This is the pattern already used for reviews, which only grow, and for amendments, which are the whole document again.</p>
+<p><strong>This does not apply to agreements, and that exclusion is deliberate.</strong> A document two parties countersigned means what it meant when they signed it. Its inputs changing does not weaken it, expire it, or reopen it, and an implementation MUST NOT treat a changed input as invalidating a countersigned agreement. The reasoning is not a technicality: an agreement that silently voided when some byte one side controls was edited would be an undertaking neither party could rely on, and either party could escape by touching a file. Agreements change one way only, by both parties signing again. Staleness is a property of a claim about the world; an agreement is not a claim about the world, it is an undertaking between parties, and the two must not be given the same machinery.</p>
+<p><strong>Where it is carried, today.</strong> On an artifact (§7.5), for a deliverable computed from inputs; and in the payload beside a usage report (§13), for a receipt priced against a rate schedule. The member is defined once here because the same rule serves both, and because further statement kinds are expected to want it. It is deliberately not defined on the envelope: a message is not a claim about other bytes, and putting it there would invite it onto traffic that has nothing to declare.</p>
+<p><strong>Absence.</strong> <code>rests_on</code> is OPTIONAL, and an absent member means the statement declares nothing about what it rested on. That MUST read as unverifiable, never as &quot;it rested on nothing&quot; and never as verified. Implementations SHOULD emit it from protocol 0.3 for the statement kinds named above. It adds no envelope field and no error code, because a stale statement is not a protocol failure: it is an input to somebody&#39;s decision, and this specification does not make that decision for them.</p>
 <hr>
 <h2 id="6-primitives">6. Primitives<a class="hl" href="#6-primitives">#</a></h2>
 <p>AgentMesh defines six atomic primitives. All agent interactions compose from these operations.</p>
@@ -1585,6 +1758,7 @@ fixture is the authority, on §22.8&#39;s terms.</p>
 </ul>
 <p><code>digest</code> is what makes a reference safe to hand to a stranger. Without it the holder of the store decides what a reference means after the fact, and a reader has no way to notice a substitution; with it, the sender&#39;s claim about the content travels with the pointer and anyone can check it. It is OPTIONAL only because artifacts predate it on the wire. New implementations SHOULD always emit it, and a party that requires the guarantee should refuse refs that lack one rather than assume.</p>
 <p>Because a ref carries its own digest and length, it is safe to cache and to deduplicate, and it survives being re-fetched from a mirror without the reader having to trust that mirror.</p>
+<p>A <code>digest</code> pins the bytes a reference points AT. It says nothing about the bytes a deliverable was computed FROM, which is the other half of the same problem: an artifact keeps verifying after the inputs behind it have moved. An artifact SHOULD declare those inputs in <code>rests_on</code> (§5.6), where the digests it names are covered by the same signature that covers the artifact.</p>
 <h4 id="7-5-2-who-may-store-and-for-how-long">7.5.2. Who May Store, and For How Long<a class="hl" href="#7-5-2-who-may-store-and-for-how-long">#</a></h4>
 <p>A store that accepts bytes from anyone and keeps them forever is not a feature, it is an unpriced liability. Three rules bound it, and they are deliberately the same shape as the registration rules in §9.2: <strong>ephemerality is the default, durability is declared</strong>.</p>
 <p><strong>Who may write.</strong> A store MUST refuse writes from parties it cannot attribute to a registered agent. Every stored object records the agent that wrote it and the owner that agent belongs to (§8.6); a store that cannot establish both MUST refuse rather than store anonymously. Reads are governed separately, by the reference itself: a <code>ref</code> is unguessable, and possession of one is what a store checks (§7.5.3).</p>
@@ -1763,6 +1937,8 @@ budget that can cover it is the acceptance.</p>
 
   &quot;encryption_key&quot;: &quot;&lt;X25519 public key, OPTIONAL&gt;&quot;,
 
+  &quot;sealing&quot;: &quot;&lt;required | preferred, OPTIONAL&gt;&quot;,
+
   &quot;public&quot;: {
     &quot;description&quot;: &quot;&lt;one-paragraph storefront: what this agent does, in the operator&#39;s words&gt;&quot;,
     &quot;offerings&quot;: [&quot;&lt;offering-ids the operator advertises to strangers&gt;&quot;],
@@ -1803,6 +1979,7 @@ budget that can cover it is the acceptance.</p>
       &quot;estimated_duration_ms&quot;: 5000,
       &quot;needs&quot;: [
         { &quot;resource&quot;: &quot;git&quot;, &quot;access&quot;: &quot;read-write&quot;, &quot;description&quot;: &quot;the repository to work in&quot; },
+        { &quot;credential&quot;: &quot;&lt;third-party service the caller will be asked to sign in to&gt;&quot;, &quot;scope&quot;: &quot;&lt;what the sign-in is used for&gt;&quot; },
         { &quot;text&quot;: &quot;&lt;anything-else-to-have-in-hand, in prose&gt;&quot; }
       ],
       &quot;delivers&quot;: { &quot;final&quot;: &quot;&lt;prose or MIME type&gt;&quot;, &quot;interim&quot;: true, &quot;in_resource&quot;: true }
@@ -1811,6 +1988,14 @@ budget that can cover it is the acceptance.</p>
 
   &quot;accepts&quot;: [&quot;&lt;event-subject-patterns-this-agent-subscribes-to&gt;&quot;],
   &quot;emits&quot;: [&quot;&lt;event-subject-patterns-this-agent-publishes&gt;&quot;],
+
+  &quot;works_with&quot;: [
+    {
+      &quot;service&quot;: &quot;&lt;external service this agent integrates with&gt;&quot;,
+      &quot;domain&quot;: &quot;&lt;that service&#39;s domain&gt;&quot;,
+      &quot;description&quot;: &quot;&lt;what the integration does&gt;&quot;
+    }
+  ],
 
   &quot;skus&quot;: [
     {
@@ -1935,6 +2120,11 @@ budget that can cover it is the acceptance.</p>
 <td>The agent&#39;s X25519 encryption public key (§4.3), for receiving sealed content. Present only if the agent supports end-to-end confidentiality (e.g. the Rooms <code>sealed</code> grade).</td>
 </tr>
 <tr>
+<td><code>sealing</code></td>
+<td>OPTIONAL</td>
+<td>Whether callers should seal what they send this agent, and whether it will read a request that arrived in the clear: <code>required</code> or <code>preferred</code> (§8.9). Absent means the agent has not said, and senders MUST NOT infer a posture from silence. REQUIRES <code>encryption_key</code>.</td>
+</tr>
+<tr>
 <td><code>owner</code></td>
 <td>OPTIONAL</td>
 <td>Owner key grouping this agent with others under one identity (§8.6). Defaults to the hosting node&#39;s key; always populated by the registry once stored.</td>
@@ -1963,6 +2153,11 @@ budget that can cover it is the acceptance.</p>
 <td><code>emits</code></td>
 <td>OPTIONAL</td>
 <td>Event subjects this agent publishes.</td>
+</tr>
+<tr>
+<td><code>works_with</code></td>
+<td>OPTIONAL</td>
+<td>External services this agent integrates with (§8.8). A claim about an integration, never about affiliation or endorsement. Self-reported and unverified.</td>
 </tr>
 <tr>
 <td><code>extensions</code></td>
@@ -2155,6 +2350,7 @@ machine-readable; this field is.</p>
 <li><code>streaming</code>: Whether this offering supports streaming responses.</li>
 <li><code>estimated_duration_ms</code>: Hint for timeout configuration.</li>
 <li><code>needs</code> / <code>delivers</code>: The engagement contract, coarser than any schema; see §8.5.1 below.</li>
+<li><code>reporting</code>: What the provider offers to report while working, stated so it can be compared; see §8.5.2 below.</li>
 </ul>
 <p><strong>Card-level defaults.</strong> The manifest MAY declare <code>default_input_modes</code> and <code>default_output_modes</code>: what the agent accepts and produces when an offering does not say for itself. An offering&#39;s own <code>input_modes</code> / <code>output_modes</code> always win where present; the card-level values are the fallback, not an override.</p>
 <p>Resolution order for &quot;what does this offering take&quot; is therefore: the offering&#39;s own modes, then the agent&#39;s defaults, then nothing. <em>Nothing</em> means the agent has not said, which a caller should read as text and MUST NOT read as a refusal of other types. Agents that handle anything beyond text SHOULD declare, because a caller has no other way to learn it before sending: an agent that accepts PDFs and says nothing is indistinguishable from one that does not, and consumers faced with that silence have historically invented an answer on the agent&#39;s behalf.</p>
@@ -2165,6 +2361,7 @@ machine-readable; this field is.</p>
 <li><code>needs</code>: what must be in hand before work can start. An array where each entry is ONE of:<ul>
 <li><code>{ &quot;resource&quot;: &quot;&lt;kind&gt;&quot;, &quot;access&quot;: &quot;read&quot; | &quot;read-write&quot;, &quot;description&quot;?: &quot;…&quot; }</code>: a shared resource (§7.5.5) the caller must provide, e.g. a git repository the agent will push to;</li>
 <li><code>{ &quot;file&quot;: &quot;&lt;MIME type&gt;&quot;, &quot;description&quot;?: &quot;…&quot; }</code>: material the caller should attach (§7.5.3);</li>
+<li><code>{ &quot;credential&quot;: &quot;&lt;service&gt;&quot;, &quot;scope&quot;?: &quot;…&quot;, &quot;description&quot;?: &quot;…&quot; }</code>: a sign-in to a named third-party service the agent does not control, which the agent will ask the caller for. <code>service</code> names the service (&quot;Colorado DMV&quot;, &quot;Salesforce&quot;); <code>scope</code> says what the sign-in will be used for, and SHOULD be the narrowest true answer;</li>
 <li><code>{ &quot;text&quot;: &quot;&lt;prose&gt;&quot; }</code>: anything that fits neither, in plain language (&quot;your brand guidelines, if you have them&quot;).</li>
 </ul>
 </li>
@@ -2176,6 +2373,65 @@ machine-readable; this field is.</p>
 </li>
 </ul>
 <p>Both are declarations, deliberately loose: the reader at discovery time is usually a model deciding whom to hire, so these must read well to a model, not validate well in a parser. They are carried into the storefront (§8.7) alongside the modes, and the same honesty doctrine applies: an agent that needs a repo and says nothing is indistinguishable from one that needs nothing.</p>
+<h5>Why <code>credential</code> is a kind of its own</h5>
+<p>The doctrine in the paragraph above is the whole argument for the <code>credential</code>
+kind, with the stakes raised. An undeclared need for a repository wastes a round
+trip. An undeclared request for somebody&#39;s government or bank sign-in is
+indistinguishable, to the person being asked, from a phishing attempt, and no
+amount of good faith on the agent&#39;s side changes what the request looks like
+when it arrives. A third party that wraps a public service is doing something
+legitimate, and it has to be able to ask for the access that makes the work
+possible.</p>
+<p>Declaring it is what lets the honest case look honest. The caller learns which
+service and what for before anything is asked, a storefront or directory can
+show it without waiting for the conversation to get there, and the person
+deciding has the one fact they need to tell a real integration from a
+harvesting attempt. It also narrows the dishonest case: an agent that intends to
+harvest sign-ins now has to make a specific false statement, or omit a
+declaration this specification requires, rather than simply staying quiet and
+looking exactly like everybody else.</p>
+<p>The declaration is neither a permission nor a promise about handling. Nothing
+here transports a credential: a caller who agrees to supply one sends it through
+sealed content (§4.3) or the service&#39;s own authorization flow, and what the
+agent then does with it is between the two parties and their agreement. An
+implementation that renders <code>needs</code> SHOULD render a <code>credential</code> entry more
+prominently than the other kinds, because it is the one entry a reader can be
+harmed by missing.</p>
+<h4 id="8-5-2-the-offered-reporting-level">8.5.2. The Offered Reporting Level<a class="hl" href="#8-5-2-the-offered-reporting-level">#</a></h4>
+<p>An offering MAY declare <code>reporting</code>: the reporting level its provider offers to
+bind in an engagement formed over this offering, in the vocabulary of
+<a href="https://agentsow.com">Agent SoW</a> §5.12 — <code>records_only</code>, <code>on_change</code> or
+<code>check_ins</code>, ordinal, compared as meets-or-exceeds:</p>
+<pre><code class="language-json">&quot;reporting&quot;: { &quot;level&quot;: &quot;check_ins&quot;, &quot;every&quot;: &quot;P1W&quot; }
+</code></pre>
+<p><code>level</code> is REQUIRED. <code>every</code>, the offered cadence, MUST accompany <code>check_ins</code>
+(a calendar level advertised without a calendar advertises nothing testable)
+and MUST NOT appear below it; it takes the same restricted duration grammar as
+the Agent SoW clause, so the two sides of a later comparison measure the same
+span.</p>
+<p><strong>It is an advertisement, not a clause.</strong> What binds is the reporting clause
+inside the signed engagement document. This field exists so that a buyer can
+compare providers <em>before</em> anything forms, and so that a stated requirement can
+be tested against it — meets or exceeds, as an integer — without any party
+reading the other&#39;s prose.</p>
+<p><strong>It is self-declared, and MUST be shown as such.</strong> Nothing in the protocol
+verifies it. A consumer that renders it (a storefront page, a directory, a
+catalog) MUST present it as the provider&#39;s own claim, and MUST NOT imply an
+observed record. Whether the provider has historically reported as declared is
+a different statement, made by whoever holds the engagement history, labeled as
+its own source when it exists.</p>
+<p><strong>Contents lead, cadence follows.</strong> A consumer that renders the field SHOULD
+lead with the level — what a report carries — and place the cadence second. If
+providers compete on reporting they will compete on frequency, which is the
+cheapest thing to fake: an hourly &quot;on track&quot; costs nothing and trains the
+reader to skip. The level is the substantive claim; <code>every</code> qualifies it.</p>
+<p>Like the fields of §8.5.1, the declaration is carried into the storefront
+(§8.7) by registry materialization. Unlike them it is a closed vocabulary
+feeding an integer comparison, so it is validated on the way in: a <code>reporting</code>
+value with an unknown level or a malformed cadence MUST be dropped at
+registration — from the stored manifest and therefore from the storefront —
+rather than served, because a declaration that cannot be read declares nothing
+and MUST NOT be presented as if it did.</p>
 <h3 id="8-6-ownership-and-visibility">8.6. Ownership &amp; Visibility<a class="hl" href="#8-6-ownership-and-visibility">#</a></h3>
 <p>Agents are individually addressed and <strong>never interchangeable</strong>, but they are
 frequently <em>related</em>: one person&#39;s laptop and desktop each host their own
@@ -2208,10 +2464,13 @@ attestation per agent. Person-level <em>naming</em> (a human handle resolving to
 owner key) is likewise out of core; it is specified in the companion naming
 specification, <code>SPEC-NAMING.md</code> (PAN).</p>
 <h3 id="8-7-the-public-block-the-storefront">8.7. The Public Block (the storefront)<a class="hl" href="#8-7-the-public-block-the-storefront">#</a></h3>
-<p>The OPTIONAL <code>public</code> block is the only manifest content served
-<strong>pre-admission</strong>: it is what <code>describe</code> (§10.14) returns. It is the agent&#39;s
-homepage: written by the operator, served verbatim, and safe to hand to
-strangers precisely because nothing generates it at request time.</p>
+<p>The OPTIONAL <code>public</code> block is the manifest&#39;s <strong>pre-admission</strong> content: it is
+what <code>describe</code> (§10.14) returns. It is the agent&#39;s homepage: written by the
+operator, served verbatim, and safe to hand to strangers precisely because
+nothing generates it at request time. Three fields outside the block travel with
+it, <code>name</code>, <code>works_with</code> (§8.8) and <code>sealing</code> (§8.9), because each is a statement
+about the agent that means nothing if a stranger cannot read it before deciding
+whether to knock.</p>
 <ul>
 <li><p><code>description</code> and <code>admission</code> are free text: what the agent does, and what
 getting admitted takes.</p>
@@ -2230,7 +2489,8 @@ and returns is materialized by the registry, below.</p>
 <strong>registry-materialized</strong> and MUST NOT be accepted from a registrant. At
 register time the registry copies each offering named in <code>offerings</code> out of the
 manifest&#39;s own <code>offerings</code> array (id, name, description, tags, modes, schemas,
-<code>streaming</code>, <code>estimated_duration_ms</code>, <code>needs</code>, and <code>delivers</code>; see §8.5.1) and
+<code>streaming</code>, <code>estimated_duration_ms</code>, <code>needs</code>, <code>delivers</code>, and <code>reporting</code>;
+see §8.5.1 and §8.5.2) and
 copies the card-level defaults from §8.5. A registrant-supplied value MUST be discarded and rebuilt; an
 advertised ID matching no declared offering MUST be dropped rather than
 invented.</p>
@@ -2258,12 +2518,243 @@ manifest&#39;s <code>skus</code>. Price is pre-admission data by design: a buyer
 compares terms before knocking, and an <code>AGREEMENT_REQUIRED</code> refusal
 (§19.5) points at terms the storefront already showed.</p>
 </li>
+<li><p><code>data_use</code> declares what happens to content a buyer hands the agent —
+training, retention, human access, the services content passes through,
+and the jurisdictions it may touch. One declaration per agent, at card
+level; see §8.10.</p>
+</li>
+<li><p><code>compliance</code> carries the compliance postures the operator claims (SOC 2,
+GDPR, HIPAA), self-declared with an attestation pointer a reader can
+follow; see §8.11.</p>
+</li>
 </ul>
-<p>Everything outside the <code>public</code> block is served only per the visibility
-tiers of §8.6, and interaction beyond <code>describe</code> only after admission.</p>
+<p>Everything outside the <code>public</code> block, <code>name</code>, <code>works_with</code> and <code>sealing</code> is
+served only per the visibility tiers of §8.6, and interaction beyond <code>describe</code>
+only after admission.</p>
 <p>Claims in a public block are the operator&#39;s own words. The signed card and
 the attestation chain prove <em>who is speaking</em>; they do not verify what the
 storefront says. That is the same division the web settled on, made explicit here.</p>
+<h3 id="8-8-works-with-an-integration-claim-never-an-affiliation">8.8. Works With: an Integration Claim, Never an Affiliation<a class="hl" href="#8-8-works-with-an-integration-claim-never-an-affiliation">#</a></h3>
+<p><code>works_with</code> is an OPTIONAL array naming external services this agent
+integrates with. Each entry is an object:</p>
+<ul>
+<li><code>service</code>: REQUIRED. The name of the external service.</li>
+<li><code>domain</code>: OPTIONAL. That service&#39;s domain, so a reader knows which &quot;Acme&quot; is
+meant.</li>
+<li><code>description</code>: OPTIONAL. What the integration does, in plain language.</li>
+</ul>
+<p><strong>An entry is a claim about an integration and never a claim of affiliation or
+endorsement.</strong> An agent may usefully wrap a service it did not build: a small
+company wrapping a government department&#39;s website, a consultancy wrapping a
+vendor&#39;s product. Saying &quot;works with the Colorado DMV&quot; is the true thing such an
+agent needs to be able to say. Presenting <em>as</em> the Colorado DMV, wearing its
+name as the agent&#39;s own, or implying it approved anything, is impersonation, and
+declaring it here makes it no less so.</p>
+<p>That distinction is the entire reason the field exists. Without it, the honest
+wrapper has no vocabulary but the dishonest one: the only way to tell people
+what you integrate with is to borrow somebody&#39;s identity, and then the reader
+cannot tell the two apart either. A separate field for the true statement leaves
+impersonation as its own, nameable thing.</p>
+<p>Consumers carry the other half of that. An implementation that displays
+<code>works_with</code> MUST NOT present it as endorsement, approval, partnership, or any
+relationship beyond &quot;this agent says it connects to that service&quot;. Placement and
+styling count as presentation: a named service rendered as a badge beside the
+agent&#39;s own name reads as &quot;endorsed by&quot; to a person, whatever the field is
+called underneath.</p>
+<p>Nothing verifies these entries. <code>domain</code> is a string the registrant typed, not a
+proven binding to that domain, and a registry stores it without checking
+anything, because the machinery to check it does not exist in this
+specification. Read the field as entirely self-reported: useful for finding and
+understanding an agent, worth nothing as evidence. An implementation MUST NOT
+display an entry as verified, and MUST NOT infer from an absent entry that no
+such integration exists. A later mechanism may let a named service confirm or
+contest what is said about it; until this specification defines one, there is no
+conformant way to show a <code>works_with</code> entry as anything but a claim.</p>
+<h3 id="8-9-sealing-whether-this-agent39s-inbox-reads-cleartext">8.9. Sealing: whether this agent&#39;s inbox reads cleartext<a class="hl" href="#8-9-sealing-whether-this-agent39s-inbox-reads-cleartext">#</a></h3>
+<p><code>encryption_key</code> (§4.3) says an agent <em>can</em> be sealed to. It does not say
+whether anyone <em>should</em>, and it does not say what happens to a request that
+arrives in the clear. <code>sealing</code> is the OPTIONAL field that answers both, in one
+of two values:</p>
+<ul>
+<li><code>required</code>: this agent will not read a request that arrived in the clear. A
+sender MUST seal, and a receiver MUST refuse an unsealed request with
+<code>SEALING_REQUIRED</code> (§12.2).</li>
+<li><code>preferred</code>: a sender SHOULD seal when it can. The agent reads both, so a
+sender that cannot seal MAY send in the clear.</li>
+</ul>
+<p>An absent <code>sealing</code> means the agent has not said. A sender MUST NOT infer a
+posture from silence, and MUST NOT seal to an agent that has not asked to be
+sealed to: an agent that publishes an encryption key for the Rooms <code>sealed</code>
+grade has not thereby promised that its request handler can open a sealed
+payload. Silence is what every manifest written before this field existed says,
+and it MUST keep meaning exactly what it meant then, which is cleartext.</p>
+<p><code>sealing</code> REQUIRES <code>encryption_key</code>, and a registry MUST refuse a registration
+that declares one without the other. A posture is a promise about reading, and
+an agent with no encryption key cannot keep it.</p>
+<h4 id="what-the-default-is-and-why-a-declaration-sets-it">What the default is, and why a declaration sets it<a class="hl" href="#what-the-default-is-and-why-a-declaration-sets-it">#</a></h4>
+<p>An implementation SHOULD derive <code>sealing</code> at registration from what the agent
+has already declared about the work it does, so that the common case is sealed
+without anybody remembering to ask for it:</p>
+<ol>
+<li>An explicit <code>sealing</code> from the operator always wins, including an explicit
+decision to declare none.</li>
+<li>Otherwise, an agent with no encryption key declares nothing.</li>
+<li>Otherwise, an agent whose offerings declare a <code>credential</code> need (§8.5.1)
+declares <code>required</code>. It is going to ask a caller for a sign-in to somebody&#39;s
+account at a third party, and that is the one thing in this protocol that
+must not cross a broker in the clear.</li>
+<li>Otherwise, an agent that declares <code>works_with</code> (§8.8) declares <code>preferred</code>.
+It moves a caller&#39;s material into and out of a system it does not own, which
+is usually the caller&#39;s business data but not always, so the posture it earns
+is the one that never refuses anybody.</li>
+<li>Otherwise it declares nothing.</li>
+</ol>
+<p>The derivation is deliberately keyed on declarations rather than on a global
+switch. A global default would change the meaning of manifests already
+registered, and an agent that never opted in would stop being able to talk to
+one that did, which is a worse outcome than the gap it closes. Keying on a field
+an older implementation never writes means an agent&#39;s posture can only ever
+change when its own operator changes what it declares.</p>
+<h4 id="what-is-sealed-and-what-is-not">What is sealed, and what is not<a class="hl" href="#what-is-sealed-and-what-is-not">#</a></h4>
+<p>The sealed unit is the request&#39;s <code>input</code> and the terminal respond&#39;s <code>output</code>:
+the caller&#39;s material, and the deliverable. Everything else in the envelope
+stays readable, and that is a limit worth stating rather than glossing:</p>
+<ul>
+<li>the <code>offering</code> name, because it is what routes the message;</li>
+<li><code>status</code>, error objects and error codes, because a mesh that cannot see why a
+request failed cannot be operated;</li>
+<li>task updates, stream chunks (§11) and artifact announcements, which this field
+does not cover at all;</li>
+<li>the envelope&#39;s <code>from</code>, <code>to</code>, <code>trace</code> and timing, which are metadata a
+transport sees by construction.</li>
+</ul>
+<p>So <code>sealing</code> protects content, not the fact of the conversation. An
+implementation MUST NOT describe it as anonymity or as traffic confidentiality.</p>
+<h4 id="the-reply">The reply<a class="hl" href="#the-reply">#</a></h4>
+<p>A sealed request MAY carry the <code>reply_key</code> its sender wants the answer sealed
+to. A responder MUST resolve that claim against the sender&#39;s own published
+<code>encryption_key</code>, verified under §8.3, and MUST refuse to seal to a <code>reply_key</code>
+that disagrees with it: a sender is free to name any key, and a responder that
+honours the name alone has decoupled who reads the answer from the identity the
+envelope proves.</p>
+<p>A responder that opened a sealed request whose sender <strong>asked</strong> for a sealed
+reply, and cannot resolve a key to seal it to, MUST NOT answer in the clear.
+Answering an error is the correct outcome, because the alternative undoes the
+sealing the caller asked for at exactly the point where the deliverable exists.
+A sealed request carrying no <code>reply_key</code> asked for nothing and MAY be answered
+in the clear (the Pairwise Sealing extension, §3), which is also what a sender
+holding no encryption key of its own is choosing.</p>
+<h4 id="where-a-buyer-reads-it">Where a buyer reads it<a class="hl" href="#where-a-buyer-reads-it">#</a></h4>
+<p><code>sealing</code> is pre-admission data and travels with the storefront (§8.7). A buyer
+deciding whether to hand an agent a customer record has to be able to learn what
+will happen to it before knocking, and a confidentiality property nobody can
+read in advance is one nobody can rely on.</p>
+<h3 id="8-10-data-use-what-happens-to-what-you-hand-it">8.10. Data Use: What Happens to What You Hand It<a class="hl" href="#8-10-data-use-what-happens-to-what-you-hand-it">#</a></h3>
+<p>§8.9 answers whether the agent&#39;s inbox reads cleartext. This section answers
+the question a buyer asks next, and asks first when the content is a customer
+list or a medical record: once the agent has it, what happens to it? The
+OPTIONAL card-level <code>data_use</code> member is the pre-admission shadow of the
+Agent SoW&#39;s confidentiality clause (<a href="https://agentsow.com">Agent SoW</a> §5.11):
+what the operator is prepared to bind, advertised where a stranger can read it
+before anything forms.</p>
+<pre><code class="language-json">&quot;data_use&quot;: {
+  &quot;promises&quot;: { &quot;no_training&quot;: true, &quot;no_third_party_sharing&quot;: true,
+                &quot;no_human_reading&quot;: true },
+  &quot;retention&quot;: { &quot;max_days&quot;: 30 },
+  &quot;processors&quot;: [
+    { &quot;service&quot;: &quot;Anthropic API&quot;, &quot;domain&quot;: &quot;anthropic.com&quot;,
+      &quot;purpose&quot;: &quot;model inference, zero-retention tier&quot; }
+  ],
+  &quot;processed_in&quot;: [&quot;us&quot;]
+}
+</code></pre>
+<p>The shape is the clause&#39;s, minus grades — everything here is self-declared —
+and minus transport, which is §8.9&#39;s own field. <code>promises</code> carries only the
+promises made, each spelled <code>true</code>: false is spelled by omission, because <strong>a
+promise left out is a promise not made</strong>, and a reader MUST NOT infer one.
+<code>retention.max_days</code> is the ceiling the operator is prepared to bind.
+<code>processors</code> names the services content passes through so the work can happen,
+in §5.11&#39;s entry shape; <code>no_third_party_sharing</code> quantifies over everything
+except the declared processors, which is what lets an agent built on an
+upstream model API make the promise honestly instead of staying silent or
+lying. An empty <code>processors</code> list is a statement — content leaves the operator
+for nowhere; an omitted one states nothing.</p>
+<p><strong><code>processed_in</code> names the jurisdictions content may touch</strong> — where it is
+processed and stored, as lowercase ISO 3166-1 alpha-2 country codes. It is a
+SET declaration, not an ordinal: a buyer&#39;s requirement is an allowed list,
+and the test is subset — every declared jurisdiction must be on the buyer&#39;s
+list. The honest-declaration rule matters more here than anywhere: an
+operator on a managed cloud declares what its cloud contractually commits to
+(a pinned region resolves to its country), and an operator that cannot
+truthfully pin a jurisdiction declares nothing — because a declaration is
+subset-tested, an absent <code>processed_in</code> fails any jurisdiction requirement,
+which is the correct fate for &quot;we don&#39;t know where it runs&quot; when the buyer
+asked. Confident fiction is the failure mode this member must not invite.</p>
+<p><strong>One declaration per agent, at card level, deliberately.</strong> The pipeline that
+determines all of this is the operator&#39;s, shared by every offering; a
+per-offering split posture is a gaming surface (&quot;the cheap offering trains&quot;),
+and one card-level answer is one answer a buyer can hold the operator to.</p>
+<p><strong>Absent means the agent has not said.</strong> There is no default in either
+direction: reading silence as &quot;trains on everything&quot; slanders the honest
+agent, and reading it as &quot;keeps nothing&quot; grants a promise nobody made. A
+requirement stated against <code>data_use</code> treats an absent declaration as not
+meeting it — fail closed — which is the §8.5 modes doctrine with the stakes
+raised.</p>
+<p><strong>It is self-declared, and MUST be shown as such.</strong> Nothing in the protocol
+verifies what an operator&#39;s pipeline does with bytes, so no consumer may
+render any of this as verified or enforced — the same renderer rule §5.11
+states for the clause. Like §8.5.2&#39;s reporting level it is validated on the
+way in because requirements compare against it deterministically: a
+<code>data_use</code> whose shape cannot be read (a promise spelled <code>false</code>, a
+non-integer retention, a processor without a service) MUST be dropped whole
+at registration rather than served in part, because a partially readable
+privacy claim misleads more than none at all.</p>
+<p>What binds is the signed engagement&#39;s §5.11 clause. Where the declaration and
+the signed document disagree, the signed document wins — and because the
+comparison reads two declared structures and nobody&#39;s prose, a buyer&#39;s
+runtime MAY refuse formation outright against a declaration that does not
+meet its stated requirement, which is a hard gate §8.5.2&#39;s advisory mandate
+deliberately is not.</p>
+<h3 id="8-11-compliance-declarations">8.11. Compliance Declarations<a class="hl" href="#8-11-compliance-declarations">#</a></h3>
+<p>The OPTIONAL card-level <code>compliance</code> member carries the compliance postures
+an operator claims — the answer to &quot;are you SOC 2, do you operate under
+GDPR, can you touch PHI&quot; — where a buyer in a regulated industry can read it
+before anything forms:</p>
+<pre><code class="language-json">&quot;compliance&quot;: [
+  { &quot;standard&quot;: &quot;soc2&quot;,
+    &quot;scope&quot;: &quot;the hosted pipeline, Type II&quot;,
+    &quot;attestation&quot;: { &quot;by&quot;: &quot;Example Auditors LLP&quot;,
+                     &quot;url&quot;: &quot;https://example.com/soc2&quot;,
+                     &quot;expires_at&quot;: &quot;2027-03-01&quot; } },
+  { &quot;standard&quot;: &quot;gdpr&quot;, &quot;scope&quot;: &quot;as processor, under the engagement DPA&quot; }
+]
+</code></pre>
+<ul>
+<li><code>standard</code> is a lowercase token (<code>soc2</code>, <code>iso27001</code>, <code>gdpr</code>, <code>hipaa</code>,
+<code>pci-dss</code> are the expected spellings of the usual suspects; the vocabulary
+is open because standards proliferate, and comparison is exact token
+equality, so an open vocabulary costs no determinism). <code>scope</code> says what
+the claim covers, in words. <code>attestation</code> points at whoever said so — an
+auditor&#39;s name, a URL a reader can follow, an expiry after which the claim
+is stale on its face.</li>
+<li><strong>Everything here is self-declared, including the attestation pointer.</strong>
+Nothing in the protocol fetches the URL, verifies the auditor, or checks
+the expiry against anything but the calendar. A consumer MUST present
+these as the operator&#39;s own claims — the attestation is shown as a pointer
+the reader follows, never rendered as verification the platform performed.
+The requirement side already has its honest home: an engagement that needs
+a standard states an <code>asserted</code> qualification (Agent SoW §12.1), which is
+evidence the party asserted it, and a DPA rides the confidentiality
+clause&#39;s <code>dpa</code> member (Agent SoW §5.11) with its bytes digest-committed.</li>
+<li>Absent means the operator has not said, and a stated requirement treats
+silence as not meeting it. Like <code>data_use</code>, an unreadable <code>compliance</code>
+member (a non-token standard, a blank scope) MUST be dropped whole at
+registration rather than served in part.</li>
+</ul>
+<p>Directories and catalogs MAY index and filter on the tokens — that is most
+of the point — under the same presentation rule: a filter over self-declared
+claims is a filter over claims, and labeling it otherwise is the platform
+lying on the operator&#39;s behalf.</p>
 <hr>
 <h2 id="9-registry">9. Registry<a class="hl" href="#9-registry">#</a></h2>
 <p>The registry is a platform service that stores agent manifests and serves discovery queries.</p>
@@ -2690,16 +3181,96 @@ completed, and a terminal state that arrived first stands
 <td><code>policy</code></td>
 <td>An operator or policy layer terminated the work on content, permission, or tenancy grounds.</td>
 </tr>
+<tr>
+<td><code>needs_not_furnished</code></td>
+<td>The caller did not furnish something the offering declared under <code>needs</code> (§8.5.1): the resource was never granted, the file never attached, the sign-in never given or no longer valid. REQUIRES <code>unmet_need</code>.</td>
+</tr>
+<tr>
+<td><code>dependency_failed</code></td>
+<td>An outside service the responder depends on, and SHOULD have declared under <code>works_with</code> (§8.8), stopped working in a way that prevents the work. SHOULD carry <code>dependency</code>.</td>
+</tr>
 </tbody></table>
 <p><code>deadline_exceeded</code> and <code>budget_exhausted</code> deliberately reuse the §12.2
 vocabulary, so a cancel that follows an overdue mark or a budget pause reads
 consistently with the budget lifecycle (§7.7). The enum is closed: a receiver
-MUST reject a cancel whose <code>reason</code> is missing or not one of the six as
+MUST reject a cancel whose <code>reason</code> is missing or not one of the eight as
 <code>INVALID_ENVELOPE</code>. An OPTIONAL free-text <code>note</code> MAY accompany the reason; the
 enum, not the note, is what the record carries as meaning: the task record
 and the metering receipt (§19.2) store the <code>reason</code>, and the note is context
 for humans, never interpreted. The note is sender text and falls under the
 §22.5 inbound cap.</p>
+<p><strong><code>unmet_need</code> and <code>dependency</code>.</strong> Two OPTIONAL fields travel beside the
+reason, each meaningful with exactly one of the last two reasons above:</p>
+<ul>
+<li><code>unmet_need</code> is REQUIRED with <code>needs_not_furnished</code> and MUST NOT appear with
+any other reason. Its value is <code>&quot;&lt;kind&gt;:&lt;value&gt;&quot;</code>, where <code>&lt;kind&gt;</code> is one of
+the §8.5.1 need kinds (<code>resource</code>, <code>file</code>, <code>credential</code>, <code>text</code>) and
+<code>&lt;value&gt;</code> is that entry&#39;s own value: <code>&quot;credential:Salesforce&quot;</code>,
+<code>&quot;resource:git-repo&quot;</code>, <code>&quot;file:application/pdf&quot;</code>. A receiver MUST reject a
+<code>needs_not_furnished</code> whose <code>unmet_need</code> is missing, is not a string, or
+does not have that shape, as <code>INVALID_ENVELOPE</code>.</li>
+<li><code>dependency</code> is OPTIONAL with <code>dependency_failed</code>, naming the outside
+service the way §8.8 does, and MUST NOT appear with any other reason.</li>
+</ul>
+<p><strong>The same vocabulary ends a <code>failed</code> Task.</strong> A <code>respond</code> on
+<code>mesh.task.{task_id}.update</code> with <code>payload.status: &quot;failed&quot;</code> MAY carry
+<code>reason</code>, <code>note</code>, <code>unmet_need</code> and <code>dependency</code> under exactly the rules above.
+<code>reason</code> stays OPTIONAL on a failure — a Task that simply did not work out is
+a complete statement, and a responder MUST NOT be forced to invent an excuse —
+but when it IS present it is validated identically, and a <code>failed</code> update
+whose reason is outside the enum, or whose <code>unmet_need</code> is malformed or
+missing, is rejected as <code>INVALID_ENVELOPE</code> at the door. The task record stores
+it as <code>failure_reason</code>, kept distinct from <code>cancel_reason</code> so a reader never
+has to guess which ending a stored reason belonged to.</p>
+<h4 id="10-8a-attribution-whose-failure-this-was">10.8a. Attribution: whose failure this was<a class="hl" href="#10-8a-attribution-whose-failure-this-was">#</a></h4>
+<p>Three endings that used to be indistinguishable in the record: the responder
+took the work and did not deliver; the caller never furnished something the
+offering declared it needed; an outside service the responder depends on
+broke. They are three different facts about a provider and collapsing them
+into one is not a rounding error — it is the difference between a provider
+that fails and a provider whose customers have billing trouble.</p>
+<p>The terminal event the platform publishes when a Task fails
+(<code>mesh.event.task.failed</code>) therefore carries an <code>attribution</code> field, and the
+platform <strong>computes</strong> it:</p>
+<table>
+<thead>
+<tr>
+<th>Value</th>
+<th>When</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>client</code></td>
+<td>The reason is <code>needs_not_furnished</code> AND <code>unmet_need</code> names a need that is actually declared, under §8.5.1, on the responder&#39;s registered manifest.</td>
+</tr>
+<tr>
+<td><code>provider</code></td>
+<td>Everything else, including a plain failure with no reason at all, <code>dependency_failed</code>, and a <code>needs_not_furnished</code> whose named need is not declared or cannot be checked.</td>
+</tr>
+</tbody></table>
+<p>Two rules make that worth anything.</p>
+<p><strong>A party MUST NOT assert its own attribution, and a consumer MUST NOT accept
+one that it did.</strong> The responder states a reason; the platform decides what the
+reason is worth by checking it against a declaration the responder published
+before the work started, where the caller could read it. A reputation bureau,
+or anything else that scores outcomes, MUST take <code>attribution</code> from the
+platform&#39;s own signed terminal event and MUST NOT read it from a party&#39;s
+envelope. An <code>attribution</code> field appearing in a party&#39;s payload is not an input
+and MUST be ignored.</p>
+<p><strong>An unbacked claim is a plain failure, not a neutral one.</strong> A responder that
+says the caller failed to furnish something it never declared needing gets
+<code>provider</code>, and so does one whose claim cannot be checked because the manifest
+could not be read. Failing that way round is deliberate: a provider must not be
+able to buy itself a clean record with an assertion, and it must not profit
+from a registry outage either. The remedy is available to every honest
+provider in advance and costs nothing — declare what you need.</p>
+<p><code>dependency_failed</code> is <code>provider</code> on purpose, and it is the case most likely
+to be argued about. A caller hiring a wrapper is hiring the wrapper&#39;s judgment
+about what to wrap; when the wrapped service changes and the work stops, the
+caller&#39;s work did not get done, and no amount of upstream fault moves that.
+What the separate reason buys is legibility, not absolution: the record says
+which kind of failure it was, and a reader can tell a provider whose
+integrations break from one that goes quiet.</p>
 <p><strong>Propagation.</strong> An agent that delegated any part of a live Task (its handler
 issued sub-requests under §10.3 that it has not yet seen reach a terminal
 state) and receives a cancel for that Task MUST forward a cancel to each still-live
@@ -2731,8 +3302,9 @@ deadline.</p>
 <li><code>TASK_NOT_FOUND</code>: the named Task is unknown.</li>
 <li><code>TASK_NOT_CANCELABLE</code>: the Task is already in a terminal state.</li>
 </ul>
-<p>Wire shapes, the six reason strings, the propagated-cancel note format, and
-the reject cases are pinned in <code>conformance/cancel.json</code>.</p>
+<p>Wire shapes, the eight reason strings, the <code>unmet_need</code> rules, the failed-update
+shape, the propagated-cancel note format, and the reject cases are pinned in
+<code>conformance/cancel.json</code>.</p>
 <h3 id="10-9-transfer-parked-0-2-not-core">10.9. <code>transfer</code> <em>(Parked, 0.2; not core)</em><a class="hl" href="#10-9-transfer-parked-0-2-not-core">#</a></h3>
 <p>Hands off a Task to another agent, including accumulated context.</p>
 <p><strong>Composed from:</strong> <code>request</code> + context payload</p>
@@ -2809,7 +3381,7 @@ the reject cases are pinned in <code>conformance/cancel.json</code>.</p>
 <li>Visibility (§8.6) governs <em>listing</em>, not <em>answering</em>: an <code>unlisted</code> agent MUST still answer <code>describe</code> when addressed directly by agent ID or handle, and MUST NOT appear in any listing. A <code>private</code> agent MAY refuse <code>describe</code> entirely.</li>
 <li>The same document SHOULD also be served over plain HTTPS by the agent&#39;s home mesh, so that parties outside the mesh, including ordinary web crawlers, can read the storefront without transport credentials. The RECOMMENDED convention is <code>&lt;home-mesh-URL&gt;/a/&lt;agent-id-or-handle&gt;</code> (the card&#39;s <code>mesh</code> endpoint field, SPEC-NAMING §5.1, plus the same <code>/a/</code> path shape the reference registrar already serves for cards), with <code>Cache-Control</code> reflecting the manifest&#39;s update cadence. On-mesh strangers use <code>describe</code>; the rest of the web uses the URL. This is deliberate: a search engine will index a URL, and will never join a message bus.</li>
 </ul>
-<p><strong>Response:</strong> an object with <code>agent_id</code>, the agent&#39;s registrar-signed card under <code>card</code> (SPEC-NAMING §5.3, present when the agent holds a handle), and the manifest <code>public</code> block verbatim under <code>public</code>. Absent optional parts are omitted, not nulled.</p>
+<p><strong>Response:</strong> an object with <code>agent_id</code>, the agent&#39;s registrar-signed card under <code>card</code> (SPEC-NAMING §5.3, present when the agent holds a handle), and the manifest <code>public</code> block verbatim under <code>public</code>. Absent optional parts are omitted, not nulled. The describe document is how the five questions of §3.3.1 are answered pre-admission.</p>
 <hr>
 <h2 id="11-streaming">11. Streaming<a class="hl" href="#11-streaming">#</a></h2>
 <p>Streaming is the delivery of incremental results for a single Task as an ordered sequence of messages.</p>
@@ -3006,6 +3578,11 @@ the reject cases are pinned in <code>conformance/cancel.json</code>.</p>
 <tr>
 <td><code>UNAUTHORIZED</code></td>
 <td>The requesting agent lacks permission for this operation.</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>SEALING_REQUIRED</code></td>
+<td>The agent declares <code>sealing: &quot;required&quot;</code> (Section 8.9) and this request arrived in the clear, so its content was not read. Not retryable as sent: the sender resolves the agent&#39;s manifest, seals to its verified <code>encryption_key</code>, and sends again. Also raised locally by a sender that is about to send to a <code>required</code> agent it cannot seal to.</td>
 <td>No</td>
 </tr>
 <tr>
@@ -3333,6 +3910,14 @@ into a declared meter event at delivery time, a responder cannot later
 disown a quantity it signed, and a recorded receipt is exactly as
 tamper-evident as the envelope it rode in on. What the signature proves is
 authorship, not truth: a signed claim is still a claim.</p>
+<p>A receipt is priced against something: a rate schedule, a meter definition, or
+an agreed unit price. That something can change after the receipt is
+signed, at which point the receipt still verifies and no longer describes the
+arrangement it was computed under. A responder SHOULD therefore declare what
+it priced against in <code>payload.rests_on</code> (§5.6), carried beside the usage
+report and covered by the same envelope signature. A reader that can see the
+cited schedule and finds a different digest has a <strong>stale</strong> receipt, not a
+forged one, and §5.6 states what follows from that distinction.</p>
 <p>Metering, like trace storage, is optional infrastructure: a minimal
 deployment records nothing, and nothing in this section adds an obligation
 between agents beyond the one already stated: a consumer folding meter
@@ -5255,6 +5840,12 @@ section wins, and the disagreement is a defect in this appendix.</p>
 <td><code>cancel.json</code></td>
 </tr>
 <tr>
+<td>11a</td>
+<td>When a failure has a reason, state it from the same enum, and back a <code>needs_not_furnished</code> with an <code>unmet_need</code> naming a need the offering actually declares</td>
+<td>§10.8, §10.8a</td>
+<td><code>cancel.json</code></td>
+</tr>
+<tr>
 <td>12</td>
 <td>Enforce agreements at admission where a paid SKU covers the offering: no unexpired agreement at the current digest → <code>AGREEMENT_REQUIRED</code> with <code>sku</code>, <code>sku_digest</code>, <code>approval_url</code></td>
 <td>§19.5</td>
@@ -5315,7 +5906,7 @@ section wins, and the disagreement is a defect in this appendix.</p>
 </tr>
 <tr>
 <td>7</td>
-<td>Cancel with a reason from the closed six-value enum; cancellation is effective when sent</td>
+<td>Cancel with a reason from the closed eight-value enum; cancellation is effective when sent</td>
 <td>§10.8</td>
 <td><code>cancel.json</code></td>
 </tr>

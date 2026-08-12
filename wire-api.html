@@ -159,6 +159,7 @@
         <a href="spec.html">/ specification</a>
         <a href="related-specs.html">/ related-specs</a>
         <a href="sdk-reference.html">/ sdk-reference</a>
+        <a href="cli.html">/ cli</a>
         <a href="adapter-cli.html">/ adapter-cli</a>
         <a href="what-it-sends.html">/ what-it-sends</a>
         <a href="implementation-status.html">/ implementation-status</a>
@@ -471,6 +472,11 @@
                   renewal is how revocation works.</td></tr>
               <tr><td>mesh.rooms.expel</td><td>request-reply</td>
                 <td><b>acl grade only, creator-only:</b> remove a member.</td></tr>
+              <tr><td>mesh.rooms.leave</td><td>request-reply</td>
+                <td><b>acl grade only:</b> a member removes itself from the room's admit
+                  list (EXT-5 &sect;8.3, extension version 1.7.0). The creator is refused
+                  and pointed at <code class="inline">mesh.rooms.reclaim</code>; leaving a
+                  room you already left succeeds quietly rather than erroring.</td></tr>
             </tbody>
           </table>
           <div class="callout">

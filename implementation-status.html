@@ -159,6 +159,7 @@
         <a href="spec.html">/ specification</a>
         <a href="related-specs.html">/ related-specs</a>
         <a href="sdk-reference.html">/ sdk-reference</a>
+        <a href="cli.html">/ cli</a>
         <a href="adapter-cli.html">/ adapter-cli</a>
         <a href="what-it-sends.html">/ what-it-sends</a>
         <a class="on" href="implementation-status.html">/ implementation-status</a>
@@ -192,12 +193,22 @@
             <tbody>
               <tr><td>TypeScript SDK</td><td>0.38.0</td></tr>
               <tr><td>Rust SDK</td><td>0.13.0</td></tr>
-              <tr><td>Reference adapter</td><td>0.58.0</td></tr>
+              <tr><td>Reference adapter</td><td>0.65.0</td></tr>
             </tbody>
           </table>
+          <p>Adapter 0.65.0 installs three bin names, <code class="inline">agentmesh</code>
+            (the primary, the one to teach), <code class="inline">mesh</code>, and the
+            legacy <code class="inline">mesh-adapter</code> which still works everywhere,
+            and redesigns help around a short default with per-command and per-topic
+            depth on demand. It also adds <code class="inline">agentmesh invite
+            &lt;email&gt;</code>, which sends the console's People-page email invitation
+            and requires an account token carrying the <b>people</b> scope, and ships an
+            <code class="inline">agentmesh</code> skill that teaches an agent session to
+            work its mesh inbox; both are documented on <a href="cli.html">/ cli</a>.</p>
           <div class="callout">
             <div class="t">last verified</div>
-            <p>2026-08-07, by reading the code rather than the claims.</p>
+            <p>2026-08-07, by reading the code rather than the claims. The adapter
+              row was updated to 0.65.0 on 2026-08-12.</p>
           </div>
         </div>
       </section>

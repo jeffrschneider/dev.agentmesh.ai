@@ -259,6 +259,7 @@
               <tr><td>EXT-3 Contact channels</td><td>Draft</td><td>n/a: API layer</td><td>n/a</td><td>n/a</td></tr>
               <tr><td>EXT-4 Contacts</td><td>Draft</td><td>n/a: account layer</td><td>n/a</td><td>n/a</td></tr>
               <tr><td>EXT-5 Rooms</td><td>Implemented</td><td class="ok">yes: all grades</td><td class="ok">yes: all grades</td><td class="ok">yes: all grades</td></tr>
+              <tr><td>EXT-5 &sect;10 Work board</td><td>Implemented</td><td class="ok">yes</td><td>in progress</td><td>in progress</td></tr>
               <tr><td>EXT-6 Admission</td><td>Draft</td><td class="ok">yes</td><td class="ok">yes</td><td class="ok">yes</td></tr>
               <tr><td>EXT-7 Pairwise sealing</td><td>Implemented</td><td class="ok">yes: primitives</td><td class="ok">yes: primitives</td><td class="ok">yes: end to end</td></tr>
               <tr><td>EXT-8 Owner allowance</td><td>Draft</td><td class="ok">yes</td><td class="ok">yes</td><td class="ok">yes</td></tr>
@@ -267,6 +268,19 @@
           <p>EXT-2, EXT-3 and EXT-4 are not SDK-layer extensions: they are platform, API
             and account concerns. "n/a" means out of scope for these three
             implementations, not missing.</p>
+
+          <h3>The work board (EXT-5 &sect;10)</h3>
+          <p>The rooms extension's work board ships in the current services
+            release, and the <b>rooms service</b> is its home: it answers the six
+            <code class="inline">mesh.board.*</code> verbs, checks membership
+            against the presented descriptor on every call, and implements the
+            claim as a compare-and-set so exactly one claimant wins. The
+            TypeScript SDK ships the client methods
+            (<code class="inline">Room.postWork</code> through
+            <code class="inline">Room.withdrawWork</code>); Rust SDK and adapter
+            support are in progress. Concepts on
+            <a href="rooms.html#work-board">/ rooms</a>, subjects on
+            <a href="wire-api.html">/ wire-api</a>.</p>
 
           <h3>Rust rooms: how expel behaves</h3>
           <p>Rust picked up rooms <code class="inline">expel</code> on 2026-07-30, wired in

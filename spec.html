@@ -175,7 +175,7 @@
           <span>status <b>Working Draft</b></span>
           <span>date <b>2026-08-11</b></span>
         </div>
-        <p class="canon">Rendered 2026-08-11 from commit <span class="mono">9ec2243</span>.
+        <p class="canon">Rendered 2026-08-12 from commit <span class="mono">2293abb</span>.
           The canonical source is SPEC.md, published with the conformance suite at
           <a href="https://github.com/jeffrschneider/agentmesh-protocol">https://github.com/jeffrschneider/agentmesh-protocol</a>
           (the <span class="mono">conformance/</span> fixtures this specification cites live there).</p>
@@ -4504,6 +4504,13 @@ primitive layer, not the wire layer.</p>
 <td>1h</td>
 <td>1</td>
 <td>Session metadata</td>
+</tr>
+<tr>
+<td><code>mesh_board_items</code></td>
+<td><code>{room_id}.{item_id}</code></td>
+<td>None</td>
+<td>3</td>
+<td>Work-board items (EXT-5 §10): claim is a revision-checked compare-and-set; items die with their room</td>
 </tr>
 </tbody></table>
 <p>Tasks (Section 7) are persisted in the <code>mesh_tasks</code> KV bucket keyed by <code>task_id</code>; this KV entry is the authoritative source of truth for task state and is updated on every state transition. Task status and artifact updates are published to <code>mesh.task.{task_id}.update</code> subjects, which the Task Manager consumes; the <code>MESH_TASKS</code> stream captures these for delivery guarantees, while the KV bucket remains canonical for lookups.</p>

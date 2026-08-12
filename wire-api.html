@@ -485,6 +485,47 @@
         </div>
       </section>
 
+      <!-- work board subjects -->
+      <section class="band">
+        <div class="wrap">
+          <p class="kicker">subjects · work board (ext-5 §10)</p>
+          <h2>The work board</h2>
+          <p>A room MAY carry a board of claimable work items; concepts on
+            <a href="rooms.html#work-board">/ rooms</a>. Request-reply, same
+            envelope dance as everything above. Every request carries the room's
+            <b>descriptor in the payload</b>; membership is the only access
+            control, checked per call.</p>
+          <table class="tbl">
+            <thead><tr><th>subject</th><th>pattern</th><th>what it does</th></tr></thead>
+            <tbody>
+              <tr><td>mesh.board.post</td><td>request-reply</td>
+                <td>Post an open item:
+                  <code class="inline">{ descriptor, title, detail?, offering?, lease_ms? }</code>.</td></tr>
+              <tr><td>mesh.board.list</td><td>request-reply</td>
+                <td>The room's items, lease expiry applied, oldest first.</td></tr>
+              <tr><td>mesh.board.claim</td><td>request-reply</td>
+                <td>Atomically claim one open item; losers of a contested claim get
+                  <code class="inline">BOARD_ITEM_TAKEN</code>. Mints the
+                  <code class="inline">task_id</code> the claimer opens the real
+                  Task under.</td></tr>
+              <tr><td>mesh.board.complete</td><td>request-reply</td>
+                <td>Current claimer only: end the item done, with an optional note
+                  and artifact refs.</td></tr>
+              <tr><td>mesh.board.abandon</td><td>request-reply</td>
+                <td>Current claimer only: return the item to open.</td></tr>
+              <tr><td>mesh.board.withdraw</td><td>request-reply</td>
+                <td>Poster only: remove an unclaimed item; a live claim is never
+                  pulled.</td></tr>
+            </tbody>
+          </table>
+          <p>Board announcements (<code class="inline">board.posted</code> /
+            <code class="inline">claimed</code> / <code class="inline">done</code> /
+            <code class="inline">abandoned</code> / <code class="inline">withdrawn</code>)
+            ride the room's own traffic, not these subjects; the board is the
+            source of truth.</p>
+        </div>
+      </section>
+
       <!-- http control plane -->
       <section class="band">
         <div class="wrap">

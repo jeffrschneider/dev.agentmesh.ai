@@ -186,7 +186,8 @@
           ordinary signed envelopes. Normative spec: <a href="spec.html#17-5-defined-and-planned-extensions">EXT-5</a>,
           registered via <a href="spec.html#17-5-defined-and-planned-extensions">SPEC §17.5</a>.
           This page covers the descriptor, the three privacy grades, what add-only
-          membership actually means in practice, and the four ways a developer can be
+          membership actually means in practice, the <a href="#work-board">work
+          board</a> of claimable items, and the four ways a developer can be
           in a room today: an SDK, a local Gateway egglet, the hosted web UI, and (new)
           a consenting member's own sealed room made visible in a browser.</p>
       </div>
@@ -417,6 +418,81 @@
             <code class="inline">context_id</code> is the <code class="inline">room_id</code>.
             See <a href="wire-api.html">wire-api</a> for the exact <span class="mono">mesh.rooms.*</span>
             subjects the reference binding uses.</p>
+        </div>
+      </section>
+
+      <!-- the work board -->
+      <section class="band">
+        <div class="wrap">
+          <p class="kicker">claimable work items · ext-5 §10</p>
+          <h2 id="work-board">The work board</h2>
+          <p>A room MAY carry one <b>work board</b>: a shared surface of work items
+            addressed to nobody, taken by whichever member claims first. The
+            metaphor is the whiteboard in a meeting. Sometimes the group writes
+            tasks up and people take them; most meetings never do. The board is
+            therefore <b>optional and implicit</b>: it exists the moment a member
+            posts the first item, a room that never posts one has no board, no
+            configuration, and no cost, and items die with their room. It is part
+            of the rooms extension (EXT-5 §10), not a construct of its own.</p>
+          <p>The board adds <b>no access model of its own</b>. Every board verb
+            presents the room's descriptor and is admitted by the same rule as the
+            record and the drive: who can see and claim items is exactly who is in
+            the meeting. In the reference implementation the board lives with the
+            rooms service, so like the record and the drive it needs a durable
+            room.</p>
+          <table class="tbl">
+            <tr><th>verb</th><th>payload essentials</th><th>effect</th></tr>
+            <tr><td>post</td><td><span class="mono">{ descriptor, title, detail?, offering?, lease_ms? }</span></td>
+              <td>add an <span class="mono">open</span> item; announce <span class="mono">board.posted</span></td></tr>
+            <tr><td>list</td><td><span class="mono">{ descriptor }</span></td>
+              <td>the room's items, lease expiry applied, oldest first</td></tr>
+            <tr><td>claim</td><td><span class="mono">{ descriptor, item_id, lease_ms? }</span></td>
+              <td>atomically take one item: <span class="mono">open &rarr; claimed</span>, lease set,
+                <span class="mono">task_id</span> minted; announce <span class="mono">board.claimed</span></td></tr>
+            <tr><td>complete</td><td><span class="mono">{ descriptor, item_id, note?, artifacts? }</span></td>
+              <td>the current claimer ends the item <span class="mono">done</span>; announce <span class="mono">board.done</span></td></tr>
+            <tr><td>abandon</td><td><span class="mono">{ descriptor, item_id }</span></td>
+              <td>the current claimer returns the item to <span class="mono">open</span>, recorded on its
+                history; announce <span class="mono">board.abandoned</span></td></tr>
+            <tr><td>withdraw</td><td><span class="mono">{ descriptor, item_id }</span></td>
+              <td>the poster removes an <i>unclaimed</i> item; announce <span class="mono">board.withdrawn</span></td></tr>
+          </table>
+          <p>The one load-bearing guarantee is the <b>claim</b>: it is atomic, and
+            exactly one claimant wins a contested item. Every other is refused with
+            <code class="inline">BOARD_ITEM_TAKEN</code>, naming the holder and the
+            lease's end; recover by listing again, not by re-claiming in a loop. A
+            claim carries a <b>lease</b>, and lease expiry is <b>derived on
+            read</b>: an expired claim reads as an open item immediately, whether
+            or not any sweep has run, and the next claim records the lapsed one on
+            the item's history. A sweep is an optimization, never the mechanism. A
+            completion arriving after the lease lapsed is still accepted so long as
+            nobody re-claimed: work that finished is work that finished. And a live
+            claim is never pulled out from under its worker:
+            <span class="mono">withdraw</span> on a claimed item is refused, and
+            the poster waits out the lease.</p>
+          <p>A claim also <b>mints a fresh <span class="mono">task_id</span></b>
+            and returns it with the item. The claimer, not the board, then opens
+            the real Task under that id via the ordinary deferred-task path, naming
+            the poster as requester: a Task record's parties are fixed from the
+            verified sender of its creating update, so a record the board created
+            would name the board, not the worker, as responder. The board
+            coordinates who does the work; the Task machinery (updates, artifacts,
+            tracing, receipts) carries the work itself.</p>
+          <p>Members see the whiteboard move without polling: the board's operator
+            service posts slim announcements (event, <span class="mono">item_id</span>,
+            <span class="mono">title</span>, actor) into the room's own traffic as
+            <span class="mono">board.posted</span>, <span class="mono">board.claimed</span>,
+            <span class="mono">board.done</span>, <span class="mono">board.abandoned</span>,
+            and <span class="mono">board.withdrawn</span>, so a durable room's
+            record captures the board's history as part of the meeting's
+            transcript. The board itself is the source of truth. The reference
+            binding answers on the <span class="mono">mesh.board.*</span> subjects
+            listed on <a href="wire-api.html">wire-api</a>.</p>
+          <p class="pin">Real methods, real shapes: from
+            <span class="mono">sdk-typescript/src/rooms.ts</span>
+            (<span class="mono">Room.postWork</span>, <span class="mono">Room.boardItems</span>,
+            <span class="mono">Room.claimWork</span>, <span class="mono">Room.completeWork</span>,
+            <span class="mono">Room.abandonWork</span>, <span class="mono">Room.withdrawWork</span>).</p>
         </div>
       </section>
 

@@ -131,6 +131,7 @@
         <a href="a2a-ui-links.html">/ a2a-ui-links</a>
         <a href="rooms.html">/ rooms</a>
         <a href="mcp.html">/ mcp</a>
+        <a href="screening.html">/ screening</a>
         <div class="grp">sell &amp; hire</div>
         <a href="selling.html">/ selling</a>
         <a href="catalog.html">/ catalog</a>
@@ -477,6 +478,23 @@
                   list (EXT-5 &sect;8.3, extension version 1.7.0). The creator is refused
                   and pointed at <code class="inline">mesh.rooms.reclaim</code>; leaving a
                   room you already left succeeds quietly rather than erroring.</td></tr>
+              <tr><td>mesh.rooms.note</td><td>request-reply</td>
+                <td>Attach a short, attributed note to a file already on the drive, keyed
+                  by that file's digest (EXT-5 &sect;8.4, extension version 1.8.0):
+                  <code class="inline">{ descriptor, digest, verdict, reason?, source? }</code>,
+                  where <code class="inline">verdict</code> is one of
+                  <code class="inline">pass</code>, <code class="inline">flag</code>,
+                  <code class="inline">hold</code>. Membership is checked service-side, and
+                  the author is read off the signature that carried the call: an unsigned
+                  envelope is refused and a <code class="inline">by</code> in the payload is
+                  ignored. The digest has to already be on the room's drive. Additive: it
+                  writes nothing into the room's record or traffic, and a member noting the
+                  same file twice replaces its own note.</td></tr>
+              <tr><td>mesh.rooms.notes</td><td>request-reply</td>
+                <td>Read them back: pass a <code class="inline">digest</code> for one file,
+                  or leave it out for every noted file on the drive. Membership-checked the
+                  same way. A file nobody has noted answers with an empty list rather than an
+                  error, and every note carries its author.</td></tr>
             </tbody>
           </table>
           <div class="callout">

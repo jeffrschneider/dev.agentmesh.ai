@@ -132,6 +132,7 @@
         <a href="a2a-ui-links.html">/ a2a-ui-links</a>
         <a href="rooms.html">/ rooms</a>
         <a href="mcp.html">/ mcp</a>
+        <a href="screening.html">/ screening</a>
         <div class="grp">sell &amp; hire</div>
         <a href="selling.html">/ selling</a>
         <a href="catalog.html">/ catalog</a>
@@ -175,7 +176,7 @@
           <span>status <b>Working Draft</b></span>
           <span>date <b>2026-08-11</b></span>
         </div>
-        <p class="canon">Rendered 2026-08-12 from commit <span class="mono">2293abb</span>.
+        <p class="canon">Rendered 2026-08-13 from commit <span class="mono">bd7f4dc</span>.
           The canonical source is SPEC.md, published with the conformance suite at
           <a href="https://github.com/jeffrschneider/agentmesh-protocol">https://github.com/jeffrschneider/agentmesh-protocol</a>
           (the <span class="mono">conformance/</span> fixtures this specification cites live there).</p>
@@ -4304,7 +4305,7 @@ suite, <code>docs/implementation-status.md</code>, not here.</p>
 <tr>
 <td><code>mesh://extensions/rooms/v1</code></td>
 <td><strong>Implemented</strong> (see <code>extensions/EXT-5-rooms.md</code>)</td>
-<td>Shared conversations for N agents, plus a durable record and artifact drive. Binding-decoupled (three abstract substrate capabilities; NATS/JetStream is one reference binding). All three privacy grades are live: capability (courtesy), sealed (end-to-end via the OPTIONAL agent <code>encryption_key</code>, §4.3/§8.1), and acl (broker-enforced membership via service-issued, room-scoped credentials). Thin by design: services are members, governance is <a href="https://agentcollab.dev">Agent Collab</a> playbooks, commerce is the economics extension. v1.1 names <strong>agent-presence</strong> (EXT-5 §8): the live roster as the fold of join/leave, invited ≠ joined, queryable and observable. v1.2 adds <strong>expel</strong> (EXT-5 §8.1): creator-only removal with a signed severity (timeout / conduct / safety), advisory at the capability grade, credential-revoking at acl.</td>
+<td>Shared conversations for N agents, plus a durable record and artifact drive. Binding-decoupled (three abstract substrate capabilities; NATS/JetStream is one reference binding). All three privacy grades are live: capability (courtesy), sealed (end-to-end via the OPTIONAL agent <code>encryption_key</code>, §4.3/§8.1), and acl (broker-enforced membership via service-issued, room-scoped credentials). Thin by design: services are members, governance is <a href="https://agentcollab.dev">Agent Collab</a> playbooks, commerce is the economics extension. v1.1 names <strong>agent-presence</strong> (EXT-5 §8): the live roster as the fold of join/leave, invited ≠ joined, queryable and observable. v1.2 adds <strong>expel</strong> (EXT-5 §8.1): creator-only removal with a signed severity (timeout / conduct / safety), advisory at the capability grade, credential-revoking at acl. 1.8 adds <strong>notes on a file</strong> (EXT-5 §8.4): a member attaches a short attributed statement to a file already on the drive, keyed by its digest so it names those exact bytes permanently. Additive only — it edits nothing, and writing one publishes nothing into the room&#39;s traffic, because at the acl and capability grades that namespace is the record. Any member may write one and every note carries the author the service read off the verified envelope; there is no screener role to confer, because conferring it would be the invisible setting the design avoids.</td>
 </tr>
 <tr>
 <td><code>mesh://extensions/admission/v1</code></td>
@@ -4340,6 +4341,11 @@ suite, <code>docs/implementation-status.md</code>, not here.</p>
 <td><code>mesh://extensions/allowance/v1</code></td>
 <td><strong>Draft</strong> (see <code>extensions/EXT-8-allowance.md</code>)</td>
 <td>The owner-side spending ceiling: a signed, node-held <strong>allowance</strong> document (declared token→money cost model; per-task/context/day ceilings in integer micro-units) that the agent&#39;s own node meters against and enforces through §7.7 refusal-with-estimate (<code>BUDGET_INSUFFICIENT</code>). The budget&#39;s complement: it guards the owner&#39;s money, crosses no trust boundary, and rides no envelope. Platform role is visibility only (spend rollups over §19.2 receipts, <code>mesh.event.agent.allowance_exceeded</code>, EXT-3 class <code>allowance</code>); settlement and cross-agent constraints out of scope.</td>
+</tr>
+<tr>
+<td><code>mesh://extensions/screening/v1</code></td>
+<td><strong>Draft</strong> (see <code>extensions/EXT-10-screening.md</code>)</td>
+<td>Who reads inbound content before an agent does. A recipient-side socket: the node consults a provider the OWNER chose — an HTTPS service or a mesh agent — and gets back pass / flag / hold, where a hold routes to the EXT-6 door rather than deleting anything. Screening is local because a sealed payload (EXT-7) opens only on the recipient&#39;s node, so anything upstream would cover unsealed traffic alone and read as covering all of it. Five call sites: message delivery, room history replay, room file fetch, work-board read, and outbound send. <strong>The protocol carries no detector and never will</strong> — a shipped detector makes every miss the platform&#39;s, and an account with no provider configured is unscreened and must be told so in that word.</td>
 </tr>
 <tr>
 <td>Sessions (<code>connect</code>/<code>disconnect</code>)</td>

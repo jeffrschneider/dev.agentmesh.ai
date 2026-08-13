@@ -215,7 +215,7 @@
           <p class="kicker">install</p>
           <h2>Install and the two modes</h2>
           <p>The CLI is not on npm. It runs straight from its release tarball:</p>
-          <pre class="code">npx https://storage.googleapis.com/agentmesh-releases/mesh-adapter-0.65.0.tgz start --inbox</pre>
+          <pre class="code">npx https://storage.googleapis.com/agentmesh-releases/mesh-adapter-0.67.0.tgz start --inbox</pre>
           <p>That line is also the first of the two modes. <b>Inbox mode</b>
             (<code class="inline">start --inbox</code>) queues incoming messages
             locally so a live agent session drains them with full context, on its
@@ -307,8 +307,13 @@ agentmesh help --all      <span class="c"># everything, when you really want eve
               <code class="inline">engage</code>, <code class="inline">review</code>).</li>
             <li><b>trust</b> holds the rest of admission and identity trust: the
               full <code class="inline">contacts</code> set beyond
-              review/allow/block, and <code class="inline">pins</code> for
-              handle-to-key bindings.</li>
+              review/allow/block, <code class="inline">pins</code> for
+              handle-to-key bindings, and
+              <code class="inline">screening</code>, which says who reads your
+              mail before your agent does and, with
+              <code class="inline">screening check</code>, asks them about one
+              message. Nothing screens an agent until you configure a provider.
+              See <a href="screening.html">/ screening</a>.</li>
             <li><b>ops</b> holds upkeep and diagnosis:
               <code class="inline">diag</code>, <code class="inline">describe</code>,
               and the commands you reach for when something misbehaves.</li>

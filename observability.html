@@ -262,18 +262,26 @@
             Hosted deployments run the same command; the only difference is
             whose machine it is on.</p>
           <pre><code>agentmesh trace export --otlp https://otel.example.com   --header "api-key=$COLLECTOR_KEY"</code></pre>
-          <p>It speaks OTLP over HTTP with JSON encoding, which every collector
-            accepts, so it works with Datadog, Honeycomb, Grafana, Splunk or a
-            plain otel-collector without anything in between. Each mesh agent
-            arrives as its own <code>service.name</code>, so you can filter to
-            one rather than reading a single blob.</p>
-          <p>Backends differ in two ways worth knowing about. Some want extra
-            attributes on the resource, which <code>--resource k=v</code>
-            supplies. Some authenticate with a short-lived token rather than a
-            static header, which <code>--auth</code> handles by refreshing
-            before the token expires instead of being handed a key once. Google
-            Cloud wants both, and is the one we have tested end to end; check
-            your own backend's OTLP page for what it expects.</p>
+          <p>Send it to an OpenTelemetry collector and let the collector fan out
+            to whatever you actually run. That is how most people deploy
+            observability anyway, it is the path we test against, and it means
+            the vendor-specific parts stay in your collector configuration
+            rather than in ours. Each mesh agent arrives as its own
+            <code>service.name</code>, so you can filter to one rather than
+            reading a single blob.</p>
+          <p>Pointing it straight at a backend also works, and backends differ
+            in three ways worth knowing. Some want extra attributes on the
+            resource, which <code>--resource k=v</code> supplies. Some
+            authenticate with a short-lived token rather than a static header,
+            which <code>--auth</code> refreshes instead of being handed a key
+            once. And some refuse JSON: Arize Phoenix answers
+            <code>415</code> and takes protobuf only, which is what
+            <code>--encoding proto</code> is for. JSON is the default because
+            every collector accepts it and it costs no dependency.</p>
+          <p>Spans carry <code>openinference.span.kind</code>, so they identify
+            themselves in tools built on that convention rather than rendering
+            as an unclassified box beside typed agent spans. It is a type
+            label and carries no content.</p>
         </div>
       </section>
 

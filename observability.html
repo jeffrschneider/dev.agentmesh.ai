@@ -267,6 +267,13 @@
             plain otel-collector without anything in between. Each mesh agent
             arrives as its own <code>service.name</code>, so you can filter to
             one rather than reading a single blob.</p>
+          <p>Backends differ in two ways worth knowing about. Some want extra
+            attributes on the resource, which <code>--resource k=v</code>
+            supplies. Some authenticate with a short-lived token rather than a
+            static header, which <code>--auth</code> handles by refreshing
+            before the token expires instead of being handed a key once. Google
+            Cloud wants both, and is the one we have tested end to end; check
+            your own backend's OTLP page for what it expects.</p>
         </div>
       </section>
 
@@ -313,33 +320,6 @@
         </div>
       </section>
 
-      <section class="band">
-        <div class="wrap">
-          <p class="kicker">sending to google cloud</p>
-          <h2>Google needs a project attribute and a refreshed token</h2>
-          <p>Google's Telemetry API accepts OTLP over HTTP with JSON encoding,
-            which is what the exporter already speaks. Two things are worth
-            knowing before you point at it. It requires a project attribute on
-            the resource and refuses the whole payload without it. And it
-            authenticates with a short-lived token rather than a static header,
-            so a long-running exporter has to refresh rather than being handed
-            a key once.</p>
-          <p>These are the settings for Google specifically, tested against it.
-            Other backends we have not tested may want the same shape, may want
-            a static header, or may want something else again; the flags below
-            are general and the values are not.</p>
-          <pre><code>agentmesh trace export   --otlp https://telemetry.googleapis.com   --auth gcp   --resource "gcp.project_id=YOUR_PROJECT"</code></pre>
-          <p><code>--auth gcp</code> takes a token from the instance metadata
-            server and refreshes it before it expires, so on a Google Cloud VM
-            there is no stored credential at all and nothing to rotate. The
-            service account needs the Cloud Telemetry Writer role.</p>
-          <p>One thing to expect once data is flowing: a trace fetched by id
-            comes back complete, while the same spans can take a while to turn
-            up in searches and time-range listings. If a trace you know you sent
-            is not in the Trace Explorer list, look it up by id before assuming
-            the pipeline is broken.</p>
-        </div>
-      </section>
 
       <section class="band">
         <div class="wrap">

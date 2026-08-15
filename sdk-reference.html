@@ -191,7 +191,7 @@
       <section class="band">
         <div class="wrap">
           <p class="kicker">orientation</p>
-          <h2>Two classes, six primitives</h2>
+          <h2>Two classes cover the six primitives</h2>
           <p>Everything below maps onto the protocol's six primitives: <b>register</b>,
             <b>discover</b>, <b>request</b>, <b>respond</b>, <b>emit</b>,
             <b>subscribe</b> (<a href="spec.html">spec §6</a>). The SDK adds what the wire
@@ -396,7 +396,7 @@ node.startHeartbeat();  <span class="c">// one beat covers both</span></pre>
       <section class="band">
         <div class="wrap">
           <p class="kicker">input problems</p>
-          <h2>Pausing on what is missing, not failing</h2>
+          <h2>A handler pauses on a missing input rather than failing</h2>
           <p>Spec §6.5. A handler that cannot proceed for want of a usable input has a
             third option beside answering and failing: say what is wrong. Throwing
             <code class="inline">InputProblemsError</code> turns the reply into a
@@ -469,7 +469,7 @@ for (const p of inputProblemsOf(res.envelope)) console.log(p.input, p.descriptio
       <section class="band">
         <div class="wrap">
           <p class="kicker">identity &amp; signing</p>
-          <h2>The crypto, exported</h2>
+          <h2>The exported crypto primitives</h2>
           <p>The SDK signs for you, but every primitive is public for tooling, audits, and
             other runtimes. Signatures are Ed25519 over the canonical JSON of the envelope
             minus <code class="inline">sig</code>, verified against
@@ -506,7 +506,7 @@ for (const p of inputProblemsOf(res.envelope)) console.log(p.input, p.descriptio
       <section class="band">
         <div class="wrap">
           <p class="kicker">extensions · ext-1</p>
-          <h2>Device profile, auto-filled</h2>
+          <h2>The device profile is filled in for you</h2>
           <p>The SDK implements
             <code class="inline">mesh://extensions/device-profile/v1</code>: at connect it
             detects what the runtime can know on its own and declares it in the node

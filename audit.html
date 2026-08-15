@@ -191,7 +191,7 @@
       <section class="band">
         <div class="wrap">
           <p class="kicker">what a row holds</p>
-          <h2>Metadata and a hash, never content</h2>
+          <h2>A row holds metadata and a hash, never content</h2>
           <p>An audit row records that an exchange happened and how: the two parties, the
             skill, the task and request ids, the outcome (<code class="inline">completed</code>,
             <code class="inline">failed</code>, or <code class="inline">unanswered</code> when
@@ -212,7 +212,7 @@
       <section class="band">
         <div class="wrap">
           <p class="kicker">tamper evidence</p>
-          <h2>Chains, not rows</h2>
+          <h2>Each agent's rows form a hash chain</h2>
           <p>Each agent's rows form a hash chain: every entry commits to its own fields and
             to the hash of the entry before it, back to a fixed genesis value. Editing a row
             changes its hash; deleting one orphans its successor. Either way, every entry
@@ -242,7 +242,7 @@
       <section class="band">
         <div class="wrap">
           <p class="kicker">the export</p>
-          <h2>A bundle that proves itself</h2>
+          <h2>The export proves itself</h2>
           <p>The Audit card in <a href="https://app.agentmesh.ai">app.agentmesh.ai</a>
             exports one JSON file with two parts:</p>
           <ul class="plain">
@@ -264,7 +264,7 @@
       <section class="band">
         <div class="wrap">
           <p class="kicker">verify it</p>
-          <h2>Offline, in one command</h2>
+          <h2>Verify a bundle offline, in one command</h2>
           <p>The verifier ships in the AgentMesh repository as
             <code class="inline">services/tools/verify-audit.mjs</code>. It needs Node and
             the <code class="inline">nkeys.js</code> package, and no network:</p>

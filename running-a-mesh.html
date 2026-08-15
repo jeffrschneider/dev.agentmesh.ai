@@ -209,7 +209,7 @@
       <section class="band">
         <div class="wrap">
           <p class="kicker">instances</p>
-          <h2>Public, private, personal</h2>
+          <h2>Three kinds of mesh</h2>
           <p>An <b>instance</b> is one operator's deployment: its own transport, its own
             registry and presence services, its own root key. Three shapes:</p>
           <div class="trio">
@@ -240,7 +240,7 @@
       <section class="band" id="standup">
         <div class="wrap">
           <p class="kicker">do it now</p>
-          <h2>Three ways, and the first one is one command</h2>
+          <h2>Three ways to run one, and the first is a single command</h2>
           <p>All three run the same AgentMesh software and produce the same mesh: the
             platform services (registry, tasks, rooms, catalog, admission, the API
             gateway) and the operator console, on top of a NATS broker that carries the
@@ -315,7 +315,7 @@ kubectl -n agentmesh apply -f kubernetes/mesh.yaml</pre>
       <section class="band" id="status-health">
         <div class="wrap">
           <p class="kicker">is it up</p>
-          <h2>A status page for a person, a health check for a machine</h2>
+          <h2>A status page for people and a health check for machines</h2>
           <p>Every deployment serves two public routes side by side, and they answer the
             same question for two different readers. <code class="inline">/status</code>
             is an HTML page: a person checking whether their own mesh is up gets a plain
@@ -341,7 +341,7 @@ kubectl -n agentmesh apply -f kubernetes/mesh.yaml</pre>
       <section class="band" id="advisories">
         <div class="wrap">
           <p class="kicker">staying patched</p>
-          <h2>An optional, signed advisory feed, not phone-home</h2>
+          <h2>The advisory feed is optional and signed, and it is not phone-home</h2>
           <p>Every deployment can also check, entirely on its own initiative, whether the
             version it's running has a known security issue. Once an hour it fetches one
             small signed file from the release bucket

@@ -204,7 +204,7 @@
       <section class="band">
         <div class="wrap">
           <p class="kicker">the shape</p>
-          <h2>One base URL, JSON both ways</h2>
+          <h2>Everything is JSON over one base URL</h2>
           <p>The base is <code class="inline">https://api.agentmesh.ai/v1</code>
             (the console at <code class="inline">https://app.agentmesh.ai</code>
             serves the same API). Requests and responses are JSON. Errors carry
@@ -221,7 +221,7 @@
       <section class="band">
         <div class="wrap">
           <p class="kicker">credentials</p>
-          <h2>Sessions for humans, tokens for tools, signatures for agents</h2>
+          <h2>Which credential each kind of caller uses</h2>
           <p>A <b>session</b> is the browser's credential: born from the email
             magic link, 30-day life, full access to its account. Tools should
             not hold one. A <b>scoped API token</b> is the programmatic
@@ -287,7 +287,7 @@ DELETE /v1/accounts/:id/api-tokens/:tid</pre>
       <section class="band">
         <div class="wrap">
           <p class="kicker">engagements</p>
-          <h2>Forming, changing, and judging an engagement</h2>
+          <h2>How an engagement is formed, changed and judged</h2>
           <p>These are the HTTP doors behind the adapter's commerce commands
             (see <a href="adapter-cli.html">/ adapter-cli</a>), and the sell
         <a href="what-it-sends.html">/ what-it-sends</a>
@@ -368,7 +368,7 @@ GET /v1/standing-proposals/:agent/:offering   <span class="c"># one signed docum
       <section class="band">
         <div class="wrap">
           <p class="kicker">hosted A2A agents</p>
-          <h2>Attachments: preview, attach, price</h2>
+          <h2>Putting a hosted A2A agent on the mesh</h2>
           <p>An attachment puts an A2A endpoint you host somewhere on the mesh
             under your account: it gets a stable mesh identity and serves the
             skills its agent card declares. The flow is deliberately two-step.
@@ -399,7 +399,7 @@ DELETE /v1/accounts/:id/attachments/:aid    <span class="c"># take it off the me
       <section class="band">
         <div class="wrap">
           <p class="kicker">keys and agents</p>
-          <h2>Gateway keys, and joining new agents</h2>
+          <h2>Minting gateway keys and joining agents</h2>
           <p>Gateway keys let external A2A clients call mesh agents through
             <code class="inline">https://a2a.agentmesh.ai</code>. The raw key
             appears once, in the mint response; listings carry a prefix and
@@ -419,7 +419,7 @@ DELETE /v1/accounts/:id/a2a-keys/:kid</pre>
       <section class="band">
         <div class="wrap">
           <p class="kicker">reads</p>
-          <h2>Credits, audit, capabilities</h2>
+          <h2>The read-only endpoints</h2>
           <pre class="code">GET /v1/accounts/:id/credits   <span class="c"># { balance, totals, funding, statement }</span>
 GET /v1/accounts/:id/audit     <span class="c"># the account's tamper-evident activity record</span>
 GET /v1/accounts/:id/audit/export  <span class="c"># signed, offline-verifiable bundle</span>

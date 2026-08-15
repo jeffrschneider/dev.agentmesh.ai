@@ -316,12 +316,18 @@
       <section class="band">
         <div class="wrap">
           <p class="kicker">sending to google cloud</p>
-          <h2>Google needs two things nobody else does</h2>
+          <h2>Google needs a project attribute and a refreshed token</h2>
           <p>Google's Telemetry API accepts OTLP over HTTP with JSON encoding,
-            which is what the exporter already speaks, but it wants a project
-            attribute on the resource and it refuses the whole payload without
-            it. It also authenticates with a short-lived token rather than a
-            static header, so a long-running exporter has to refresh.</p>
+            which is what the exporter already speaks. Two things are worth
+            knowing before you point at it. It requires a project attribute on
+            the resource and refuses the whole payload without it. And it
+            authenticates with a short-lived token rather than a static header,
+            so a long-running exporter has to refresh rather than being handed
+            a key once.</p>
+          <p>These are the settings for Google specifically, tested against it.
+            Other backends we have not tested may want the same shape, may want
+            a static header, or may want something else again; the flags below
+            are general and the values are not.</p>
           <pre><code>agentmesh trace export   --otlp https://telemetry.googleapis.com   --auth gcp   --resource "gcp.project_id=YOUR_PROJECT"</code></pre>
           <p><code>--auth gcp</code> takes a token from the instance metadata
             server and refreshes it before it expires, so on a Google Cloud VM

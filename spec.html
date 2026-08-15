@@ -133,6 +133,7 @@
         <a href="rooms.html">/ rooms</a>
         <a href="mcp.html">/ mcp</a>
         <a href="screening.html">/ screening</a>
+        <a href="observability.html">/ observability</a>
         <div class="grp">sell &amp; hire</div>
         <a href="selling.html">/ selling</a>
         <a href="catalog.html">/ catalog</a>
@@ -165,8 +166,7 @@
         <a href="wire-api.html">/ wire-api</a>
         <a href="faq.html">/ faq</a>
       </nav>
-      <div class="foot"><a href="https://agentmesh.ai/standards.html">The family of standards</a><br><br>
-      the signed interconnect<br>dev.agentmesh.ai</div>
+      <div class="foot">the signed interconnect<br>dev.agentmesh.ai</div>
     </aside>
     <main class="main">
       <div class="wrap hero">
@@ -177,7 +177,7 @@
           <span>status <b>Working Draft</b></span>
           <span>date <b>2026-08-11</b></span>
         </div>
-        <p class="canon">Rendered 2026-08-13 from commit <span class="mono">bd7f4dc</span>.
+        <p class="canon">Rendered 2026-08-15 from commit <span class="mono">c226e15</span>.
           The canonical source is SPEC.md, published with the conformance suite at
           <a href="https://github.com/jeffrschneider/agentmesh-protocol">https://github.com/jeffrschneider/agentmesh-protocol</a>
           (the <span class="mono">conformance/</span> fixtures this specification cites live there).</p>
@@ -3775,6 +3775,84 @@ shape, the propagated-cancel note format, and the reject cases are pinned in
   }
 }
 </code></pre>
+<h4 id="13-1-1-the-span-model">13.1.1. The span model<a class="hl" href="#13-1-1-the-span-model">#</a></h4>
+<p>A mesh hop is one span. The sender closes a <strong>producer</strong> span when its message
+is on the wire; the receiver closes a <strong>consumer</strong> span when it has finished
+handling it. The two share a <code>trace_id</code>, and the consumer&#39;s <code>parent_span_id</code> is
+the producer&#39;s <code>span_id</code>, which is what makes a chain of agents read as one
+trace rather than a pile of unrelated work.</p>
+<p>Span attributes are drawn from the envelope and from the outcome, never from
+the content:</p>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Source</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>agentmesh.primitive</code></td>
+<td>envelope <code>type</code></td>
+<td><code>request</code>, <code>respond</code>, <code>emit</code>, <code>subscribe</code>.</td>
+</tr>
+<tr>
+<td><code>agentmesh.peer</code></td>
+<td>envelope <code>to</code> / <code>from</code></td>
+<td>The counterparty&#39;s handle or key.</td>
+</tr>
+<tr>
+<td><code>agentmesh.offering</code></td>
+<td>request payload</td>
+<td>The offering named, not its input.</td>
+</tr>
+<tr>
+<td><code>agentmesh.task_id</code></td>
+<td>envelope <code>task_id</code></td>
+<td>Absent outside a task.</td>
+</tr>
+<tr>
+<td><code>agentmesh.context_id</code></td>
+<td>envelope <code>context_id</code></td>
+<td>Absent when the envelope has none.</td>
+</tr>
+<tr>
+<td><code>agentmesh.outcome</code></td>
+<td>terminal state</td>
+<td><code>ok</code>, <code>error</code>, <code>refused</code>, <code>timeout</code>, <code>canceled</code>.</td>
+</tr>
+<tr>
+<td><code>agentmesh.error_code</code></td>
+<td>error object</td>
+<td>The closed-enum code <strong>only</strong>.</td>
+</tr>
+</tbody></table>
+<p><strong>What a span MUST NOT carry.</strong> Payloads, artifacts, artifact contents, sender
+text, offering inputs or outputs, credentials, and the free-text <code>message</code> of a
+remote party&#39;s error. A span records <em>that</em> an exchange happened and how it
+ended, never what was said. An implementation that needs the content has the
+audit trail (§20) and the history record, both of which are the parties&#39; own
+and neither of which leaves the mesh as a side effect of observability.</p>
+<p><strong>Amounts are excluded on purpose.</strong> Price, cost, quoted totals and settled
+amounts MUST NOT appear on a span, even though they are useful for debugging
+spend. A span is routinely exported into third-party tooling that the
+counterparty never agreed to and cannot see; commercial terms belong in the
+agreement, the meter report and the settlement record, which are addressed to
+the parties rather than to whoever an operator has configured a collector for.</p>
+<p><strong>Emission is off unless the operator turns it on.</strong> Propagation (§13.1) is
+always on and costs nothing. Publishing <code>span_completed</code> events is a node
+setting that defaults to off, so a node produces no record of its counterparties
+until somebody decides it should. Deployments SHOULD hold <code>mesh.trace.&gt;</code> with a
+retention measured in hours: it is a hand-off buffer for a collector, not a
+store to query, and spans that nobody collects are expected to age out.</p>
+<p><strong>A trace is the observer&#39;s own record.</strong> An agent that emits spans is
+describing exchanges it took part in, the same way it already keeps logs. The
+counterparty is not notified, cannot opt out, and gains no visibility into what
+was recorded about the hop. This is stated here rather than left implicit
+because the rest of this specification is deliberately conservative about
+disclosure, and this is a place where it is not: the protections that apply to
+content (above) exist precisely because the surrounding record is not
+consent-gated.</p>
 <h3 id="13-2-metrics">13.2. Metrics<a class="hl" href="#13-2-metrics">#</a></h3>
 <p>Agents SHOULD publish periodic metrics as events:</p>
 <p><strong>Subject:</strong> <code>mesh.metrics.{agent_id}</code></p>

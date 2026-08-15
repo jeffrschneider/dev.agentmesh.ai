@@ -270,6 +270,71 @@
         </div>
       </section>
 
+
+      <section class="band">
+        <div class="wrap">
+          <p class="kicker">the runbook</p>
+          <h2>How to switch it on, in order</h2>
+          <p>Three separate switches have to agree before a single span reaches
+            your collector, and each one is silent when it is off. That is
+            deliberate, because none of them should turn themselves on, but it
+            does mean a half-configured setup looks exactly like a broken one.
+            Do them in this order and check each before moving to the next.</p>
+
+          <p><b>1. Turn on the buffer.</b> The mesh needs somewhere to hold
+            spans between the agent producing them and your collector reading
+            them. Set <code>TRACE_STREAM_ENABLED=1</code> in the environment
+            your services run under and restart them. The registry creates a
+            stream called <code>MESH_TRACE</code> on start: six hours of
+            retention, capped in bytes, oldest discarded first. Nothing else
+            about your deployment changes, and while no node is emitting the
+            stream stays empty and costs nothing.</p>
+
+          <p><b>2. Turn on emission, on one node first.</b> Set
+            <code>MESH_EMIT_SPANS=1</code> in the environment of the node you
+            want to watch, and restart it. Start with a single agent rather
+            than everything you run: a whole fleet emitting with nobody
+            collecting just fills the buffer. Nothing is produced by any node
+            you have not set this on.</p>
+
+          <p><b>3. Give the collector its own credential.</b> This is the step
+            that catches people, including us. An agent's credential allows it
+            to publish spans <b>for itself</b> and nothing more, which is what
+            you want: a span says "this agent did this", so publishing one as
+            somebody else is a forgery. A collector reads <b>everyone's</b>
+            spans, so it is a different party with a different credential, and
+            it needs subscribe permission on <code>mesh.trace.&gt;</code>.
+            Without it the exporter starts, connects, and fails with a
+            permissions error on the subscription. There is no self-serve way
+            to mint one yet; on the hosted mesh, ask us.</p>
+
+          <p><b>4. Run the exporter.</b> Once the three above are true, spans
+            start arriving.</p>
+        </div>
+      </section>
+
+      <section class="band">
+        <div class="wrap">
+          <p class="kicker">sending to google cloud</p>
+          <h2>Google needs two things nobody else does</h2>
+          <p>Google's Telemetry API accepts OTLP over HTTP with JSON encoding,
+            which is what the exporter already speaks, but it wants a project
+            attribute on the resource and it refuses the whole payload without
+            it. It also authenticates with a short-lived token rather than a
+            static header, so a long-running exporter has to refresh.</p>
+          <pre><code>agentmesh trace export   --otlp https://telemetry.googleapis.com   --auth gcp   --resource "gcp.project_id=YOUR_PROJECT"</code></pre>
+          <p><code>--auth gcp</code> takes a token from the instance metadata
+            server and refreshes it before it expires, so on a Google Cloud VM
+            there is no stored credential at all and nothing to rotate. The
+            service account needs the Cloud Telemetry Writer role.</p>
+          <p>One thing to expect once data is flowing: a trace fetched by id
+            comes back complete, while the same spans can take a while to turn
+            up in searches and time-range listings. If a trace you know you sent
+            is not in the Trace Explorer list, look it up by id before assuming
+            the pipeline is broken.</p>
+        </div>
+      </section>
+
       <section class="band">
         <div class="wrap">
           <p class="kicker">what is not built</p>

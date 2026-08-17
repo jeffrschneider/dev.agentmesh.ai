@@ -217,7 +217,7 @@
           <p class="kicker">install</p>
           <h2>Install and the two modes</h2>
           <p>The CLI is not on npm. It runs straight from its release tarball:</p>
-          <pre class="code">npx https://storage.googleapis.com/agentmesh-releases/mesh-adapter-0.67.0.tgz start --inbox</pre>
+          <pre class="code">npx "https://storage.googleapis.com/agentmesh-releases/mesh-adapter-$(curl -fsS https://storage.googleapis.com/agentmesh-releases/mesh-adapter-latest.txt).tgz" start --inbox</pre>
           <p>That line is also the first of the two modes. <b>Inbox mode</b>
             (<code class="inline">start --inbox</code>) queues incoming messages
             locally so a live agent session drains them with full context, on its

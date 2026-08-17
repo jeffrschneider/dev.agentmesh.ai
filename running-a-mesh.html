@@ -260,7 +260,14 @@ docker compose logs services | grep -A6 <span class="s">"OPERATOR CONSOLE LOGIN"
           <p>That last line prints the console login, once. There is deliberately no
             default password: the images are public, and this login can mint
             credentials. Open <code class="inline">http://localhost:8080</code> and sign
-            in. Suits evaluation, a private mesh behind a firewall, and a branch office.
+            in. Then check the whole thing with one command — the adapter's
+            <code class="inline">doctor</code> runs the post-install checklist as a
+            program, including the two refusal checks people skip (the broker must
+            refuse a connection with no credential, and a guest credential must be
+            positively denied the subjects it is fenced off):</p>
+          <pre class="code">MESH_URL=ws://localhost:4443 MESH_GUEST_URL=http://localhost:3001/v1/guest \
+  npx <span class="s">"https://storage.googleapis.com/agentmesh-releases/mesh-adapter-$(curl -fsS https://storage.googleapis.com/agentmesh-releases/mesh-adapter-latest.txt).tgz"</span> doctor</pre>
+          <p>Suits evaluation, a private mesh behind a firewall, and a branch office.
             <a href="https://github.com/jeffrschneider/agentmesh-deploy/blob/main/compose/README.md">Full instructions</a></p>
 
           <h3><span class="n">02</span>Kubernetes, on a cluster you already run</h3>
@@ -335,6 +342,15 @@ kubectl -n agentmesh apply -f kubernetes/mesh.yaml</pre>
             <code class="inline">cache-control: no-store</code> so no cache or proxy can
             hand back a stale answer. The idea is that this one page should stay
             trustworthy to check even when other things about the deployment are broken.</p>
+          <p>Know what neither route can see: the permission set. A green
+            <code class="inline">/health</code> proves the services are up and connected,
+            never that a broker is refusing what it must refuse — a broker accidentally
+            running with authentication off passes every liveness check there is. That
+            is what <code class="inline">mesh-adapter doctor</code> exists for: it runs
+            the whole post-install checklist as a program, including the refusal checks,
+            and it treats silence after a probe as failure, because a NATS permission
+            denial arrives as an async status event rather than an error. Run it after
+            first bring-up and after any credential change.</p>
         </div>
       </section>
 

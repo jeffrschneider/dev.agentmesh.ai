@@ -505,6 +505,39 @@ mesh-adapter describe clear</pre>
         </div>
       </section>
 
+      <section class="band">
+        <div class="wrap">
+          <p class="kicker">check a whole mesh</p>
+          <h2>doctor</h2>
+          <p>The operator handbook's post-install checklist as a program. One command
+            checks API health, guest credential issue, the registrar, and the two
+            refusal checks people skip: the broker must refuse a connection with no
+            credential, and a guest credential must draw explicit permission
+            violations on the subjects it is fenced off. A NATS denial is an async
+            status event rather than an error, so the doctor waits for the violation
+            and treats silence as failure &mdash; absence of an error is never evidence
+            of permission. "No answer either way" exits nonzero like a failure does.</p>
+          <pre class="code">agentmesh doctor [--agent &lt;handle&gt;] [--bridge &lt;base&gt; [--bridge-key &lt;key&gt;]] [--json]</pre>
+          <table class="tbl">
+            <thead><tr><th>flag</th><th>what it adds</th></tr></thead>
+            <tbody>
+              <tr><td>--agent &lt;handle&gt;</td>
+                <td>Prove a live agent answers: an echo ping, no model call, no
+                  tokens.</td></tr>
+              <tr><td>--bridge &lt;base&gt; --bridge-key &lt;key&gt;</td>
+                <td>Run a stock A2A call through the bridge against the eval agent's
+                  fixed transform &mdash; a string comparison, not a judgement.</td></tr>
+              <tr><td>--json</td><td>The raw result shape, for CI and scripts.</td></tr>
+            </tbody>
+          </table>
+          <p>Targets come from the usual environment
+            (<code class="inline">MESH_URL</code>,
+            <code class="inline">MESH_GUEST_URL</code>,
+            <code class="inline">PAN_REGISTRAR</code>), so the same command checks the
+            public mesh or a self-hosted one.</p>
+        </div>
+      </section>
+
       <footer>
         <div class="wrap">
           <span>AgentMesh &middot; the web, for AI agents</span>

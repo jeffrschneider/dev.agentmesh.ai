@@ -173,11 +173,11 @@
         <span class="eyebrow"><span class="tag">agentmesh</span> · protocol specification</span>
         <h1>AgentMesh Protocol Specification</h1>
         <div class="metas">
-          <span>version <b>0.2.0-draft</b></span>
+          <span>version <b>0.3.0-draft</b></span>
           <span>status <b>Working Draft</b></span>
-          <span>date <b>2026-08-11</b></span>
+          <span>date <b>2026-08-18</b></span>
         </div>
-        <p class="canon">Rendered 2026-08-15 from commit <span class="mono">c226e15</span>.
+        <p class="canon">Rendered 2026-08-17 from commit <span class="mono">c5b6f88</span>.
           The canonical source is SPEC.md, published with the conformance suite at
           <a href="https://github.com/jeffrschneider/agentmesh-protocol">https://github.com/jeffrschneider/agentmesh-protocol</a>
           (the <span class="mono">conformance/</span> fixtures this specification cites live there).</p>
@@ -562,6 +562,40 @@ pages, not only inboxes, and the storefront had no way to say so. The
 member also feeds the UI links card extension
 (dev.agentmesh.ai/extensions/ui-links/v1), whose vocabulary it shares.</p>
 </blockquote>
+<blockquote>
+<p><strong>2026-08-18: the bare-mode reply path collapses to one shape (0.3.0-draft).</strong>
+Through 0.2 a bare response had two shapes: live, on the transport&#39;s private
+reply subject, and drained, at the sender&#39;s inbox (§16.4, §18.6). Now there
+is one: a <code>respond</code> to a bare-mode request MUST be published to the
+requester&#39;s <strong>inbox</strong> subject, resolved from the request&#39;s <code>from</code>, correlated
+by <code>in_reply_to</code>, and responders MUST NOT publish response data to a
+transport reply subject; requesters accept bare responds only via their inbox
+delivery paths, where the §22 protections already run, and ignore response
+data arriving on a reply subject (§6.4, §6.4a, §6.5, §18.7). The reply
+subject MAY still be set, reserved as a liveness signal: an unserved inbox
+draws the server&#39;s immediate no-responders error, distinguishing an offline
+agent from a slow one, and it never carries response data. Two deliberate
+exceptions, both platform plumbing, close the list: the registry liveness
+probe (<code>__registry_probe__</code>, §18.7) and a live delivery on an
+admission-guarded inbox (EXT-6, §18.7) are answered on the reply subject. The
+drain-bound rationale in §16.4, §18.6 and §22.2 is restated (both paths now
+answer the same destination), §13 states the capture consequence, and
+Appendices A, C and D follow. Hard cutover: no compatibility window.</p>
+</blockquote>
+<blockquote>
+<p><strong>2026-08-18: the events stream binding is made true (0.3.0-draft).</strong>
+§18.3&#39;s row <code>MESH_EVENTS | mesh.event.&gt; | Interest | 24h</code> stands exactly as
+written, and the binding prose now says how to live under it: a stream that
+needs its own retention over a slice of the event space (the reference
+binding&#39;s per-room records, the metering stream) MUST be a subject-less
+stream that <strong>sources</strong> from <code>MESH_EVENTS</code> with a subject filter, never a
+subject-bound stream, because the reference transport refuses a stream whose
+bound subject overlaps another stream&#39;s: one subject space, one owner.
+Interest retention means an event published while no consumer or source
+holds matching interest is not retained, so durable capture of a domain
+begins when its first durable consumer or source exists. <code>MESH_EVENTS</code>
+carries a duplicate-tracking window of at least the §18.8 two minutes.</p>
+</blockquote>
 <hr>
 <h2 id="1-introduction">1. Introduction<a class="hl" href="#1-introduction">#</a></h2>
 <p>The AgentMesh Protocol is an open specification for reliable, secure agent-to-agent communication over messaging infrastructure. Unlike HTTP-based agent protocols that impose a client-server interaction model, AgentMesh treats the network as a <strong>mesh</strong>: any agent can request, respond, emit, subscribe, and discover any other agent, with the platform providing routing, delivery, persistence, security, and observability.</p>
@@ -702,7 +736,7 @@ member also feeds the UI links card extension
 <ul>
 <li>Publish messages to any subject its node is authorized to publish on.</li>
 <li>Subscribe to any subject its node is authorized to subscribe to.</li>
-<li>Request-reply with any agent that is listening on its inbox subject, whether that agent is on another node across the internet or on the <strong>same node</strong> (see Section 4.7, Local Delivery).</li>
+<li>Request-respond with any agent that is listening on its inbox subject, whether that agent is on another node across the internet or on the <strong>same node</strong> (see Section 4.7, Local Delivery). Both halves travel on inbox subjects: the request to the responder&#39;s, the respond to the requester&#39;s (§6.5).</li>
 </ul>
 <p>The transport handles routing, delivery, persistence, and node-level security; the reference binding (Section 18) provides these via JetStream and the NATS credential chain. Agents do not need to know each other&#39;s network addresses, only their mesh identities. Whether a peer is remote or co-located is transparent to the agent (<strong>location transparency</strong>).</p>
 <h3 id="3-3-agent-surface-area">3.3. Agent Surface Area<a class="hl" href="#3-3-agent-surface-area">#</a></h3>
@@ -1178,8 +1212,8 @@ binding provides publish-side deduplication (§18.8).</li>
 <tr>
 <td><code>respond</code></td>
 <td>Agent → Requester</td>
-<td>Reply subject (NATS inbox)</td>
-<td>Return a response to a prior request. Completes or progresses a Task.</td>
+<td><code>mesh.agent.{requester_id}.inbox</code></td>
+<td>Return a response to a prior request, at the requester&#39;s inbox (§6.5). Completes or progresses a Task.</td>
 </tr>
 <tr>
 <td><code>emit</code></td>
@@ -1292,7 +1326,7 @@ binding provides publish-side deduplication (§18.8).</li>
 <li>The agent MUST create a Task <strong>only when</strong> it defers, streams, or enters <code>input_required</code>/<code>auth_required</code>. It MUST NOT create a Task solely to answer a request it can complete immediately.</li>
 <li>If the agent cannot handle the request, it MUST respond with an appropriate error (see Section 12). Error responses need not create a Task.</li>
 <li>When a live handler admits the request, the responder&#39;s SDK emits the accept signal before the handler runs (§6.4a).</li>
-<li>The request MUST include a reply subject for response delivery.</li>
+<li>Every <code>respond</code> to the request, the accept signal included, is delivered to the requester&#39;s own <strong>inbox</strong> subject and correlated by <code>in_reply_to</code> (§6.5); nothing of the answer travels on a transport reply subject. The requester MAY still set a transport reply subject, reserved as a liveness signal (§18.7): a requester MUST ignore response data arriving on it.</li>
 <li>If <code>config.stream</code> is <code>true</code>, the agent SHOULD use the Task response shape and deliver incremental results as a sequence of <code>respond</code> messages on a task-specific subject (see Section 11).</li>
 <li>If <code>config.stream</code> is <code>true</code>, the agent SHOULD deliver incremental results as a sequence of <code>respond</code> messages on a task-specific subject (see Section 11).</li>
 <li>If <code>config.timeout_ms</code> is specified, the requester SHOULD cancel the request if no response is received within the timeout.</li>
@@ -1301,10 +1335,9 @@ binding provides publish-side deduplication (§18.8).</li>
 <p><strong>Offline targets (the queued outcome).</strong> A request to an agent that is not
 currently connected is not necessarily lost: if the target has a redelivery
 buffer (Section 16.4), the transport captures the request and the target
-processes it when it returns. Because the original reply channel does not
-survive the wait, the late <code>respond</code> is delivered as a normal message to the
-<strong>sender&#39;s own inbox</strong>, correlated by <code>in_reply_to</code>, and buffered in turn if the
-sender has meanwhile gone offline. Senders SHOULD therefore treat silence from
+processes it when it returns. The late <code>respond</code> is delivered where every
+respond is delivered, to the <strong>sender&#39;s own inbox</strong>, correlated by
+<code>in_reply_to</code>, and buffered in turn if the sender has meanwhile gone offline. Senders SHOULD therefore treat silence from
 a registered agent as <em>possibly queued</em> rather than failed, and surface it
 that way. <code>AGENT_UNAVAILABLE</code> means the request was undeliverable <strong>and
 unbuffered</strong> (e.g., sandbox agents, which have no buffer). A responder MAY
@@ -1342,7 +1375,9 @@ themselves the first reply, and emitting an accept asserts that admission
 already happened. What MAY follow an accept is the work&#39;s own outcome,
 including a terminal error such as <code>OFFERING_NOT_FOUND</code> or <code>INPUT_INVALID</code>
 discovered at dispatch, or a plain failure. A failure of the <em>work</em> may
-follow an accept; a refusal of <em>admission</em> may not.</p>
+follow an accept; a refusal of <em>admission</em> may not. The accept travels the
+path every <code>respond</code> travels: the requester&#39;s inbox subject, correlated by
+<code>in_reply_to</code> (§6.5), never a transport reply subject.</p>
 <p><strong>What it means to the caller.</strong> An accept confirms delivery and admission in
 one signal: the request passed the recipient&#39;s inbound checks and its budget
 admission, and a handler is about to run in a live process: the <strong>agent</strong> is
@@ -1370,7 +1405,10 @@ node-level convention, which the reference adapter already implements, is a
 with a reply payload carrying <code>queued: true</code> and an <code>inbox_id</code>, telling the
 sender the message is held for a live session to drain and that the real
 reply will arrive later at the sender&#39;s own inbox (§6.4&#39;s offline-targets
-correlation). The two signals are disjoint by construction: <strong><code>&quot;accepted&quot;</code>
+correlation). The queued ack rides the transport reply channel, the one
+channel §18.7 reserves for delivery-status signals: it is the node speaking
+about delivery, not the agent answering, and it carries nothing of the
+answer. The two signals are disjoint by construction: <strong><code>&quot;accepted&quot;</code>
 means a handler will run now; <code>queued</code> means a mailbox holds the message.</strong>
 They also differ in what they certify: an accept asserts admission, while a
 queued ack deliberately does not: the reference adapter answers the
@@ -1451,7 +1489,7 @@ in <code>conformance/sender-preflight.json</code>, a sibling of
 fixture is the authority, on §22.8&#39;s terms.</p>
 <h3 id="6-5-respond">6.5. <code>respond</code><a class="hl" href="#6-5-respond">#</a></h3>
 <p>Returns a response to a prior <code>request</code>. Completes or progresses a Task.</p>
-<p><strong>Subject:</strong> NATS reply subject (for synchronous) or <code>mesh.task.{task_id}.update</code> (for async updates)</p>
+<p><strong>Subject:</strong> the requester&#39;s inbox subject (for direct responds: the accept signal, the bare answer, the Task-creating first reply) or <code>mesh.task.{task_id}.update</code> (for subsequent Task updates)</p>
 <p><strong>Envelope:</strong></p>
 <pre><code class="language-json">{
   &quot;type&quot;: &quot;respond&quot;,
@@ -1483,6 +1521,7 @@ fixture is the authority, on §22.8&#39;s terms.</p>
 <p><strong>Behavior:</strong></p>
 <ul>
 <li>A <code>respond</code> MUST reference the original request via <code>in_reply_to</code>.</li>
+<li>A direct <code>respond</code> MUST be published to the requester&#39;s <strong>inbox</strong> subject, resolved from the request envelope&#39;s <code>from</code> (§14.4); the pair (<code>in_reply_to</code>, sender) is the whole correlation. A responder MUST NOT publish response data to a transport reply subject. A requester MUST accept responds only via its own inbox delivery paths, the live subscription or the mailbox drain (§16.4), where the §22 protections apply on every arrival, and MUST ignore response data arriving on a transport reply subject. The reply subject, where set, is reserved for delivery-status signaling (§18.7): the transport&#39;s no-responders error and the node&#39;s queued acknowledgement (§6.4a). It never carries response data, with exactly two plumbing exceptions, closed by construction: the registry liveness probe&#39;s answer and the answer to a live delivery on an admission-guarded inbox, both specified in §18.7.</li>
 <li>A <code>respond</code> carries a <code>task_id</code> <strong>only</strong> when the interaction is in Task mode. A <strong>bare</strong> response (§6.4) sets <code>task_id: null</code> and MUST use a terminal <code>payload.status</code> (<code>completed</code> or <code>failed</code>). The one non-terminal <code>respond</code> legal without a <code>task_id</code> is the accept signal (§6.4a): <code>payload.status: &quot;accepted&quot;</code>, a delivery signal that precedes the substantive reply and is neither the bare answer nor a Task update.</li>
 <li>The <code>payload.status</code> field indicates the outcome (bare) or the Task state transition (Task mode; see Section 7).</li>
 <li>A <code>respond</code> with <code>status: &quot;completed&quot;</code> is a terminal response. In Task mode, no further responses for this Task are expected unless the Task is reopened.</li>
@@ -3445,7 +3484,7 @@ shape, the propagated-cancel note format, and the reject cases are pinned in
 <h3 id="11-3-stream-lifecycle">11.3. Stream Lifecycle<a class="hl" href="#11-3-stream-lifecycle">#</a></h3>
 <ol>
 <li>Requester sends <code>request</code> with <code>config.stream: true</code>.</li>
-<li>Responder sends initial <code>respond</code> via NATS reply subject with <code>status: &quot;working&quot;</code> and <code>task_id</code>.</li>
+<li>Responder sends the initial <code>respond</code> to the requester&#39;s inbox (§6.5) with <code>status: &quot;working&quot;</code> and <code>task_id</code>.</li>
 <li>Requester creates a durable JetStream consumer on <code>mesh.task.{task_id}.stream</code>.</li>
 <li>Responder publishes chunks to <code>mesh.task.{task_id}.stream</code>.</li>
 <li>Final chunk has <code>payload.final: true</code> and <code>payload.status: &quot;completed&quot;</code>.</li>
@@ -3736,6 +3775,7 @@ shape, the propagated-cancel note format, and the reject cases are pinned in
 <blockquote>
 <p><strong>Core vs. optional.</strong> Trace <strong>propagation</strong> (the <code>trace</code> object in every envelope) is core and always on; it costs nothing and is the part with real debugging value. Trace/metric/log <strong>storage</strong> (the <code>MESH_TRACE</code>/<code>MESH_METRICS</code>/<code>MESH_LOG</code> streams and the publishing of span/metric/log events) is <strong>optional</strong> and created only if a deployment wants it (§18.3). A minimal deployment carries trace context in-band and stores nothing.</p>
 </blockquote>
+<p><strong>What the transport can capture.</strong> With the single reply path (§6.5, §18.7), every bare-mode exchange between agents travels entirely on inbox subjects: the request arrives at the responder&#39;s inbox, and every <code>respond</code>, the accept signal included, arrives at the requester&#39;s. Nothing of a completed exchange rides a private transport reply subject (§18.7&#39;s two plumbing exceptions aside), which is what makes <strong>both halves</strong> of an exchange capturable by the transport for mailbox-holding agents (the §16.4 redelivery buffer, the <code>MESH_INBOX_*</code> streams of §18.3), not just the half that happened to be addressed to a buffered party. Task-mode traffic was already durable on <code>mesh.task.&gt;</code>; the reply path closes the same gap for bare mode. Capture remains conditional on a buffer existing: sandbox agents have none (§16.4), and their traffic stays live-only.</p>
 <h3 id="13-1-distributed-tracing">13.1. Distributed Tracing<a class="hl" href="#13-1-distributed-tracing">#</a></h3>
 <p>Every message envelope includes a <code>trace</code> object. The tracing model is <a href="https://www.w3.org/TR/trace-context/">W3C Trace Context</a> carried in the envelope instead of an HTTP header: <code>trace_id</code> MUST be 32 lowercase hex characters and <code>span_id</code> 16 lowercase hex characters, exactly as in a <code>traceparent</code> header, so a trace context MUST round-trip losslessly between an envelope and a version-<code>00</code> <code>traceparent</code> (<code>00-{trace_id}-{span_id}-{flags}</code>). An agent bridging to or from an HTTP system (an A2A endpoint, a webhook, an LLM API instrumented with OpenTelemetry) copies the ids across unchanged; the mesh hop and the HTTP hop land in the same trace. The optional <code>tracestate</code> field carries the W3C <code>tracestate</code> value verbatim.</p>
 <p><strong>Propagation Rules:</strong></p>
@@ -4078,7 +4118,7 @@ events MUST deduplicate on the idempotency key.</p>
 </tr>
 <tr>
 <td><code>mesh.agent.{agent_id}.inbox</code></td>
-<td>Direct requests to an agent</td>
+<td>Direct requests to an agent, and the responds addressed to it (§6.5)</td>
 <td>Core NATS</td>
 </tr>
 <tr>
@@ -4288,7 +4328,7 @@ back to constructing.</p>
 <p>Durable delivery is the responsibility of the <strong>hosting node</strong>, not a server-side per-user queue. A node holds its agents&#39; inboxes locally and is the durable endpoint; the transport retains only a short redelivery buffer for messages sent while a node is briefly offline (a JetStream stream with a bounded age/size, delivered on reconnect and acked by the node). This is the inverse of v0.1&#39;s server-side mailbox: the always-on node owns the mailbox, the mesh server is a thin buffer.</p>
 <ul>
 <li>The node MUST ack messages it has durably accepted; unacked messages remain in the redelivery buffer until TTL.</li>
-<li><strong>The drain MUST be bounded to the backlog the buffer held when the node bound its consumer.</strong> The node reads the buffer&#39;s last sequence at bind time, delivers up to that sequence, and stops; anything the buffer captures after that belongs to the live subscription (§14.1). This is not an optimisation. The buffer captures the very subject live messages arrive on, so an unbounded drain competes with the live subscription for every live message, and deduplication (§22.2) does not make that overlap harmless, because it decides only <em>which</em> of the two paths dispatches, and the two answer <strong>different destinations</strong>: the live path answers the requester&#39;s transport-minted reply subject, the drain answers the sender&#39;s inbox (§6.4), a buffered requester being assumed gone. Unbounded, the reply destination is therefore a race, and a requester that is still waiting can time out while its answer is delivered to its inbox instead. A drain that stops early (an error, a lost connection) MUST leave the agent live and serving on its live subscription; the part of the backlog it did not reach stays buffered.</li>
+<li><strong>The drain MUST be bounded to the backlog the buffer held when the node bound its consumer.</strong> The node reads the buffer&#39;s last sequence at bind time, delivers up to that sequence, and stops; anything the buffer captures after that belongs to the live subscription (§14.1). This is not an optimisation. The buffer captures the very subject live messages arrive on, so an unbounded drain competes with the live subscription for every live message, and deduplication (§22.2) does not make that overlap harmless, because it decides only <em>which</em> of the two paths dispatches. Both paths now answer the same destination, the sender&#39;s inbox (§6.5), so the answer no longer races between destinations; what an unbounded drain still costs is the overlap itself. Every live message would lean on the bounded §22.2 memory to run once, an evicted entry becoming a second dispatch and a second answer, and the drain path judges age by the mailbox freshness window (§22.3), which is far wider than the live one, so live traffic delivered through it is judged by a bound built for old mail. A drain that stops early (an error, a lost connection) MUST leave the agent live and serving on its live subscription; the part of the backlog it did not reach stays buffered.</li>
 <li><strong>The bounded drain MUST be re-run: on every transport reconnect, and periodically thereafter.</strong> A bound alone is not the whole fix, because the bound is also where the consumer&#39;s cursor stops. Everything the buffer captures after a pass (which is every live message) then sits on the consumer undelivered and unacked, and that <strong>tail</strong> grows for the life of the process, capped only by the buffer&#39;s retention. The next restart binds, sees the whole tail as backlog, and dispatches it: handlers re-run and answers go to senders&#39; inboxes, with nothing to suppress them, because §22.2&#39;s memory does not survive a restart. A bound without re-runs therefore trades a race for replay-on-restart, which on a long-lived agent is the worse of the two. Each re-run MUST read a <strong>fresh</strong> last sequence and stop at it, so repeating the drain does not weaken the bound.<ul>
 <li><strong>Reconnect is the trigger that matters</strong>, because a gap in the live subscription is exactly the window in which the buffer holds a message nothing dispatched. An implementation SHOULD use its transport client&#39;s own connection-event channel for this rather than polling connection state.</li>
 <li><strong>The interval bounds the tail</strong>, and MUST be chosen against the §22.2 memory: a re-run re-delivers everything the live path already handled in this process, and it is that memory which turns the re-delivery into an ack rather than a second dispatch. RECOMMENDED default: <strong>60 seconds</strong>, which at the RECOMMENDED memory size of 5,000 pairs (§22.2) requires a sustained 83 inbound messages per second on one agent before an entry is evicted before the re-run reaches it. It SHOULD be configurable.</li>
@@ -4444,7 +4484,7 @@ carriage only in existing extensible slots, independent versioning.</p>
 <ul>
 <li><strong>Addressing:</strong> hierarchical, dot-delimited subject addressing with multi-level wildcards, per the Subject Namespace (Section 14).</li>
 <li><strong>Delivery:</strong> ordered, at-least-once delivery per subject, with deduplication keyed on <code>(from, id)</code> (§5.5, §22.2).</li>
-<li><strong>Request-reply:</strong> correlated request-reply with a per-request reply address and a configurable timeout.</li>
+<li><strong>Request-reply:</strong> correlated request-reply with a per-request reply address and a configurable timeout, used by platform service operations and as the liveness signal (§18.7). Agent <code>respond</code> delivery does not use it: responds ride the addressing and delivery guarantees above, published to the requester&#39;s inbox (§6.5).</li>
 <li><strong>Durable task store:</strong> a durable, keyed store holding authoritative Task state, updated on every transition (Section 7).</li>
 <li><strong>Large-payload storage:</strong> an object store (or equivalent) for payloads exceeding the message size limit, referenced by artifact <code>ref</code> parts (Section 7.5).</li>
 <li><strong>Identity &amp; credentials:</strong> a signed operator → account → node credential chain (Section 4), node-key connection authentication, subject-scoped publish/subscribe authorization, and tenant import/export enforcement.</li>
@@ -4520,9 +4560,27 @@ primitive layer, not the wire layer.</p>
 <td>Limits</td>
 <td>7d / 25 MB, discard old</td>
 <td>1</td>
-<td>Per-agent offline redelivery buffer (§16.4). Created by the registry at registration (non-sandbox only), deleted at deregistration/reaping. Capture works even when core NATS reports no-responders, so the live fast path is untouched.</td>
+<td>Per-agent offline redelivery buffer (§16.4). Created by the registry at registration (non-sandbox only), deleted at deregistration/reaping. Capture works even when core NATS reports no-responders, and never delays live delivery on the same subject.</td>
 </tr>
 </tbody></table>
+<p>Two binding rules travel with the <code>MESH_EVENTS</code> row. First, its
+duplicate-tracking window MUST be at least the two minutes §18.8 requires, so
+a publisher&#39;s redelivered publish deduplicates instead of appearing in the
+record twice. Second, <code>MESH_EVENTS</code> is the <strong>only</strong> stream bound to
+<code>mesh.event.&gt;</code>, and MUST stay so: a stream that needs its own retention over a
+slice of the event space (in the reference binding, the per-room records and
+the metering stream) MUST be a <strong>subject-less</strong> stream that <em>sources</em> from
+<code>MESH_EVENTS</code> with a subject filter, never a subject-bound stream, because the
+reference transport refuses a stream whose bound subject overlaps another
+stream&#39;s: one subject space has one owner. Sourcing gives the slice its own
+retention without contesting ownership, and the events it copies survive in
+the sourcing stream on that stream&#39;s terms after <code>MESH_EVENTS</code> ages them out.</p>
+<p>Interest retention has a consequence a deployment must plan around rather
+than discover: an event published while no consumer or source holds matching
+interest is <strong>not retained</strong>. Durable capture of a domain therefore begins
+when its first durable consumer or source exists, and a deployment that wants
+a domain&#39;s history MUST create the sourcing stream (or a durable consumer)
+before the history it wants.</p>
 <p><strong>Optional</strong> (create only if the deployment wants them; the protocol does not require them):</p>
 <table>
 <thead>
@@ -4649,10 +4707,12 @@ after durably accepting it: the ack is the §16.4 handoff. It drains only as far
 as the stream&#39;s <code>last_seq</code> at bind time and then stops (§16.4): past that point a
 captured message is the live subscription&#39;s, and a message beyond the bound is
 neither dispatched nor acked by the drain. Deduplication is still required
-(§22.2), because this consumer can redeliver what it did not see acked, but it
-is not what keeps the two paths apart, because they answer different destinations.
-Responses to drained messages are published to the sender&#39;s inbox (there is no
-live reply subject).</p>
+(§22.2), because this consumer can redeliver what it did not see acked and
+because the drain and the live subscription deliver the same subject; it is
+the drain bound, not the dedup memory, that keeps the overlap small (§16.4).
+Responses to drained messages are published to the sender&#39;s inbox, which since
+0.3 is where every respond goes (§6.5); the drain differs only in when, never
+in where.</p>
 <p><strong>Event Consumer (per subscriber):</strong></p>
 <pre><code>Stream: MESH_EVENTS
 Filter: mesh.event.{subscribed_pattern}
@@ -4663,18 +4723,46 @@ Max Deliver: 5
 Durable: mesh_event_{agent_id}_{subscription_hash}
 </code></pre>
 <h3 id="18-7-request-reply-mapping">18.7. Request-Reply Mapping<a class="hl" href="#18-7-request-reply-mapping">#</a></h3>
-<p>Synchronous <code>request</code>/<code>respond</code> uses NATS core request-reply:</p>
+<p><code>request</code>/<code>respond</code> between agents rides plain publishes on inbox subjects;
+NATS core request-reply supplies only a liveness signal:</p>
 <ol>
-<li>Requester publishes to <code>mesh.agent.{agent_id}.inbox</code> with a NATS reply subject (<code>_INBOX.{uuid}</code>).</li>
-<li>Responder publishes the response to the reply subject.</li>
-<li>NATS delivers the response to the requester.</li>
+<li>Requester publishes to <code>mesh.agent.{agent_id}.inbox</code>, and MAY set a NATS
+reply subject (<code>_INBOX.{uuid}</code>).</li>
+<li>Responder publishes every <code>respond</code> (the accept signal, the bare answer,
+or the Task-creating first reply) to the <strong>requester&#39;s inbox</strong>, resolved
+from the request&#39;s <code>from</code> (§14.4) and correlated by <code>in_reply_to</code> (§6.5).
+Responders MUST NOT publish response data to the reply subject.</li>
+<li>The requester takes responds on its own inbox delivery paths, live
+subscription or mailbox drain, where the §22 protections apply; response
+data arriving on the reply subject MUST be ignored.</li>
 <li>Default timeout: 30 seconds (configurable per request via <code>config.timeout_ms</code>).</li>
 </ol>
-<p>For long-running requests, the responder publishes an immediate acknowledgment response (Task in <code>submitted</code> state) to the reply subject, then delivers subsequent updates via JetStream on <code>mesh.task.{task_id}.update</code>.</p>
+<p>The reply subject, where set, is reserved for <strong>delivery-status signals</strong>: the
+server&#39;s immediate no-responders error when the target inbox has no
+subscriber (the liveness signal below), and the node-level queued
+acknowledgement of §6.4a. It never carries response data.</p>
+<p><em>Why one shape.</em> Through 0.2 a bare response had two shapes: live, on the
+transport&#39;s private reply subject, and drained, at the sender&#39;s inbox
+(§16.4), a requester learning which it got from where the answer arrived. The
+live shape was invisible to durable capture: a reply subject is
+transport-minted, subscribed by one process for one wait, and gone, so the
+answering half of an exchange left no record even for mailbox-holding agents,
+and the requester&#39;s inbound protections ran on its inbox paths but not on the
+private subject. One shape ends both: a response is witnessable because it
+travels a subject the transport can capture (§13, §18.3), and the requester&#39;s
+protections run on every path an answer can arrive by, because every answer
+arrives by an inbox path.</p>
+<p>For long-running requests, the responder publishes an immediate response (Task
+in <code>submitted</code> state) to the requester&#39;s inbox, then delivers subsequent
+updates via JetStream on <code>mesh.task.{task_id}.update</code>.</p>
 <p>With inbox buffers (§16.4) in place, a no-responders or timeout outcome on an
 agent inbox no longer implies the request was lost, only that the agent was
 not live; the buffered copy survives and the queued-outcome semantics of §6.4
 apply.</p>
+<p>Platform service operations keep ordinary request-reply: <code>register</code> (§6.2),
+<code>discover</code> (§6.3), presence lookups (§9.6), and the artifact store below are
+services answering immediately on their own subjects, not agent <code>respond</code>
+traffic (§6.4a, Scope).</p>
 <p><strong>Artifact store (§7.5).</strong> The store answers request-reply on well-known subjects, each on a queue group so exactly one instance serves a request:</p>
 <table>
 <thead>
@@ -4705,7 +4793,8 @@ apply.</p>
 </tr>
 </tbody></table>
 <p>Bytes ride base64-encoded in the payload, which bounds one object to what the transport carries (§18.9); a store&#39;s own per-object limit therefore sits at or below it. The writing agent is <code>from</code> on the signed envelope (§4.5) and the owner is resolved from the registry (§8.6). §7.5.2 requires both, so a store that cannot establish an owner MUST refuse the write rather than store anonymously.</p>
-<p><em>Informative:</em> core NATS answers a request on a subject with no subscribers with an immediate <strong>no-responders</strong> error rather than a timeout. In this binding that signal doubles as a definitive agent-liveness probe: an agent&#39;s inbox has a subscriber exactly while the agent is connected and serving, so a registry implementing the retention policy (§9.2) can distinguish a dead agent on a live node (no responders) from a slow one (any reply, including an error, proves liveness). This is a binding technique, not core protocol: other bindings supply their own liveness signal or rely on node-level presence alone.</p>
+<p><em>The liveness signal.</em> Core NATS answers a request on a subject with no subscribers with an immediate <strong>no-responders</strong> error rather than a timeout. In this binding that signal is the reply subject&#39;s whole job for agent traffic: an agent&#39;s inbox has a subscriber exactly while the agent is connected and serving, so a request published with a reply subject distinguishes an offline agent (immediate no-responders) from a slow or buffered one (silence until the answer arrives at the requester&#39;s inbox, §6.4). A registry implementing the retention policy (§9.2) uses the same mechanism as a liveness probe: it sends a signed <code>request</code> with <code>payload.offering: &quot;__registry_probe__&quot;</code> to the agent&#39;s inbox, and any answer, including an error, proves liveness. The probe&#39;s answer is the first of two deliberate exceptions to the reply-path rule (§6.5): it <strong>is</strong> published to the transport reply subject, because it is platform plumbing rather than agent traffic, and its answer must stay cheap and anonymous to the record. Answered at the prober&#39;s inbox it would put an envelope into durable capture for every sweep of every agent, a record about traffic that says nothing; implementations that fold captured traffic into activity or reputation records ignore <code>__registry_probe__</code> exchanges entirely. This is a binding technique, not core protocol: other bindings supply their own liveness signal or rely on node-level presence alone.</p>
+<p><em>The guarded delivery.</em> The second exception comes in through the extensions tier rather than core: the admission extension (EXT-6, §17.5) lets a guarded agent leave its public inbox to an admission-guard relay and take admitted mail on a private guarded subject (<code>mesh.agent.{agent_id}.inbox.guarded</code> in the reference deployment; core does not name it). A request delivered <strong>live</strong> on the guarded subject is answered on the transport reply subject. The reason is who is actually asking: the requester of record on a guarded delivery is the relay, a platform service that forwards the answer to the true sender itself, so the reply subject here is the relay&#39;s forwarding channel, not a response delivery path to an agent, and answering to the true sender&#39;s inbox would bypass the very relay that admitted the message. A guarded message drained later from the mailbox has no relay waiting, and is answered to the sender&#39;s inbox like any drained message (§16.4, §18.6). The exception list is closed: exactly two answers ride the transport reply subject, the probe&#39;s and the live guarded delivery&#39;s, and everything else an agent sends in answer is response data and travels to an inbox (§6.5).</p>
 <h3 id="18-8-exactly-once-delivery">18.8. Exactly-Once Delivery<a class="hl" href="#18-8-exactly-once-delivery">#</a></h3>
 <p>For critical operations (task state transitions, artifact delivery):</p>
 <ul>
@@ -4731,7 +4820,7 @@ connect, app provision/refresh) MUST include a <code>mesh</code> object:</p>
   &quot;jwt&quot;: &quot;…&quot;, &quot;seed&quot;: &quot;…&quot;, &quot;publicKey&quot;: &quot;…&quot;,
   &quot;mesh&quot;: {
     &quot;name&quot;: &quot;agentmesh.ai&quot;,
-    &quot;protocol&quot;: &quot;0.2&quot;,
+    &quot;protocol&quot;: &quot;0.3&quot;,
     &quot;nats_endpoints&quot;: [
       &quot;nats://mesh.agentmesh.ai:4222&quot;,
       &quot;ws://mesh.agentmesh.ai:4443&quot;
@@ -5065,16 +5154,20 @@ grain.</li>
 <li>An agent offered an offering version it does not serve refuses with <code>OFFERING_NOT_FOUND</code>, naming the versions it does; resubmitting against one of those is the agreement mechanism (the same refuse-with-estimate shape as §7.7).</li>
 </ul>
 <h3 id="20-4-the-0-3-subject-tree">20.4. The 0.3 Subject Tree<a class="hl" href="#20-4-the-0-3-subject-tree">#</a></h3>
-<p>A declared migration mechanism, not a current behavior. When 0.3 breaks the
-wire (the planned removal of legacy untagged-signature acceptance in §5.3 is
-the flag day already named), incompatible deployments SHOULD occupy a
-versioned subject tree (a distinct top-level prefix in place of <code>mesh.</code>), so
-that 0.2 and 0.3 traffic coexist invisibly rather than erroring at each other
-on shared subjects. That moment costs nothing extra: a wire break re-mints
-credentials anyway, and subject permissions live inside the credentials
-(§14.3), so granting the new tree happens in the re-mint every deployment is
-already doing. Callers that resolve rather than construct (§14.4) never see
-the difference, which is that rule&#39;s point.</p>
+<p>A declared migration mechanism, not a current behavior. 0.3 breaks the wire
+(the single reply path of §6.5, and the removal of legacy untagged-signature
+acceptance in §5.3, are the break already named), and a deployment with live
+counterparties still on the old wire SHOULD occupy a versioned subject tree
+(a distinct top-level prefix in place of <code>mesh.</code>), so that 0.2 and 0.3
+traffic coexist invisibly rather than erroring at each other on shared
+subjects. A deployment with no external party on the old protocol MAY instead
+take the break in place, on the existing tree: a coexistence mechanism with
+no second party protects nothing. For anyone who does need the overlap, the
+moment costs nothing extra: a wire break re-mints credentials anyway, and
+subject permissions live inside the credentials (§14.3), so granting the new
+tree happens in the re-mint every deployment is already doing. Callers that
+resolve rather than construct (§14.4) never see the difference, which is that
+rule&#39;s point.</p>
 <hr>
 <h2 id="21-federation-planned">21. Federation (Planned)<a class="hl" href="#21-federation-planned">#</a></h2>
 <p>This spec defines a single mesh <strong>instance</strong>: one operator, one transport, one
@@ -5467,12 +5560,13 @@ drain. Remember first, then judge.</li>
 <li><strong>Restart.</strong> An in-process memory forgets everything when the process
 restarts, so the same duplicate is accepted after a restart.</li>
 <li><strong>Which path ran it.</strong> This memory makes the work happen once; it does not
-make two delivery paths equivalent. Where the paths answer <em>different</em>
-destinations (the live subscription answers the requester&#39;s reply subject,
-the mailbox drain answers the sender&#39;s inbox, §16.4), deduplication decides
-which destination the answer goes to, and that is a race, not a protection.
-Paths that differ in where they answer MUST NOT be left to overlap and be
-resolved here; §16.4 bounds the drain for exactly this reason.</li>
+make two delivery paths equivalent. The live subscription and the mailbox
+drain deliver the same subject and answer the same destination, the
+sender&#39;s inbox (§6.5, §16.4), so deduplication decides which path
+dispatches, never where the answer lands. What it cannot do is make
+unbounded overlap cheap: every message both paths carry spends an entry of
+this bounded memory, and an evicted entry is a second dispatch and a second
+answer. §16.4 bounds the drain for exactly this reason.</li>
 </ul>
 <p>Neither of the first two is a defect, and neither is fixed by growing the memory. They are the
 reason <strong>§22.3 is not optional</strong>: duplicate rejection catches a <em>repeat</em>, and
@@ -5816,12 +5910,13 @@ Everything else in the fixture is a promise.</li>
        |  2. request(offering: &quot;web-scrape&quot;)       |
        |------&gt; mesh.agent.{B}.inbox            |
        |        reply: _INBOX.abc123            |
+       |        (liveness signal only, §18.7)   |
        |                                        |
        |  3. respond(status: accepted)          |
-       |&lt;------ _INBOX.abc123          (§6.4a)  |
+       |&lt;------ mesh.agent.{A}.inbox   (§6.4a)  |
        |                                        |
        |  4. respond(status: submitted)         |
-       |&lt;------ _INBOX.abc123                   |
+       |&lt;------ mesh.agent.{A}.inbox            |
        |        task_id: task-789               |
        |                                        |
        |  5. [subscribe to task updates]        |
@@ -5861,10 +5956,10 @@ Everything else in the fixture is a promise.</li>
        |------&gt; mesh.agent.{B}.inbox            |
        |                                        |
        |  respond(status: accepted)    (§6.4a)  |
-       |&lt;------ _INBOX (reply subject)          |
+       |&lt;------ mesh.agent.{A}.inbox            |
        |                                        |
        |  respond(status: working, task_id)     |
-       |&lt;------ _INBOX (reply subject)          |
+       |&lt;------ mesh.agent.{A}.inbox            |
        |                                        |
        |  [subscribe: mesh.task.{id}.stream]    |
        |                                        |
@@ -5981,6 +6076,12 @@ section wins, and the disagreement is a defect in this appendix.</p>
 <td>§13.5</td>
 <td><code>metering.json</code></td>
 </tr>
+<tr>
+<td>14</td>
+<td>Publish every direct <code>respond</code> (accept, bare answer, Task-creating first reply) to the requester&#39;s inbox, correlated by <code>in_reply_to</code>; never response data on a transport reply subject</td>
+<td>§6.5, §18.7</td>
+<td><em>(none)</em></td>
+</tr>
 </tbody></table>
 <h3 id="d-2-a-caller-a-sender-of-requests">D.2. A caller (a sender of requests)<a class="hl" href="#d-2-a-caller-a-sender-of-requests">#</a></h3>
 <table>
@@ -6042,8 +6143,8 @@ section wins, and the disagreement is a defect in this appendix.</p>
 </tr>
 <tr>
 <td>9</td>
-<td>Treat silence from a registered agent as possibly queued, not failed; late replies arrive at your own inbox, correlated by <code>in_reply_to</code></td>
-<td>§6.4</td>
+<td>Treat silence from a registered agent as possibly queued, not failed; every reply, live or late, arrives at your own inbox, correlated by <code>in_reply_to</code>, and response data on a transport reply subject is ignored</td>
+<td>§6.4, §6.5</td>
 <td><em>(none)</em></td>
 </tr>
 </tbody></table>

@@ -227,14 +227,23 @@
             either.</p>
           <div class="callout">
             <div class="t">capture honesty</div>
-            <p>Capture is a <b>best-effort tap</b>: a row means the platform witnessed the
-              exchange. Requests that never got an answer are recorded as
-              <code class="inline">unanswered</code> after five minutes; a late reply then
-              adds a second, <code class="inline">completed</code> entry, because both
-              events happened and an append-only record says so in order. The bundle
-              manifest states this capture model in its own
-              <code class="inline">capture</code> field, so the artifact never outclaims
-              the mechanism.</p>
+            <p>Capture is <b>two layers</b>. A live tap records exchanges as they happen,
+              with full detail. Behind it, a durable witness reads every registered
+              agent's mailbox stream, where protocol 0.3 delivers both the request and
+              the reply, and appends a row for anything the tap missed, so a recorder
+              restart no longer means unwitnessed traffic. A witnessed row claims
+              exactly what it can: the platform durably captured this message. The
+              outcome is not claimed.</p>
+            <p>The bounds, stated rather than implied: mailbox streams hold seven days,
+              so the witness must catch up inside that window and a watchdog alerts
+              well before it closes; and sandbox or guest identities have no mailbox
+              stream, so their traffic is covered by the live tap only. Requests that
+              never got an answer are recorded as <code class="inline">unanswered</code>
+              after five minutes; a late reply then adds a second,
+              <code class="inline">completed</code> entry, because both events happened
+              and an append-only record says so in order. The bundle manifest states
+              this capture model in its own <code class="inline">capture</code> field,
+              so the artifact never outclaims the mechanism.</p>
           </div>
         </div>
       </section>

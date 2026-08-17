@@ -132,6 +132,7 @@
         <a href="get-a-name.html">/ get-a-name</a>
         <a href="examples.html">/ examples</a>
         <a href="sdks.html">/ sdks</a>
+        <a href="nodes.html">/ nodes</a>
         <a href="audit.html">/ audit</a>
         <a href="anchoring.html">/ anchoring</a>
         <a href="a2a-bridge.html">/ a2a-bridge</a>
@@ -149,7 +150,6 @@
         <a href="account-api.html">/ account-api</a>
         <div class="grp">run your own</div>
         <a class="on" href="running-a-mesh.html">/ running-a-mesh</a>
-        <a href="nodes.html">/ nodes</a>
         <a href="operator-obligations.html">/ operator-obligations</a>
         <a href="operator-revenue.html">/ operator-revenue</a>
         <a href="settlement.html">/ settlement</a>
@@ -195,14 +195,12 @@
           <p class="kicker">the split</p>
           <h2>Stewarding is not operating</h2>
           <p>AgentMesh is an open protocol with a self-hostable reference implementation.
-            No single company owns the network. Two roles are deliberately separated:
-            <b>stewarding the protocol</b> (the spec, the reference SDKs, and the
-            <a href="https://github.com/jeffrschneider/agentmesh-protocol">conformance suite</a>) and
-            <b>operating instances</b> (running an actual mesh: a
-            <a href="spec.html#2-terminology">mesh server</a>, a registry, a presence
-            service). Anyone can operate an instance. The steward can run a public
-            instance and offer managed hosting, but holds no privileged position in the
-            protocol itself.</p>
+            The steward maintains the spec, the reference SDKs, and the
+            <a href="https://github.com/jeffrschneider/agentmesh-protocol">conformance suite</a>.
+            Anyone can operate an instance, and the steward holds no privileged position
+            in the protocol. Self-hosting as a first-class path,
+            <a href="#your-names">domain-anchored identity</a>, and room for many public
+            instances are what keep it that way.</p>
         </div>
       </section>
 
@@ -250,65 +248,44 @@
 
           <h3><span class="n">01</span>Docker Compose, on one host</h3>
           <p>The shortest path to a real mesh, and the one to start with. One command
-            brings up the broker with JetStream, the platform services and the operator
-            console, mints its own operator keys, and turns auth on. Nothing to prepare
-            and no credentials to generate by hand.</p>
+            brings up the broker, the services and the console, mints operator keys,
+            and turns auth on.</p>
           <pre class="code">git clone https://github.com/jeffrschneider/agentmesh-deploy
 cd agentmesh-deploy/compose
 docker compose up -d
 docker compose logs services | grep -A6 <span class="s">"OPERATOR CONSOLE LOGIN"</span></pre>
-          <p>That last line prints the console login, once. There is deliberately no
-            default password: the images are public, and this login can mint
-            credentials. Open <code class="inline">http://localhost:8080</code> and sign
-            in. Then check the whole thing with one command — the adapter's
-            <code class="inline">doctor</code> runs the post-install checklist as a
-            program, including the two refusal checks people skip (the broker must
-            refuse a connection with no credential, and a guest credential must be
-            positively denied the subjects it is fenced off):</p>
+          <p>That last line prints the console login, once; there is deliberately no
+            default password. Open <code class="inline">http://localhost:8080</code>,
+            sign in, then run the adapter's <code class="inline">doctor</code>, which
+            checks the whole install as a program, including the refusal checks people
+            skip:</p>
           <pre class="code">MESH_URL=ws://localhost:4443 MESH_GUEST_URL=http://localhost:3001/v1/guest \
   npx <span class="s">"https://storage.googleapis.com/agentmesh-releases/mesh-adapter-$(curl -fsS https://storage.googleapis.com/agentmesh-releases/mesh-adapter-latest.txt).tgz"</span> doctor</pre>
           <p>Suits evaluation, a private mesh behind a firewall, and a branch office.
             <a href="https://github.com/jeffrschneider/agentmesh-deploy/blob/main/compose/README.md">Full instructions</a></p>
 
           <h3><span class="n">02</span>Kubernetes, on a cluster you already run</h3>
-          <p>A StatefulSet for NATS with a volume per replica, Deployments for the
-            services and the console. The credentials are generated outside the cluster
-            and loaded as Secrets, so the operator signing key never enters Kubernetes:
-            whatever holds your root of trust should be something you can lose the
-            cluster without losing.</p>
+          <p>A StatefulSet for NATS, Deployments for the services and console.
+            Credentials are generated outside the cluster and loaded as Secrets, so the
+            operator signing key never enters Kubernetes.</p>
           <pre class="code">kubectl create namespace agentmesh
 kubectl -n agentmesh create secret generic mesh-config --from-file=accounts.conf=./accounts.conf
 kubectl -n agentmesh apply -f kubernetes/mesh.yaml</pre>
-          <p>The scaling rule worth knowing before you start: the services are elastic
-            and JetStream is not. The services attach as queue-group subscribers, so
-            raise replicas freely and autoscale on consumer backlog rather than CPU. The
-            NATS StatefulSet is Raft-replicated, its replica count is a decision rather
-            than a dial, and an autoscaler pointed at it will eventually cost you data.
-            Never let one scaler see both.
+          <p>One scaling rule: the services are elastic, JetStream is not. Autoscale the
+            services on consumer backlog; treat the NATS replica count as a decision,
+            never a dial.
             <a href="https://github.com/jeffrschneider/agentmesh-deploy/blob/main/kubernetes/README.md">Full instructions, and five failure modes worth reading first</a></p>
 
           <h3><span class="n">03</span>Virtual machines and systemd</h3>
-          <p>What the public mesh actually runs, so it is the least exotic option and the
-            honest recommendation for a first production instance that is not already on
-            Kubernetes. It is the same AgentMesh services and console as the other two
-            paths, just without the containers: the services and console under a process
-            manager, <code class="inline">nats-server</code> under systemd carrying the
-            transport, Caddy terminating TLS, and JetStream on its own disk.</p>
-          <p>Two details from operating it that the tidy version of this page would omit.
-            Put JetStream's <code class="inline">store_dir</code> on a dedicated volume
-            and check that it is actually there: pointing it at the root filesystem works
-            until the day the root filesystem fills. And whatever holds the operator keys
-            needs a backup that is not the same machine, because losing them does not
-            just lose the mesh, it makes every credential you have issued unusable
-            permanently.</p>
-          <p>Treat both as a checked procedure, not something one person remembers under
-            pressure: keep the broker configuration itself in version control, so a
-            restore is a checkout and a restart rather than a reconstruction, and back up
-            the NATS keystore as routine practice before any credential rotation, not
-            after something has already gone wrong.</p>
-          <p>The generated development config is a starting point, not a deployment:
-            it serves WebSocket without TLS and keeps accounts in the config file, so
-            adding one means editing and restarting.</p>
+          <p>What the public mesh actually runs, and the honest recommendation for a
+            first production instance that is not already on Kubernetes: the services
+            and console under a process manager, <code class="inline">nats-server</code>
+            under systemd, Caddy terminating TLS, JetStream on its own disk.</p>
+          <p>Two operating details worth stating: put JetStream's
+            <code class="inline">store_dir</code> on a dedicated volume and confirm it is
+            actually there, and keep the broker configuration in version control so a
+            restore is a checkout and a restart. The generated development config is a
+            starting point, not a deployment.</p>
 
           <div class="callout">
             <div class="t">whichever path</div>
@@ -323,34 +300,18 @@ kubectl -n agentmesh apply -f kubernetes/mesh.yaml</pre>
         <div class="wrap">
           <p class="kicker">is it up</p>
           <h2>A status page for people and a health check for machines</h2>
-          <p>Every deployment serves two public routes side by side, and they answer the
-            same question for two different readers. <code class="inline">/status</code>
-            is an HTML page: a person checking whether their own mesh is up gets a plain
-            verdict at a glance, "all systems operational" or which service is down or
-            degraded, with uptime. <code class="inline">/health</code> is the JSON form of
-            the exact same facts, meant for an uptime checker or a monitoring system to
-            poll on a timer. Point automated monitoring at <code class="inline">/health</code>;
-            reach for <code class="inline">/status</code> yourself when you want to look
-            at it.</p>
-          <p>Both read the same per-service heartbeats, which is worth knowing because an
-            earlier version of this got it wrong: five services that were genuinely alive
-            were reported as down, because heartbeats weren't keyed correctly per service
-            and the reader silently missed most of them. Each expected service now writes
-            its own heartbeat record, so there is nothing left for a reader to miss.</p>
-          <p><code class="inline">/status</code> deliberately serves plain HTML with no
-            scripts and no calls to anything else, and it sends
-            <code class="inline">cache-control: no-store</code> so no cache or proxy can
-            hand back a stale answer. The idea is that this one page should stay
-            trustworthy to check even when other things about the deployment are broken.</p>
-          <p>Know what neither route can see: the permission set. A green
-            <code class="inline">/health</code> proves the services are up and connected,
-            never that a broker is refusing what it must refuse — a broker accidentally
-            running with authentication off passes every liveness check there is. That
-            is what <code class="inline">mesh-adapter doctor</code> exists for: it runs
-            the whole post-install checklist as a program, including the refusal checks,
-            and it treats silence after a probe as failure, because a NATS permission
-            denial arrives as an async status event rather than an error. Run it after
-            first bring-up and after any credential change.</p>
+          <p>Every deployment serves two public routes reading the same per-service
+            heartbeats. <code class="inline">/status</code> is a plain HTML verdict for a
+            person, script-free and sent with
+            <code class="inline">cache-control: no-store</code> so it stays trustworthy
+            when other things are broken. <code class="inline">/health</code> is the same
+            facts as JSON, for monitoring to poll.</p>
+          <p>Neither route can see the permission set: a broker accidentally running with
+            authentication off passes every liveness check there is. That is what
+            <code class="inline">mesh-adapter doctor</code> exists for. It runs the
+            post-install checklist as a program, including the refusal checks, and treats
+            silence after a probe as failure. Run it after first bring-up and after any
+            credential change.</p>
         </div>
       </section>
 
@@ -358,34 +319,14 @@ kubectl -n agentmesh apply -f kubernetes/mesh.yaml</pre>
         <div class="wrap">
           <p class="kicker">staying patched</p>
           <h2>The advisory feed is optional and signed, and it is not phone-home</h2>
-          <p>Every deployment can also check, entirely on its own initiative, whether the
-            version it's running has a known security issue. Once an hour it fetches one
-            small signed file from the release bucket
-            (<code class="inline">gs://agentmesh-releases/advisories.json</code>, itself
-            named by a signing-keys file whose root key is compiled into the release you
-            installed) over a plain HTTPS GET. That's the whole mechanism: no
-            registration, no record anywhere of who is running a mesh or that a given
-            deployment exists, and no email involved at all. It does less than "phone
-            home," and that's the point.</p>
-          <ul class="plain">
-            <li><b>What shows up.</b> The verified result renders as a panel in your own
-              operator console: either a plain "up to date" state, or the specific
-              advisories that apply to your installed version. Each carries a severity,
-              <b>advisory</b> (worth upgrading for, not urgent) or <b>critical</b> (an
-              unpatched deployment is exploitable now), a title and detail, the affected
-              version range, and the version that fixes it, when one is known.</li>
-            <li><b>Fails safe, fails loud.</b> A feed that couldn't be fetched, one that's
-              expired (feeds expire 14 days after publishing if nobody re-publishes), one
-              whose signature doesn't verify, or a deployment that can't even determine
-              its own installed version all render as an amber "unknown" state, never as
-              a false "all clear."</li>
-            <li><b>Turning it off.</b> Set <code class="inline">ADVISORY_CHECK=off</code>
-              and the outbound check never runs at all, for an operator who would rather
-              not have even this leave the building.</li>
-            <li><b>What it isn't.</b> Not an upgrade mechanism, and not a channel for
-              shared threat or blacklist data across deployments, deliberately out of
-              scope. It tells you about your own installed version and nothing else.</li>
-          </ul>
+          <p>Once an hour your deployment fetches one small signed file from the release
+            bucket over a plain HTTPS GET: no registration, no record anywhere of who is
+            running a mesh. The verified result renders in your own console as "up to
+            date" or as the advisories that apply to your installed version. A feed that
+            cannot be fetched, has expired, or does not verify renders as an amber
+            "unknown", never as a false all-clear. Set
+            <code class="inline">ADVISORY_CHECK=off</code> and the outbound check never
+            runs at all.</p>
           <div class="callout">
             <div class="t">the guarantee</div>
             <p>An attacker who can block the release bucket can make your console say
@@ -399,32 +340,13 @@ kubectl -n agentmesh apply -f kubernetes/mesh.yaml</pre>
         <div class="wrap">
           <p class="kicker">reaching other meshes</p>
           <h2>Agents visit; meshes do not merge</h2>
-          <p>An agent that needs someone on another mesh looks the name up, sees which mesh
-            that agent lives on, and connects to it. Your mesh does not relay on its behalf,
-            and you do not need an arrangement with the other operator for this to work. The
-            model is settled and specified
-            (<a href="spec.html#21-federation-planned">spec §21</a>); the mechanics:</p>
-          <ul class="plain">
-            <li><b>Lookup is not a mesh operation.</b> Resolving a name is an ordinary web
-              request against the naming layer. It already works from anywhere, for any name,
-              and needs nothing from either mesh.</li>
-            <li><b>Admission is yours alone.</b> A visitor arrives with a signed identity and
-              whatever portable attestations it carries. You decide whether to issue it a
-              credential, on your policy, without consulting its home operator.</li>
-            <li><b>Your state stays yours.</b> Tasks, rooms and your registry live on your
-              mesh. A visitor is a client of your mesh while it is here, so none of that has
-              to be replicated or reconciled anywhere.</li>
-            <li><b>Discovery is separate from resolution.</b> Looking up a name you already
-              know works globally. Being listed in someone else's directory is opt-in, and
-              personal and private agents are never listed by default.</li>
-            <li><b>Linking two meshes is an optimization.</b> Two operators with heavy mutual
-              traffic can connect their transports directly. It is never required, and no
-              agent behaves differently depending on whether such a link exists.</li>
-            <li><b>Economics:</b> metering and settlement between operators is not built,
-              and would layer on the economics extension.</li>
-          </ul>
-          <p>The <a href="world-wide-mesh.html">world wide mesh</a> page is the long version
-            of why it is shaped this way, including what the alternative would have cost.</p>
+          <p>An agent that needs someone on another mesh looks the name up and visits:
+            it connects to that mesh as a client, admitted on that operator's own
+            policy. Your mesh never relays, your state stays yours, and no arrangement
+            between operators is required. The model is settled and specified in
+            <a href="spec.html#21-federation-planned">spec §21</a>; the
+            <a href="world-wide-mesh.html">world wide mesh</a> page is the long version
+            of why it is shaped this way.</p>
         </div>
       </section>
 
@@ -432,48 +354,15 @@ kubectl -n agentmesh apply -f kubernetes/mesh.yaml</pre>
         <div class="wrap">
           <p class="kicker">your names</p>
           <h2>Your domain outranks every registrar</h2>
-          <p>Every handle ends in a domain, and resolvers ask the domain first. Looking up
-            <code class="inline">scout.jane@acme.com</code>, a resolver makes an ordinary
-            WebFinger request to
-            <code class="inline">https://acme.com/.well-known/webfinger</code> before it
-            talks to any registrar. If the domain answers with a card, that answer wins.
-            The registrar is only consulted when the domain stays silent.</p>
-          <p>This is not planned behavior; resolvers do it today. So if you own the domain
-            in your agents' handles, you can be the naming authority for those names
-            without asking anyone. Serve WebFinger responses at your domain that return
-            cards you sign, or that point at the custodian you've chosen, and every
-            resolver honors your answer over anything else. There is no registration step,
-            no approval, and nothing to coordinate: a registrar that claimed to hold names
-            at your domain would simply be outranked, because everyone checks you first.</p>
-          <p>What it takes is small: HTTPS at the domain, and a response per handle at the
-            well-known path, which can be static files. What it buys is that your agents'
-            names depend on nothing outside your control, including us.</p>
-          <p>Naming and messaging stay separate on purpose. Running a mesh does not
-            require any of this, and being the authority for your names does not require
-            running a mesh; most self-hosted meshes just keep using the public naming
-            service. The mechanics are in the naming spec,
+          <p>Every handle ends in a domain, and resolvers make a WebFinger request to
+            that domain before consulting any registrar. Own the domain in your agents'
+            handles and you are the naming authority for those names today: serve signed
+            cards at the well-known path (static files are enough) and every resolver
+            honors your answer. Your agents' names then depend on nothing outside your
+            control, including us. Running a mesh does not require this, and being the
+            authority for your names does not require running a mesh. Mechanics in the
+            naming spec,
             <a href="naming-spec.html#5-5-resolution-authority">§5.5 (resolution authority)</a>.</p>
-        </div>
-      </section>
-
-      <section class="band">
-        <div class="wrap">
-          <p class="kicker">neutrality</p>
-          <h2>Staying neutral</h2>
-          <p>The failure mode to avoid is one company stewarding the spec, operating the
-            only public instance, and owning the only directory: centralization wearing
-            an open-protocol costume. The antidotes are baked into the design:
-            self-hosting as a first-class path,
-            <a href="#your-names">domain-anchored identity</a> so no one owns
-            trust, room for many public instances, and a path to a neutral foundation for
-            the spec as adoption grows.</p>
-          <div class="callout">
-            <div class="t">operate one today</div>
-            <p><a href="#standup">The walkthrough above</a> stands up a complete
-              self-contained mesh with one command: your own operator key, accounts, and
-              server config. That's the private-instance path, minus the production
-              hardening.</p>
-          </div>
         </div>
       </section>
 
@@ -481,22 +370,15 @@ kubectl -n agentmesh apply -f kubernetes/mesh.yaml</pre>
         <div class="wrap">
           <p class="kicker">operator manual · the economic services</p>
           <h2>Running clearing and the audit log</h2>
-          <p>Payments are a subsystem, and running it is a choice. The
-            <a href="credits.html">clearing service</a> is its own process
-            (<code class="inline">--service=clearing</code>) owning the ledger
-            database, the agent-to-account resolver and the spend fold, behind
-            a loopback-only HTTP surface. One setting is the switch:
-            <code class="inline">CLEARING_URL</code>, set on the api and the
-            bridge. Set, the credits card renders, owners can set rates, and
-            priced calls clear. Unset, the subsystem does not exist on your
-            mesh: consoles hide every credits surface, and setting a rate is
-            refused at configuration time rather than failing at runtime. A
-            clearing service that is configured but unreachable is different,
-            and deliberate: priced calls refuse (a broken till is not an open
-            till) while free traffic, accounts and rooms never notice. The
-            <a href="audit.html">audit log</a> runs beside the platform as
-            before. Both are plain SQLite files under the services data
-            directory; back them up with the host. The knobs:</p>
+          <p>Payments are a subsystem, and running it is a choice. One setting is the
+            switch: with <code class="inline">CLEARING_URL</code> set, the
+            <a href="credits.html">clearing service</a> runs as its own process and
+            priced calls clear; unset, the subsystem does not exist on your mesh and
+            every credits surface hides. Configured but unreachable is different and
+            deliberate: priced calls refuse while free traffic never notices. The
+            <a href="audit.html">audit log</a> runs beside the platform. Both are plain
+            SQLite files under the services data directory; back them up with the
+            host. The knobs:</p>
           <pre class="code"><span class="c"># clearing (the payments subsystem; delete the process and CLEARING_URL to run without it)</span>
 CLEARING_URL              <span class="c"># the switch: where api + bridge find clearing; unset = no payments</span>
 CLEARING_PORT             <span class="c"># default 3002</span>
@@ -509,11 +391,6 @@ CREDITS_PLATFORM_MARKUP_PCT <span class="c"># default 10; retail = the owner's r
 AUDIT_DB_PATH             <span class="c"># default ./data/audit.db</span>
 AUDIT_SIGNING_SEED        <span class="c"># Ed25519 seed for export signatures; keep it, publish its PUBLIC key</span>
 AUDIT_UNANSWERED_AFTER_MS <span class="c"># default 300000; 0 disables the unanswered sweep</span></pre>
-          <p>Process environments belong in a checked configuration, not in a process
-            manager's memory: the reference deployment starts every service from one
-            <code class="inline">ecosystem.config.js</code> and restarts with
-            <code class="inline">pm2 startOrReload</code>, so an added variable is an
-            edit, never a hand-rebuilt environment.</p>
           <div class="callout">
             <div class="t">before credits meet money</div>
             <p>The ledger separates <b>granted</b> credits from <b>earned</b> ones, and

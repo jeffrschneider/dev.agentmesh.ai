@@ -175,9 +175,9 @@
         <div class="metas">
           <span>version <b>0.3.0-draft</b></span>
           <span>status <b>Working Draft</b></span>
-          <span>date <b>2026-08-18</b></span>
+          <span>date <b>2026-08-25</b></span>
         </div>
-        <p class="canon">Rendered 2026-08-17 from commit <span class="mono">c5b6f88</span>.
+        <p class="canon">Rendered 2026-08-25 from commit <span class="mono">4c9552d</span>.
           The canonical source is SPEC.md, published with the conformance suite at
           <a href="https://github.com/jeffrschneider/agentmesh-protocol">https://github.com/jeffrschneider/agentmesh-protocol</a>
           (the <span class="mono">conformance/</span> fixtures this specification cites live there).</p>
@@ -596,6 +596,19 @@ holds matching interest is not retained, so durable capture of a domain
 begins when its first durable consumer or source exists. <code>MESH_EVENTS</code>
 carries a duplicate-tracking window of at least the §18.8 two minutes.</p>
 </blockquote>
+<blockquote>
+<p><strong>2026-08-25: sealing&#39;s boundary is stated (0.3.0-draft).</strong> §4.3 gains
+&quot;Where sealing ends&quot;: end-to-end confidentiality terminates at the agent&#39;s
+node, wherever that node runs. An agent hosted on infrastructure its owner
+does not operate — a hosting platform, a bridge — has that operator inside
+the sealed boundary, opening payloads as the agent; when the host is also
+the transport operator, sealing protects transit and every mesh-side buffer
+but nothing against that party. <code>extensions/EXT-7-pairwise-sealing.md</code> §5&#39;s
+&quot;the node is the agent&#39;s own machine&quot; is corrected to match. Wording only:
+no wire fields, no error codes, no behaviour change — the clarification
+exists so a manifest <code>encryption_key</code> cannot be read as a promise about who
+operates the node behind it.</p>
+</blockquote>
 <hr>
 <h2 id="1-introduction">1. Introduction<a class="hl" href="#1-introduction">#</a></h2>
 <p>The AgentMesh Protocol is an open specification for reliable, secure agent-to-agent communication over messaging infrastructure. Unlike HTTP-based agent protocols that impose a client-server interaction model, AgentMesh treats the network as a <strong>mesh</strong>: any agent can request, respond, emit, subscribe, and discover any other agent, with the platform providing routing, delivery, persistence, security, and observability.</p>
@@ -875,6 +888,7 @@ to them, because they are not in any seat a counterparty chooses.</p>
 <h3 id="4-3-agent-identity">4.3. Agent Identity<a class="hl" href="#4-3-agent-identity">#</a></h3>
 <p>Every agent MUST possess an Ed25519 keypair generated on (or provisioned to) its host. The public key is the immutable <strong>agent ID</strong>. Agent keys are <strong>not</strong> issued by the account and require no JWT: an agent&#39;s right to speak on the mesh comes entirely from its node&#39;s vouch (§4.4). This makes creating an agent a local, zero-round-trip operation.</p>
 <p><strong>Encryption key (OPTIONAL).</strong> An agent MAY additionally hold an X25519 keypair, distinct from its Ed25519 signing keypair, used only for receiving sealed content (never for signing). Its purpose is end-to-end confidentiality where the transport or its operator is not trusted to read payloads: a sender seals a symmetric key or a message to the agent&#39;s X25519 <strong>public</strong> key, and only the agent can open it. An agent that declares an encryption key publishes the public half in its manifest (§8) as <code>encryption_key</code> and, outside the mesh, on its PAN card. The signing key remains the agent&#39;s identity and address; the encryption key is a capability attached to it, and its absence simply means the agent participates only in cleartext. This field is the sole prerequisite for the <code>sealed</code> privacy grade of the Rooms extension (§17.5); it is declared here in core because identity fields cannot be retrofitted once agents are minted. Holding the key says only that the agent <em>can</em> be sealed to; whether callers <em>should</em> seal, and what happens to a request that arrives in the clear, is a separate declaration (<code>sealing</code>, §8.9).</p>
+<p><strong>Where sealing ends.</strong> Sealing terminates at the agent&#39;s node, because that is where the encryption seed lives — and &quot;provisioned to its host&quot; above includes a host the owner does not operate. An agent hosted on another party&#39;s infrastructure (a hosting platform; a bridge node vouching for an external party, <code>BRIDGE-A2A.md</code>) has that operator inside the sealed boundary: the operator opens payloads <em>as the agent</em>, which is not a violation of this section but the plain meaning of hosting. In particular, when the host is the same party that operates the transport, sealing still keeps payloads confidential in transit and in every mesh-side buffer, but it buys the sender nothing against that party. A manifest&#39;s <code>encryption_key</code> (§8.1) is a statement about a key, not about who operates the node behind it; a sender whose threat model includes the recipient&#39;s host must establish where the recipient&#39;s node runs by means outside this specification.</p>
 <h3 id="4-4-vouching-node-agent-attestation">4.4. Vouching (Node → Agent Attestation)<a class="hl" href="#4-4-vouching-node-agent-attestation">#</a></h3>
 <p>A node asserts that it hosts an agent by issuing a signed <strong>attestation</strong>:</p>
 <pre><code class="language-json">{

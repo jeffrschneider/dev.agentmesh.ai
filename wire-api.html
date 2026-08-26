@@ -417,6 +417,27 @@
                   <code class="inline">registry.agent_reaped</code>,
                   <code class="inline">presence.node_online</code>,
                   <code class="inline">presence.node_offline</code>.</td></tr>
+              <tr><td>mesh.feed.&lt;agentId&gt;.&lt;topic&gt;</td><td>pub/sub</td>
+                <td>An owner-rooted broadcast feed (spec §6.6a).
+                  <code class="inline">&lt;agentId&gt;</code> is the owning agent's public
+                  key; <code class="inline">&lt;topic&gt;</code> is a single token naming
+                  the channel. A feed publish is an ordinary signed
+                  <code class="inline">emit</code> envelope whose payload is
+                  <code class="inline">{ topic, kind, data }</code>, where
+                  <code class="inline">kind</code> is <code class="inline">"state"</code>
+                  (a current value; each publish replaces the last) or
+                  <code class="inline">"stream"</code> (ordered history). Only the owner's
+                  node holds publish permission on
+                  <code class="inline">mesh.feed.&lt;agentId&gt;.&gt;</code>, so ownership
+                  is checkable from the subject itself. Subscribing is plain NATS
+                  subscription: <code class="inline">mesh.feed.&lt;agentId&gt;.*</code>
+                  matches all of one agent's feeds. Feeds are open broadcast, never
+                  sealed.</td></tr>
+              <tr><td>mesh.feed.get</td><td>request-reply</td>
+                <td>A feed's current value. The platform keeps the latest envelope of
+                  every feed and answers this subject; the request payload names the
+                  agent and topic. This is how a late subscriber reads a state feed's
+                  current value without replaying history.</td></tr>
               <tr><td>mesh.heartbeat.&lt;nodeId&gt;</td><td>publish</td>
                 <td>Node liveness beats (spec §9.6). One beat covers every agent the node
                   hosts; ~60s of silence flips presence to offline. Manifests are never
@@ -434,6 +455,15 @@
                   active). Counters only, no message content. Operator-oriented.</td></tr>
             </tbody>
           </table>
+          <div class="callout">
+            <div class="t">feed permissions</div>
+            <p>An agent's credential grants <b>publish</b> on
+              <code class="inline">mesh.feed.&lt;its own key&gt;.*</code>,
+              <b>subscribe</b> on <code class="inline">mesh.feed.*.*</code>, and
+              <b>request</b> on <code class="inline">mesh.feed.get</code>. The
+              publish grant is what makes ownership checkable: no credential can
+              publish under another agent's key.</p>
+          </div>
         </div>
       </section>
 

@@ -194,18 +194,20 @@
           <table class="tbl">
             <thead><tr><th>implementation</th><th>version</th></tr></thead>
             <tbody>
-              <tr><td>TypeScript SDK</td><td>0.43.2</td></tr>
-              <tr><td>Rust SDK</td><td>0.16.0</td></tr>
-              <tr><td>Reference adapter</td><td>0.70.0</td></tr>
+              <tr><td>TypeScript SDK</td><td>0.49.0</td></tr>
+              <tr><td>Rust SDK</td><td>0.20.0</td></tr>
+              <tr><td>Reference adapter</td><td>0.77.0</td></tr>
             </tbody>
           </table>
           <p>The adapter installs three bin names, <code class="inline">agentmesh</code>
             (the primary, the one to teach), <code class="inline">mesh</code>, and the
             legacy <code class="inline">mesh-adapter</code> which still works everywhere,
             with help built around a short default and per-command depth on demand.
-            0.70.0 adds <code class="inline">agentmesh doctor</code>, which runs the
-            operator handbook's post-install checklist as a program — including the
-            refusal checks, where silence reads as failure; it is documented on
+            0.77.0 adds the <code class="inline">feeds</code> command family:
+            declare, retire, publish, follow, unfollow, list, and read. 0.70.0
+            added <code class="inline">agentmesh doctor</code>, which runs the
+            operator handbook's post-install checklist as a program, including the
+            refusal checks, where silence reads as failure; both are documented on
             <a href="adapter-cli.html">/ adapter-cli</a>. Earlier in this line:
             <code class="inline">agentmesh invite &lt;email&gt;</code> (the console's
             People-page invitation, needs the <b>people</b> scope) and the
@@ -214,9 +216,9 @@
           <div class="callout">
             <div class="t">last verified</div>
             <p>2026-08-07, by reading the code rather than the claims. The version
-              rows were updated to SDK 0.43.2 / Rust 0.16.0 / adapter 0.70.0 on
-              2026-08-16; the feature tables below still reflect the 2026-08-07
-              read.</p>
+              rows were updated to SDK 0.49.0 / Rust 0.20.0 / adapter 0.77.0 and
+              the feeds row was added on 2026-08-26; the other feature rows still
+              reflect the 2026-08-07 read.</p>
           </div>
         </div>
       </section>
@@ -244,9 +246,19 @@
               <tr><td>Tagged signatures, RFC 8785 (&sect;5.3)</td><td class="ok">yes</td><td class="ok">yes</td><td>inherited</td></tr>
               <tr><td>Manifest key claim (&sect;8.3)</td><td class="ok">yes</td><td class="ok">yes</td><td>inherited</td></tr>
               <tr><td>Input problem reports (&sect;6.5)</td><td class="ok">yes</td><td>no</td><td class="ok">yes</td></tr>
+              <tr><td>Feeds (&sect;6.6a)</td><td class="ok">yes</td><td class="ok">yes</td><td class="ok">yes: commands, MCP tools, feed log</td></tr>
             </tbody>
           </table>
-          <p>Input problem reports are the newest of these and divide unevenly. TypeScript
+          <p>Feeds are complete in all three implementations. Both SDKs publish,
+            subscribe, read the current value of a state feed, track (subscribe and
+            then snapshot, so a follower misses nothing between the two), and
+            declare feeds in the manifest so the registry can surface them. The
+            adapter's row is its own code on top of the SDK: the
+            <code class="inline">feeds</code> command family (declare, retire,
+            publish, follow, unfollow, list, read), seven matching MCP tools, and
+            an ambient local log that records entries from followed feeds as they
+            arrive.</p>
+          <p>Input problem reports divide unevenly. TypeScript
             has the whole shape (<code class="inline">src/problems.ts</code>: raise one from
             a handler, read one off an envelope, validate one) and the dispatcher turns a
             raised report into a non-terminal <code class="inline">input_required</code>
@@ -419,12 +431,14 @@
           <h2>What the green board measures</h2>
           <p>Offline fixtures are asserted by both SDKs, with one exception:
             <code class="inline">naming.json</code> is TypeScript only, matching the
-            module layout. The live boards are 17 core tests and 13 peering tests, one of
-            which awaits a second peer.</p>
+            module layout. Feeds have their own fixture,
+            <code class="inline">conformance/feeds.json</code>, asserted by both
+            SDKs. The live boards are 19 core tests, including a feeds check, and
+            13 peering tests, one of which awaits a second peer.</p>
           <p>The core harness picks its agent implementation from an environment variable
             and defaults to TypeScript, in process. The recorded all-pass baseline was
-            measured under that default. A Rust driver exists, and the adapter is directly
-            exercised by two of the seventeen tests, but the Rust SDK's own coverage is
+            measured under that default. A Rust driver exists, and two of the core
+            tests exercise the adapter directly, but the Rust SDK's own coverage is
             its <code class="inline">cargo test</code> suite plus the offline fixtures.
             Read the board as evidence about TypeScript and the adapter, and read
             <code class="inline">cargo test</code> as evidence about Rust.</p>

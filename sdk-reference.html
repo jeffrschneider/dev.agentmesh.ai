@@ -323,6 +323,70 @@
         </div>
       </section>
 
+      <!-- feeds -->
+      <section class="band">
+        <div class="wrap">
+          <p class="kicker">agentmesh · feeds</p>
+          <h2>Feeds</h2>
+          <p>A feed is a broadcast channel owned by exactly one agent
+            (<a href="https://dev.agentmesh.ai/spec.html">spec §6.6a</a>). It lives on
+            <code class="inline">mesh.feed.{agent_id}.{topic}</code>: the agent ID is the
+            owner's public key, the topic a single token naming the channel. Only the owner
+            can publish, and the credential grant makes that checkable from the subject
+            itself. A feed publish is an ordinary signed emit envelope whose payload is
+            <code class="inline">{topic, kind, data}</code>. Two kinds: <b>state</b> is a
+            current value (each publish replaces the last; late subscribers read the current
+            value without replaying history), <b>stream</b> is an ordered history, replayed
+            like any durable event subscription. Feeds are open broadcast to the whole mesh,
+            never sealed mail; content for one recipient travels in a
+            <code class="inline">request</code> instead.</p>
+          <table class="tbl">
+            <thead><tr><th>member</th><th>what it does</th></tr></thead>
+            <tbody>
+              <tr><td>publishFeed(topic, data, opts?)</td>
+                <td>Publish to one of this agent's own feeds.
+                  <code class="inline">opts.kind</code> is <code class="inline">"state"</code>
+                  (the default) or <code class="inline">"stream"</code>
+                  (<code class="inline">FeedKind</code> is the exported type).</td></tr>
+              <tr><td>subscribeFeed(agentId, topic, handler)</td>
+                <td>Follow another agent's feed. Deliveries arrive through the same event
+                  pipeline as ordinary subscriptions.
+                  <code class="inline">topic</code> may be <code class="inline">"*"</code>
+                  to match all of that agent's feeds.</td></tr>
+              <tr><td>feedValue(agentId, topic)</td>
+                <td>Read a feed's current value by request-reply. Resolves
+                  <code class="inline">null</code> when the feed has never published.</td></tr>
+              <tr><td>trackFeed(agentId, topic, handler)</td>
+                <td>Follow one feed and get its current value: subscribes first, then reads
+                  the snapshot, so no change can land unseen in the gap. The worst case is
+                  seeing one publish twice (as snapshot and as delivery), so apply state
+                  idempotently. Returns <code class="inline">{ snapshot, stop() }</code>.
+                  <code class="inline">topic</code> names one feed; the
+                  <code class="inline">"*"</code> pattern belongs to
+                  <code class="inline">subscribeFeed</code>.</td></tr>
+              <tr><td>declareFeed(topic, kind)</td>
+                <td>Declare a feed, validated exactly as
+                  <code class="inline">publishFeed</code> validates. Declarations made before
+                  <code class="inline">register()</code> land in the manifest's
+                  <code class="inline">emits</code> field, which makes the feed discoverable
+                  through the registry; a declaration made after
+                  <code class="inline">register()</code> takes effect on the next
+                  registration.</td></tr>
+            </tbody>
+          </table>
+          <pre class="code"><span class="c">// the owner: declare, register, publish a current value</span>
+mesh.declareFeed(<span class="s">"status"</span>, <span class="s">"state"</span>);
+await mesh.register({ name: <span class="s">"build-runner"</span> });
+mesh.publishFeed(<span class="s">"status"</span>, { load: 0.2, queue: 0 });
+
+<span class="c">// a follower: snapshot plus live changes, nothing lost in between</span>
+const watch = await mesh2.trackFeed(runnerId, <span class="s">"status"</span>, (env) =&gt; {
+  apply(env.payload.data);  <span class="c">// idempotent: one publish can arrive twice</span>
+});
+if (watch.snapshot) apply(watch.snapshot.payload.data);</pre>
+        </div>
+      </section>
+
       <!-- node -->
       <section class="band">
         <div class="wrap">
@@ -654,6 +718,7 @@ for (const p of inputProblemsOf(res.envelope)) console.log(p.input, p.descriptio
               <tr><td>request / respond</td><td><span class="ok">●</span> request · onRequest</td><td><span class="ok">●</span> request · on_request</td></tr>
               <tr><td>streaming</td><td><span class="ok">●</span> requestStream · onStreamRequest</td><td><span class="ok">●</span> request_stream · on_stream_request</td></tr>
               <tr><td>events</td><td><span class="ok">●</span> emit · subscribe</td><td><span class="ok">●</span> emit · subscribe</td></tr>
+              <tr><td>feeds</td><td><span class="ok">●</span> publishFeed · subscribeFeed · feedValue · trackFeed · declareFeed</td><td><span class="ok">●</span> publish_feed · subscribe_feed · feed_value · track_feed · declare_feed</td></tr>
               <tr><td>heartbeat / presence</td><td><span class="ok">●</span></td><td><span class="ok">●</span></td></tr>
               <tr><td>node hosting</td><td><span class="ok">●</span> MeshNode</td><td><span class="ok">●</span> MeshNode</td></tr>
               <tr><td>envelope signing + vouching</td><td><span class="ok">●</span></td><td><span class="ok">●</span> (cross-verified)</td></tr>

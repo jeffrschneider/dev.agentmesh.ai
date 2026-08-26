@@ -193,13 +193,6 @@
             Azure regions, so traffic can terminate in the region and provider you
             already use. The self-hosted deployment described on
             <a href="running-a-mesh.html">/ running-a-mesh</a> is this shape.</p>
-          <p>The rest of this page answers the natural follow-up: could the mesh run
-            on a cloud's own messaging services instead? We measured the strongest
-            combination we could assemble on each cloud against the transport
-            capabilities the protocol depends on. The basics are at parity
-            everywhere. The mesh-specific capabilities are not, and that difference
-            is why the supported transport on every cloud is NATS rather than the
-            cloud's native messaging stack.</p>
           <div class="callout">
             <div class="t">what each column means</div>
             <p>Each cloud column is the strongest composite we could assemble there:
@@ -215,12 +208,13 @@
 
       <section class="band">
         <div class="wrap">
-          <p class="kicker">table one</p>
-          <h2>The basics</h2>
-          <p>Core messaging capabilities every substrate is expected to have. All
-            three clouds are at parity here, and two exceed NATS on scheduled
-            delivery and message size, neither of which the platform uses: envelopes
-            are capped small by design and deliverables travel by reference.</p>
+          <p class="kicker">the native services</p>
+          <h2>Could the mesh run on a cloud's own messaging services instead?</h2>
+          <p>The large cloud providers all offer native messaging services, and for
+            the basic scenarios they work well. The first table shows those basics,
+            and every cloud covers them. The second table shows the advanced
+            capabilities the mesh depends on, and there the native services fall
+            short: only NATS provides the full set.</p>
           <table class="tbl">
             <thead><tr><th>capability</th><th>NATS</th><th>Azure</th><th>AWS (RabbitMQ)</th><th>Google Cloud</th></tr></thead>
             <tbody>
@@ -238,18 +232,6 @@
               <tr><td>Fan-out to many subscribers</td><td class="ok">yes</td><td class="ok">yes</td><td class="ok">yes</td><td class="ok">yes</td></tr>
             </tbody>
           </table>
-        </div>
-      </section>
-
-      <section class="band">
-        <div class="wrap">
-          <p class="kicker">table two</p>
-          <h2>What the mesh design leans on</h2>
-          <p>The capabilities the protocol builds its security model, reliability
-            model, and presence model on. This is where the support thins.
-            <b>partial</b> means the capability exists on that cloud but in a weaker
-            or fragmented form: on a different connection than the rest, coarser in
-            granularity, or bounded by quotas the mesh would outgrow.</p>
           <table class="tbl">
             <thead><tr><th>capability</th><th>NATS</th><th>Azure</th><th>AWS (RabbitMQ)</th><th>Google Cloud</th></tr></thead>
             <tbody>
@@ -267,16 +249,18 @@
               <tr><td>Self-hostable / federated</td><td class="ok">yes</td><td class="no">no</td><td class="ok">yes</td><td class="no">no</td></tr>
             </tbody>
           </table>
-          <p>Two patterns are worth naming. Azure's partial column is carried by
-            three different services at once, so each capability exists somewhere
-            but never all on the same connection, and their delivery semantics
-            differ. The AWS column reads well because RabbitMQ is an open-source
-            broker with regex-scoped per-user permissions, which is the closest any
-            cloud service comes to the mesh's ownership-by-subject model; its gaps
-            are the stream, deduplication, and key-value capabilities that JetStream
-            provides natively. On every cloud, the last four rows that read
-            <b>no</b> would become application services the operator builds and
-            runs, which is exactly the work NATS absorbs today.</p>
+        </div>
+      </section>
+
+      <section class="band">
+        <div class="wrap">
+          <p class="kicker">conclusion</p>
+          <h2>Conclusion</h2>
+          <p>The native messaging services do not carry the capabilities the mesh
+            is built on, so operators put the mesh on these clouds by running NATS
+            on the cloud's own compute. Every cloud above supports that today, and
+            <a href="https://dev.agentmesh.ai/running-a-mesh.html">https://dev.agentmesh.ai/running-a-mesh.html</a>
+            walks through the deployment.</p>
         </div>
       </section>
 

@@ -177,7 +177,7 @@
           <span>status <b>Working Draft</b></span>
           <span>date <b>2026-08-25</b></span>
         </div>
-        <p class="canon">Rendered 2026-08-25 from commit <span class="mono">4c9552d</span>.
+        <p class="canon">Rendered 2026-08-26 from commit <span class="mono">9920157</span>.
           The canonical source is SPEC.md, published with the conformance suite at
           <a href="https://github.com/jeffrschneider/agentmesh-protocol">https://github.com/jeffrschneider/agentmesh-protocol</a>
           (the <span class="mono">conformance/</span> fixtures this specification cites live there).</p>
@@ -608,6 +608,30 @@ but nothing against that party. <code>extensions/EXT-7-pairwise-sealing.md</code
 no wire fields, no error codes, no behaviour change — the clarification
 exists so a manifest <code>encryption_key</code> cannot be read as a promise about who
 operates the node behind it.</p>
+</blockquote>
+<blockquote>
+<p><strong>2026-08-25: feeds — owner-rooted events (0.3.0-draft).</strong> The
+<code>mesh.event.{domain}.{event_type}</code> space is a shared commons: its subjects
+carry no owner token, so &quot;this agent&#39;s own channel&quot; is not expressible in it
+and any credential covering a domain publishes into that domain. New
+<strong>§6.6a</strong> defines a <strong>feed</strong>: an event channel rooted in the identity of the
+one agent that publishes it, subject <code>mesh.feed.{agent_id}.{topic}</code> (§14.1),
+whose publish permission a deployment grants only to a node that vouches for
+the owning agent — ownership is transport-enforced by the subject&#39;s own
+shape, the same construction as connection-bound registration. Feeds come in
+two kinds: <strong>stream</strong> (an ordered history, replayed like any event) and
+<strong>state</strong> (a current value; each publish replaces the last, and a late
+subscriber reads the current value without replaying history). §18.3 gains
+the optional <code>MESH_FEED</code> stream and the state-feed KV binding. §6.6 also now
+states what was previously only inferable: events are <strong>open broadcast</strong> —
+pairwise sealing (§4.3, EXT-7) cannot apply where readers are unknown at
+publish time, so content that needs sealing travels in a <code>request</code>, never an
+event. Additive only: no existing subject, wire field, or behaviour changes.
+<em>Same-day amendment, found live:</em> <code>MESH_FEED</code> binds the four-token grammar
+<code>mesh.feed.*.*</code>, never the <code>mesh.feed.&gt;</code> prefix — the prefix also captures
+the lookup subject <code>mesh.feed.get</code>, and JetStream then sends its publish
+acknowledgment to the request&#39;s reply subject, racing the responder&#39;s real
+answer and winning. The reference deployment observed exactly that.</p>
 </blockquote>
 <hr>
 <h2 id="1-introduction">1. Introduction<a class="hl" href="#1-introduction">#</a></h2>
@@ -1566,6 +1590,43 @@ fixture is the authority, on §22.8&#39;s terms.</p>
 <li>Events MAY reference a Task via <code>task_id</code> for traceability but are not required to.</li>
 <li>Emitters MUST NOT expect or wait for a response. Events are fire-and-forget from the publisher&#39;s perspective.</li>
 <li>The platform SHOULD enforce rate limiting on event emission per agent per subject.</li>
+<li>Events are <strong>open broadcast</strong>. Pairwise sealing (§4.3, EXT-7) cannot apply to a message whose readers are not known at publish time: an event&#39;s payload is readable by every permitted subscriber and by the transit infrastructure. Content that requires sealing MUST travel in a <code>request</code>, never in an event.</li>
+</ul>
+<h3 id="6-6a-feeds-owner-rooted-events">6.6a. Feeds (owner-rooted events)<a class="hl" href="#6-6a-feeds-owner-rooted-events">#</a></h3>
+<p>The <code>mesh.event.{domain}.{event_type}</code> space of §6.6 is a shared commons: its
+subjects name a <em>domain</em>, not an owner, so nothing in the subject says whose
+channel it is, and every credential whose permissions cover a domain publishes
+into the same space. A <strong>feed</strong> is the owned complement: an event channel that
+belongs to exactly one agent and says so in its subject.</p>
+<p><strong>Subject:</strong> <code>mesh.feed.{agent_id}.{topic}</code>, where <code>{agent_id}</code> is the owning
+agent&#39;s public key and <code>{topic}</code> is a single token naming the channel.</p>
+<p><strong>Behavior:</strong></p>
+<ul>
+<li>A feed publish is an ordinary <code>emit</code> (§6.6) addressed to a feed subject. No
+new envelope fields, no new signature.</li>
+<li><strong>Only the owner publishes.</strong> A deployment MUST grant publish permission on
+<code>mesh.feed.{agent_id}.&gt;</code> only to a node that vouches for that agent (§4.4).
+The owner token makes the grant checkable by inspection — the same
+construction as <code>mesh.registry.register.{node_id}</code> (§14.1, §14.3). A
+channel with more than one legitimate publisher is not a feed; it is a
+domain event (§6.6) or a room (EXT-5).</li>
+<li>A feed is one of two <strong>kinds</strong>, chosen by its owner:<ul>
+<li><strong>stream</strong> — an ordered history. Subscribers replay it like any other
+durable event subscription (§18.6).</li>
+<li><strong>state</strong> — a current value. Each publish replaces the last, and a late
+subscriber MUST be able to read the current value without replaying
+history (binding in §18.3). Presence-like facts, rates, and statuses are
+state; logs and occurrences are streams.</li>
+</ul>
+</li>
+<li>An agent SHOULD declare its feeds in its manifest <code>emits</code> field (§8.2),
+which is what makes them discoverable through the registry like any other
+manifest fact.</li>
+<li>Feeds inherit §6.6&#39;s rules unchanged: fire-and-forget, durable persistence,
+per-subject rate limiting, and open broadcast — a feed is public speech,
+never sealed mail.</li>
+<li>Subscription is §6.7 unchanged: <code>mesh.feed.{agent_id}.*</code> matches all of one
+agent&#39;s feeds; <code>mesh.feed.{agent_id}.{topic}</code> matches one.</li>
 </ul>
 <h3 id="6-7-subscribe">6.7. <code>subscribe</code><a class="hl" href="#6-7-subscribe">#</a></h3>
 <p>Declares interest in events matching a subject pattern.</p>
@@ -4151,6 +4212,11 @@ events MUST deduplicate on the idempotency key.</p>
 <td>JetStream</td>
 </tr>
 <tr>
+<td><code>mesh.feed.{agent_id}.{topic}</code></td>
+<td>Owner-rooted feeds (§6.6a); publishable only by the owning agent&#39;s node</td>
+<td>JetStream / KV (state feeds), <em>optional</em></td>
+</tr>
+<tr>
 <td><code>mesh.heartbeat.{node_id}</code></td>
 <td>Node heartbeat signals (presence)</td>
 <td>JetStream (short TTL)</td>
@@ -4624,12 +4690,19 @@ before the history it wants.</p>
 <td>Optional.</td>
 </tr>
 <tr>
-<td><code>MESH_SESSIONS</code></td>
-<td><code>mesh.session.&gt;</code></td>
-<td>Session messages</td>
-<td>Only if the parked <code>connect</code>/<code>disconnect</code> session ops are in use.</td>
+<td><code>MESH_FEED</code></td>
+<td><code>mesh.feed.*.*</code></td>
+<td>Stream-feed history (§6.6a)</td>
+<td>Optional. Interest retention; carries the same ≥2-minute duplicate-tracking window as <code>MESH_EVENTS</code>, and the one-owner rule applies: <code>MESH_FEED</code> is the only stream bound to the feed grammar — a slice needing its own retention sources from it. The binding is the four-token GRAMMAR, deliberately not the <code>mesh.feed.&gt;</code> prefix: a prefix binding also captures the three-token lookup subject <code>mesh.feed.get</code>, and a captured request-reply gets the stream&#39;s publish acknowledgment sent to its reply subject, racing (and in practice beating) the responder&#39;s real answer.</td>
 </tr>
 </tbody></table>
+<p><strong>State feeds</strong> (§6.6a) bind to a KV bucket rather than (or in addition to)
+the stream: keyed <code>{agent_id}.{topic}</code>, each key holding the latest emit
+envelope for that feed, written by the platform on delivery. A late subscriber
+reads the key for the current value, having first subscribed to the feed
+subject for changes — the subscribe-before-snapshot rule of §9.6 applies here
+for the same reason it applies to presence.
+| <code>MESH_SESSIONS</code> | <code>mesh.session.&gt;</code> | Session messages | Only if the parked <code>connect</code>/<code>disconnect</code> session ops are in use. |</p>
 <h3 id="18-4-kv-buckets-and-task-persistence">18.4. KV Buckets &amp; Task Persistence<a class="hl" href="#18-4-kv-buckets-and-task-persistence">#</a></h3>
 <table>
 <thead>

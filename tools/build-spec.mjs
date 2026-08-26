@@ -201,6 +201,7 @@ const page = `<!DOCTYPE html>
         <div class="grp">run your own</div>
         <a href="running-a-mesh.html">/ running-a-mesh</a>
         <a href="clouds.html">/ clouds</a>
+        <a href="platform-agents.html">/ platform-agents</a>
         <a href="operator-obligations.html">/ operator-obligations</a>
         <a href="operator-revenue.html">/ operator-revenue</a>
         <a href="settlement.html">/ settlement</a>

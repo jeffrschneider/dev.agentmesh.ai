@@ -176,32 +176,27 @@
       <div class="wrap hero">
         <span class="eyebrow"><span class="tag">agentmesh</span> · clouds</span>
         <h1>AgentMesh on <span class="am">your cloud</span></h1>
-        <p class="lede">The mesh runs on every major cloud today. This page says how,
-          and shows how each cloud's native messaging services measure against what
-          the mesh asks of its transport.</p>
+        <p class="lede">The mesh runs on every major cloud today with a NATS
+          platform.</p>
       </div>
 
       <section class="band">
         <div class="wrap">
           <p class="kicker">the short answer</p>
           <h2>Run NATS on the cloud's compute</h2>
-          <p>The mesh transport is <b>NATS</b>, an open-source messaging system. On
-            AWS, Azure, Google Cloud, or any other cloud, run NATS on ordinary
-            compute (virtual machines or Kubernetes) and every capability on this
-            page comes with it, at full fidelity. For a managed option, Synadia
-            operates NATS as a service with clusters inside AWS, Google Cloud, and
-            Azure regions, so traffic can terminate in the region and provider you
-            already use. The self-hosted deployment described on
+          <p>The mesh transport is <b>NATS</b>, an open-source messaging system.
+            Run NATS on ordinary compute (virtual machines or Kubernetes) on AWS,
+            Azure, Google Cloud, or any other cloud, and everything on this page
+            comes with it. The self-hosted deployment described on
             <a href="running-a-mesh.html">/ running-a-mesh</a> is this shape.</p>
           <div class="callout">
             <div class="t">what each column means</div>
-            <p>Each cloud column is the strongest composite we could assemble there:
-              <b>Azure</b> is Service Bus, Event Grid's MQTT broker, Event Hubs, and
-              Cosmos DB together; <b>AWS</b> is Amazon MQ for RabbitMQ with DynamoDB
-              (the serverless queue services score lower); <b>Google Cloud</b> is
-              Cloud Pub/Sub with Firestore. The NATS column is the transport the
-              mesh runs on today. Reviewed August 2026; cloud services change, so
-              read a cell as a snapshot, not a promise.</p>
+            <p>Each cloud column is the strongest combination of that cloud's
+              services: <b>Azure</b> is Service Bus, Event Grid's MQTT broker,
+              Event Hubs, and Cosmos DB together; <b>AWS</b> is Amazon MQ for
+              RabbitMQ with DynamoDB; <b>Google Cloud</b> is Cloud Pub/Sub with
+              Firestore. The NATS column is the transport the mesh runs on today.
+              Reviewed August 2026.</p>
           </div>
         </div>
       </section>

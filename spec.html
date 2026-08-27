@@ -179,7 +179,7 @@
           <span>status <b>Working Draft</b></span>
           <span>date <b>2026-08-25</b></span>
         </div>
-        <p class="canon">Rendered 2026-08-26 from commit <span class="mono">092b1d9</span>.
+        <p class="canon">Rendered 2026-08-27 from commit <span class="mono">69deadc</span>.
           The canonical source is SPEC.md, published with the conformance suite at
           <a href="https://github.com/jeffrschneider/agentmesh-protocol">https://github.com/jeffrschneider/agentmesh-protocol</a>
           (the <span class="mono">conformance/</span> fixtures this specification cites live there).</p>
@@ -210,430 +210,12 @@
             <a href="#appendix-b-example-event-driven-collaboration">Appendix B: Example, Event-Driven Collaboration</a>
             <a href="#appendix-c-example-streaming-llm-output">Appendix C: Example, Streaming LLM Output</a>
             <a href="#appendix-d-implementation-checklist">Appendix D: Implementation Checklist</a>
+            <a href="#change-history">Change History</a>
         </div>
       </div>
       <div class="wrap spec">
 <blockquote>
-<p><strong>0.2 revision in progress.</strong> This draft is being revised per <code>SPEC-0.2-PLAN.md</code>.
-The prior draft is archived at <code>SPEC-0.1.0.md</code>. Key structural changes:
-a first-class <strong>Node</strong> concept (a host that connects once and vouches for the
-agents it hosts), a <strong>registry/presence split</strong>, <strong>optional Tasks</strong>, and the
-relocation of economics and speculative operations into extensions. All
-structural changes and wording polish are applied across sections 1 to 19 (identity/
-envelope, optional tasks, registry/presence split, composed-op disposition,
-node-held inbox, extensions registry, optional observability, economics →
-extension, tenancy/visibility). <strong>§4.5 message signing is locked to
-always-sign</strong>, with stream chunks authenticated at the stream level rather
-than per chunk (§4.5, §11.6). Implemented: TypeScript and Rust SDKs (node model,
-streaming, chunk verification), platform services (registry, presence, node
-profiles, sandbox enforcement), and a public reference deployment.</p>
-<p><strong>2026-07-24: federation-readiness revision.</strong> New §1.5 states the five
-layering invariants this spec and <code>SPEC-NAMING.md</code> are subordinate to.
-New <code>describe</code> composed operation (§10.14): the pre-admission read.
-Manifest gains the <code>public</code> block (§8.7). Registry scoped as
-attachment-only (§9). Node attestations defined as portable objects
-(§9.7). <code>mesh.peer.</code> reserved (§14.1). §21 federation constraints made
-normative-now. Companion changes in <code>SPEC-NAMING.md</code> 0.5-draft
-(resolution authority, re-homing, registrar obligations).</p>
-<p><strong>2026-07-25: identity-path clarifications.</strong> §4.4 clause (b) is named as a
-<strong>transport</strong> check and given the mechanism that satisfies it: the
-connection-bound registration subject <code>mesh.registry.register.{node_id}</code>
-(§14.1, §14.3). <code>UNAUTHORIZED</code> is added to <code>register</code> (§6.2) for a
-deployment that requires it. §10.10 states that the node a heartbeat
-speaks for is its subject token and that a payload <code>node</code> field MUST be
-ignored. Stale <code>§10.9</code> heartbeat cross-references corrected to §10.10
-(§9.6, §9.7). Companion changes in <code>extensions/EXT-2-usage.md</code> (per-caller
-read authorization), <code>EXT-5-rooms.md</code> (service-side membership checks),
-and <code>EXT-6-admission.md</code> (the guard handshake).</p>
-<p><strong>2026-07-26: inbound protections made normative.</strong> New <strong>§22</strong> states the five
-receiver-side obligations that previously existed only as TypeScript SDK
-behaviour: duplicate rejection (§22.2), a freshness window (§22.3), correct
-addressing (§22.4), an inbound sender-text cap (§22.5) and sender-text fencing
-(§22.6), with refusal channels pinned in §22.7. Paired with a new fixture,
-<code>conformance/inbound-protections.json</code>, because the divergences that matter
-here are one-byte ones (a marker string, a character count&#39;s unit, an empty
-line) that prose cannot pin. §22 adds no new wire fields and no new error
-codes.</p>
-</blockquote>
-<blockquote>
-<p><strong>2026-07-27: budget made core; economics re-cut around it.</strong> New <strong>§7.7</strong>
-defines the budget: an absolute deadline plus (via the Economics extension)
-a currency cost ceiling, attached to the <code>request</code> and inherited by the Task
-if one materializes. Admission is refuse-or-accept with typed refusals
-carrying estimates; revisions are absolute with a monotonic counter, parties
-only; the ceiling pauses into <code>input_required</code>, the deadline yields central
-overdue marking and a completed-late record. Tokens are deliberately not a
-budget unit (not fungible across agents). <code>negotiate</code> and
-<code>COST_LIMIT_EXCEEDED</code> are retired, subsumed by refuse-with-estimate; §19 is
-re-cut as the money axis (prices, <code>cost_ceiling</code>, spend reports, metering
-receipts without token counts). Settlement remains out of scope.</p>
-</blockquote>
-<blockquote>
-<p><strong>2026-07-27: the envelope signature is domain-separated and version-tagged.</strong>
-The bytes an envelope&#39;s <code>sig</code> covers are now the ASCII prefix
-<code>agentmesh-envelope-v1</code> followed by one newline (0x0A), then the canonical
-JSON of the envelope minus <code>sig</code> (§4.5, §5.3). The prefix exists only inside
-the signed bytes: no wire field changes, and the encoding of <code>sig</code> is
-unchanged. A signature over untagged bytes can be replayed into any other
-context that signs the same shape; the tag pins what the signature means and
-versions it. That is the argument §8.3 and §9.7 already made for every other
-signature in the system, now applied to the one on every message. Signers
-MUST emit the tagged form from protocol 0.2 on; receivers SHOULD also accept
-the legacy untagged form during the 0.2 draft window and MUST refuse it from
-0.3. The signed envelope vectors in <code>conformance/budget.json</code> and
-<code>conformance/inbound-protections.json</code> are regenerated accordingly (each
-block&#39;s <code>signed_bytes_prefix</code> field pins the prefix).</p>
-</blockquote>
-<blockquote>
-<p><strong>2026-07-27: canonical JSON is RFC 8785 (JCS).</strong> &quot;Sorted keys, minimal
-whitespace&quot; was the entire canonical-JSON definition, leaving number
-formatting, string escaping, and absent-versus-null to the implementation.
-That is a latent cross-SDK signature failure, because serde_json&#39;s number
-formatting differs from ECMAScript&#39;s exactly there (exponent-notation
-thresholds, negative zero, integral floats, integers above 2^53, and
-UTF-8-order key sort for beyond-BMP keys). §5.3 now defines canonical JSON
-by normative reference to RFC 8785, plus two stated rules: absent members
-are omitted
-(an unset member MUST NOT be serialized as null) and null, where present,
-is a value distinct from absent. The TypeScript SDK&#39;s output was verified
-against RFC 8785&#39;s rules and its Appendix B before adoption and is
-byte-identical to strict JCS, with <strong>zero TypeScript byte changes</strong>, so no
-existing signature moves; the Rust SDK adopts a JCS serializer and its
-divergences (all on values no protocol field carries) are fixed. New
-fixture <code>conformance/canonical-json.json</code> pins 52 vectors plus the whole
-of RFC 8785 Appendix B, asserted from both SDKs. The attestations (§4.4,
-§9.7) name §5.3 as their serialization; §8.3&#39;s key claim stays
-newline-joined, not JSON, as before.</p>
-</blockquote>
-<blockquote>
-<p><strong>2026-07-27: cancel gets reasons and transitive propagation.</strong> §10.8 is
-rewritten: a cancel now carries a REQUIRED <code>reason</code> from a closed six-value
-enum (<code>user_requested</code>, <code>superseded</code>, <code>deadline_exceeded</code>,
-<code>budget_exhausted</code>, <code>upstream_cancelled</code>, <code>policy</code>) and an optional
-free-text <code>note</code>. The enum, not the note, is what the record carries as
-meaning. An agent that delegated any part of a live Task MUST forward a
-cancel to each still-live delegate as <code>upstream_cancelled</code>; the MUST is
-honor-system inside the performer, in §7.7&#39;s pattern, and its teeth are
-central visibility: a canceled Task whose delegated children remain live
-is the <strong>stranded delegates</strong> condition, flagged on the child records and
-announced on <code>mesh.event.task.stranded</code>. Deliberately <strong>no bounded
-acknowledgement</strong>: for the requester, cancellation is effective when sent;
-delivery to the performer is on mailbox time. §7.3 adds the paused-state
-cancels (<code>input_required</code>/<code>auth_required</code> → <code>canceled</code>) that §7.7 already
-promised; §19.2&#39;s metering receipt extends to canceled Tasks
-(<code>mesh.event.metering.task_canceled</code>, carrying <code>cancel_reason</code>). New
-fixture <code>conformance/cancel.json</code> pins the six reason strings, both wire
-shapes, the propagated-cancel shape, and the reject cases.</p>
-</blockquote>
-<blockquote>
-<p><strong>2026-07-27: the remaining canonical-JSON signatures are domain-tagged.</strong>
-The tag-inside-the-signed-bytes scheme §5.3 gave the envelope now covers the
-three signatures that still signed bare canonical JSON: the node→agent vouch
-attestation signs <code>agentmesh-vouch-v1</code> + LF + the canonical JSON of the
-attestation minus <code>sig</code> (§4.4); the room descriptor signs
-<code>agentmesh-room-descriptor-v1</code> + LF + the canonical descriptor
-(<code>extensions/EXT-5-rooms.md</code> §2); the admission roster signs
-<code>agentmesh-admission-roster-v1</code> + LF + the canonical document
-(<code>extensions/EXT-6-admission.md</code> §3). Each prefix exists only inside the
-signed bytes: no wire field changes, and every signature keeps its existing
-encoding. Migration mirrors the envelope&#39;s: signers MUST emit the tagged form
-from protocol 0.2 on; verifiers SHOULD also accept the legacy untagged form
-during the 0.2 draft window and MUST refuse it from 0.3. The §9.7 trust
-attestation is already domain-separated by its in-object <code>type</code> tag and is
-unchanged; the PAN card signature is governed by <code>SPEC-NAMING.md</code> and is
-likewise unchanged here. New fixture <code>conformance/signature-tags.json</code> pins
-each prefix with a really-signed vector.</p>
-</blockquote>
-<blockquote>
-<p><strong>2026-07-27: the accept signal, sender pre-flight, and three companion
-rules.</strong> (1) <strong>The accept signal</strong> (new §6.4a): when a live handler admits a
-request (the §22 inbound checks and §7.7 budget admission passed), the
-responder&#39;s SDK MUST immediately emit a non-terminal <code>respond</code> with
-<code>payload.status</code> <code>&quot;accepted&quot;</code>, before invoking the handler, so a caller
-facing a cold agent&#39;s multi-second first token no longer waits blind against
-its own timeout. Mode is thereafter told by the first <em>substantive</em> respond
-(§6.4, §6.5 and §7.0 reworded to say so), and the node-level <code>queued</code>
-acknowledgement is distinguished as the buffered path&#39;s convention:
-<code>&quot;accepted&quot;</code> means a handler will run now, <code>queued</code> means a mailbox holds
-the message. Wire shape pinned in new <code>conformance/accept-signal.json</code>.
-(2) <strong>Sender pre-flight</strong> (new §6.4b): a sending SDK MUST enforce the
-recipient&#39;s published limits locally before publishing (sender-text cap,
-transport <code>max_payload</code>, content types) and refuse locally with the same
-error codes the recipient would answer with; the sender-side mirror of §22,
-sparing the round trip and the recipient&#39;s resources. The manifest gains an
-OPTIONAL <code>limits</code> block (§8.1) as the cap&#39;s declaration point. Cases pinned
-in new <code>conformance/sender-preflight.json</code>. (3) <strong>Subscribe before
-snapshot</strong> (§9.6): a consumer tracking liveness MUST subscribe to presence
-transitions before reading the presence snapshot, closing the race in the
-gap between the two. (4) <strong>Resolve, never construct</strong> (new §14.4): callers
-outside the SDKs MUST use resolved endpoint subjects and MUST NOT construct
-them from the naming convention, which is what makes a future renaming
-survivable;
-the manifest gains <code>endpoints</code> (§8.1), OPTIONAL on registration and
-registry-populated so old manifests never lack it. (5) <strong>The 0.3 subject
-tree</strong> (new §20.4): one declared migration mechanism. When 0.3 breaks the
-wire, incompatible deployments SHOULD occupy a versioned subject tree, at
-the same flag day that re-mints credentials anyway. Plus a new <strong>Appendix
-D</strong>, the per-role implementation checklist: a normative summary that adds
-no rules.</p>
-</blockquote>
-<blockquote>
-<p><strong>2026-07-28: the owner allowance (EXT-8).</strong> The budget (§7.7) gains its
-owner-side complement, the <strong>allowance</strong>: the ceiling an owner sets on what
-their <em>own</em> agent may spend, a signed, node-held policy document defined in
-<code>extensions/EXT-8-allowance.md</code> (<code>mesh://extensions/allowance/v1</code>,
-registered in §17.5). Core changes are deliberately small: §19.3 states that
-<code>BUDGET_INSUFFICIENT</code> is legal even against a request that offered no
-ceiling (the estimate is then a price quote; resubmitting at or above it is
-acceptance; the exchange reads identically on the wire), §7.7 names the
-allowance as the complementary ceiling composing through
-refusal-with-estimate, and EXT-3 gains the <code>allowance</code> event class. No new
-wire fields and no new error codes; the platform observes
-(<code>mesh.event.agent.allowance_exceeded</code>, spend rollups over §19.2 receipts)
-and never blocks. New fixture <code>conformance/allowance.json</code> pins the document
-shape, really-signed vectors under the <code>agentmesh-allowance-v1</code> tag,
-floor-rounded metering arithmetic, smallest-remaining ceiling precedence,
-the refusal shape, and both exhaustion behaviours.</p>
-</blockquote>
-<blockquote>
-<p><strong>2026-08-02: metering made first-class; economics re-cut as SKU, price,
-and agreement.</strong> New <strong>§13.5</strong> defines the metering substrate in core: a
-<strong>meter</strong> is a named unit of consumption in one of two classes, <em>observed</em>
-(counted by the platform from traffic it can attest: requests, bytes, task
-completions) and <em>declared</em> (measurable only inside the responder: tokens,
-model time, tool calls), and a <strong>meter event</strong> is the atom of usage:
-quantity, provider, consumer, the deriving envelope&#39;s id as the idempotency
-key. Declared usage rides <code>payload.usage</code> of the <code>respond</code>, which the
-envelope signature already covers. A usage report is a signed receipt with
-no new signature. Refusals are events too (quantity zero, carrying the
-code), so declined demand is as recorded as served demand. §19 is re-cut
-around it: the manifest <code>cost</code> block is retired in favour of <strong>SKUs</strong>
-(§19.1), which pair covered offerings with a <strong>price</strong> (<code>free</code> / <code>flat</code> /
-<code>per_unit</code> / <code>package</code> / <code>tiered</code>, rated against named meters) and a billing
-<strong>provider</strong> (§19.4), and whose commercial terms are pinned by a tagged
-SHA-256 <strong>digest</strong>;
-a signed, account-level <strong>agreement</strong> (§19.5) binds a consumer&#39;s owner key
-to that digest before paid work, enforced at admission by the new
-<code>AGREEMENT_REQUIRED</code> refusal (§12.2), which carries the approval URL and is
-the §1.3 &quot;payment required&quot; refusal, now typed; and <strong>rating</strong> (§19.6) is a
-deterministic, replayable fold of meter events × agreed price, bounded by
-the budget&#39;s ceiling. The task receipt (§19.2) becomes a derived view over
-§13.5 events, same subjects. Settlement remains out of scope. New fixtures
-<code>conformance/metering.json</code> and <code>conformance/commerce.json</code> pin the shapes,
-the rating arithmetic, the digest, and really-signed vectors under
-<code>agentmesh-agreement-v1</code>.</p>
-</blockquote>
-<blockquote>
-<p><strong>2026-08-03: <em>skill</em> renamed to <em>offering</em>; shared resources; the
-engagement contract.</strong> The unit of capability an agent advertises is renamed
-from <em>skill</em> to <strong>offering</strong> throughout, because the ecosystem has settled
-&quot;skill&quot; to mean a packaged procedure loaded <em>into</em> an agent, which is not
-this concept. The legacy field names (<code>skills</code>, <code>payload.skill</code>,
-<code>skill_details</code>, <code>SKILL_NOT_FOUND</code>) are accepted as inbound aliases for a
-deprecation window (§8.5). New <strong>§7.5.5</strong> distinguishes what every prior
-part type is (a copy: inline bytes outright, a <code>ref</code> as an immutable
-snapshot) from a <strong>shared resource</strong>: one live object both parties knowingly
-operate on, carried as <code>payload.resources</code> with <code>uri</code>, <code>kind</code> (<code>git</code>
-reserved), and declared <code>access</code>. It is exempt from digest and retention
-because no snapshot-shaped claim can honestly be made about a place, with
-access arranged in the resource&#39;s own auth domain and cleartext credentials
-forbidden. New <strong>§8.5.1</strong> adds the coarse engagement contract for
-general-purpose agents: <code>needs</code> (resources, files, or prose to have in hand)
-and <code>delivers</code> (final form, interim checkpoints, and whether the
-deliverable lands in the caller&#39;s resource), both registry-materialized into
-the storefront (§8.7).</p>
-</blockquote>
-<blockquote>
-<p><strong>2026-08-07: a ninth Task state, <code>exhausted</code>.</strong> §7.2 gains a terminal state
-for the way time-and-materials work ends: the governing engagement reaches
-the not-to-exceed cap that <a href="https://agentsow.com">Agent SoW</a> §5.5.5 makes
-mandatory, and the work concludes there with whatever artifacts exist
-attached and nothing past the cap billable. It is deliberately neither
-<code>failed</code> (no error occurred, and a runtime MUST NOT record it as one) nor
-<code>canceled</code>, which some party asked for; the money ran out. §7.3 adds the
-transition from each of the four non-terminal states and none out of it.
-Implemented in the TypeScript and Rust SDKs.</p>
-</blockquote>
-<blockquote>
-<p><strong>2026-08-07: settlement does not cross an instance boundary.</strong> §21 gains a
-seventh precondition and a subsection, &quot;What a visitor pays with&quot;, answering
-the question a second settlement binding made concrete: what a visiting agent
-pays with when the visited instance&#39;s unit is not its own. Value settles on
-the instance where the work was delivered, in the unit that instance&#39;s
-settlement binding declares. No instance converts between units and none
-settles on another&#39;s behalf, because a unit can have no exchange rate by
-construction: an internal chargeback unit is allocated by budget authority,
-cannot be bought at any price and cannot leave. Four outcomes are defined and
-MUST be distinguishable: paid locally, recorded and unsettled, declared free,
-and refused. Refusal reuses <code>AGREEMENT_REQUIRED</code> and <code>BUDGET_INSUFFICIENT</code>,
-so federation adds no error code, no wire field and no new state. A rate
-asserted by one party and uncheckable by the other is evidence and never
-enforcement, and a converted amount MUST record its rate, its source and its
-instant. The visitor&#39;s home instance records nothing and MUST NOT be billed.</p>
-</blockquote>
-<blockquote>
-<p><strong>2026-08-09: saying what you wrap, and what you will ask for.</strong> Two
-declarations for the agent that offers a better way to use a service it did
-not build. §8.5.1 gains a fourth <code>needs</code> kind, <code>credential</code>: the agent names
-the third-party service it will ask the caller to sign in to, and what the
-sign-in is for. A third party asking a person for a government or bank login
-is indistinguishable from phishing to the person being asked, so the
-declaration is what lets the honest case look honest, and renderers SHOULD
-give it more prominence than the other kinds. New <strong>§8.8</strong> adds <code>works_with</code>
-to the manifest: an array of external services the agent integrates with, and
-explicitly never a claim of affiliation or endorsement. &quot;Works with the
-Colorado DMV&quot; is allowed and useful; presenting as the Colorado DMV is
-impersonation. Nothing verifies either field, <code>domain</code> least of all, so a
-consumer MUST NOT display an entry as verified or as endorsement. Both are
-pre-admission data, carried into the storefront (§8.7).</p>
-</blockquote>
-<blockquote>
-<p><strong>2026-08-09: work that ends badly says whose fault it was.</strong> §10.8&#39;s reason
-enum grows from six values to eight, and the same vocabulary now rides a
-<code>failed</code> update as well as a <code>canceled</code> one, because three different endings
-used to look identical in the record: the provider did not deliver, the
-caller never furnished something the offering declared it needed, and an
-outside service the provider depends on stopped working. New
-<code>needs_not_furnished</code> names the second and MUST carry <code>unmet_need</code>, a
-<code>&lt;kind&gt;:&lt;value&gt;</code> reference to a need the offering declared under §8.5.1; new
-<code>dependency_failed</code> names the third and SHOULD carry <code>dependency</code>. A
-dependency failure is still the provider&#39;s, because the provider chose the
-dependency. New <strong>§10.8a</strong> defines <code>attribution</code>, which the platform
-COMPUTES rather than accepts: <code>client</code> only when the reason is
-<code>needs_not_furnished</code> and the named need is actually declared on the
-responder&#39;s registered manifest, <code>provider</code> in every other case including an
-unbacked claim. A reputation consumer MUST take attribution from the
-platform&#39;s own signed terminal event and MUST NOT take a party&#39;s word for it.
-<code>conformance/cancel.json</code> grows the two strings, the <code>unmet_need</code> rules, the
-failed-update shape, and the attribution cases.</p>
-</blockquote>
-<blockquote>
-<p><strong>2026-08-10: a statement says what it rested on.</strong> New <strong>§5.6</strong> adds
-<code>rests_on</code>, an OPTIONAL list of <code>{digest, ref?, name?, role?}</code> entries naming
-the bytes a signed statement was computed from. The gap it closes: a
-signature says who spoke and that the words are unchanged, and says nothing
-about whether the inputs underneath are still what they were, so a deliverable
-or a receipt keeps verifying long after it stopped being true. No new
-signature and no combined root value: <code>rests_on</code> sits inside the statement, so
-§5.3&#39;s signature already covers it, and the list stays explicit because a
-folded hash cannot say WHICH input moved. A verifier that can reach the cited
-bytes MUST compare; a mismatch is <strong>stale</strong>, which is a different fact from
-forged and MUST NOT be reported as a signature failure. A verifier that cannot
-reach them records unchecked, never agreement (§7.5.1&#39;s rule for a missing
-<code>digest</code>, applied again). Stale statements are re-issued, never edited.
-<strong>Countersigned agreements are excluded</strong>, normatively: an undertaking that
-voided when one side touched a file is one neither party could rely on, and
-agreements change only by both parties signing again. Carried today on an
-artifact (§7.5) and beside a usage report (§13); deliberately not on the
-envelope. No new envelope field and no new error code, because a stale
-statement is an input to somebody&#39;s decision, not a protocol failure.</p>
-</blockquote>
-<blockquote>
-<p><strong>2026-08-11: the five questions; self-description gets a consistency
-rule.</strong> New <strong>§3.3.1</strong> names the set every agent answers about itself: who
-are you, what do you do, how are you used, on what terms, and what do you
-refuse, each answer already living in operator-declared signed bytes (the
-card, offerings and their materialized details, schemas and modes, skus,
-<code>data_use</code>, <code>compliance</code>, <code>sealing</code>, admission). No new verb, envelope
-field, or handler: pre-admission the set is served by <code>describe</code> and §1.5&#39;s
-two-verb invariant stands; the <em>document, not a conversation</em> rule extends
-to the whole set. What is new is the <strong>consistency rule</strong>: an agent&#39;s
-spoken statements about itself are subordinate to its signed declarations,
-conflicts resolve to the signed bytes, and a persistent conflict is
-detectable non-conformance (ask, then diff), which turns a stale manifest
-from a nuisance into a checkable defect. The <strong>interview</strong> is the matching
-conformance procedure, runnable by code that holds no model; platforms MAY
-record results as evidence, and a self-run result is a claim, never
-verification. Stated boundaries: a tool is invoked, an agent is engaged;
-platform actors are the deliberate exception (never selling, judging, or
-holding reputation, they sit outside the five questions). Written as the
-mesh binding of the self-description work developed alongside Agent RFP
-0.6.0-draft (agent-shaped postings) and the planned A2A card extensions.</p>
-</blockquote>
-<blockquote>
-<p><strong>2026-08-12: the storefront says where a person can look.</strong> §8.7&#39;s public
-block gains <code>uis</code>, an operator-declared list of the agent&#39;s web surfaces:
-per entry a REQUIRED https <code>url</code> and <code>label</code>, optional <code>purpose</code>,
-<code>audience</code>, <code>access</code>, <code>kind</code>, and <code>offering</code> binding. Two rules travel
-with it: <code>audience</code>/<code>access</code> are labels, not access control (the door
-itself enforces), and every entry is an untrusted link (rendered plain,
-never embedded, cross-origin flagged). Pre-admission data for the same
-reason <code>skus</code> and <code>links</code> are: where an agent can be looked at is part of
-deciding whether to knock. Long-lived agents serve dashboards and status
-pages, not only inboxes, and the storefront had no way to say so. The
-member also feeds the UI links card extension
-(dev.agentmesh.ai/extensions/ui-links/v1), whose vocabulary it shares.</p>
-</blockquote>
-<blockquote>
-<p><strong>2026-08-18: the bare-mode reply path collapses to one shape (0.3.0-draft).</strong>
-Through 0.2 a bare response had two shapes: live, on the transport&#39;s private
-reply subject, and drained, at the sender&#39;s inbox (§16.4, §18.6). Now there
-is one: a <code>respond</code> to a bare-mode request MUST be published to the
-requester&#39;s <strong>inbox</strong> subject, resolved from the request&#39;s <code>from</code>, correlated
-by <code>in_reply_to</code>, and responders MUST NOT publish response data to a
-transport reply subject; requesters accept bare responds only via their inbox
-delivery paths, where the §22 protections already run, and ignore response
-data arriving on a reply subject (§6.4, §6.4a, §6.5, §18.7). The reply
-subject MAY still be set, reserved as a liveness signal: an unserved inbox
-draws the server&#39;s immediate no-responders error, distinguishing an offline
-agent from a slow one, and it never carries response data. Two deliberate
-exceptions, both platform plumbing, close the list: the registry liveness
-probe (<code>__registry_probe__</code>, §18.7) and a live delivery on an
-admission-guarded inbox (EXT-6, §18.7) are answered on the reply subject. The
-drain-bound rationale in §16.4, §18.6 and §22.2 is restated (both paths now
-answer the same destination), §13 states the capture consequence, and
-Appendices A, C and D follow. Hard cutover: no compatibility window.</p>
-</blockquote>
-<blockquote>
-<p><strong>2026-08-18: the events stream binding is made true (0.3.0-draft).</strong>
-§18.3&#39;s row <code>MESH_EVENTS | mesh.event.&gt; | Interest | 24h</code> stands exactly as
-written, and the binding prose now says how to live under it: a stream that
-needs its own retention over a slice of the event space (the reference
-binding&#39;s per-room records, the metering stream) MUST be a subject-less
-stream that <strong>sources</strong> from <code>MESH_EVENTS</code> with a subject filter, never a
-subject-bound stream, because the reference transport refuses a stream whose
-bound subject overlaps another stream&#39;s: one subject space, one owner.
-Interest retention means an event published while no consumer or source
-holds matching interest is not retained, so durable capture of a domain
-begins when its first durable consumer or source exists. <code>MESH_EVENTS</code>
-carries a duplicate-tracking window of at least the §18.8 two minutes.</p>
-</blockquote>
-<blockquote>
-<p><strong>2026-08-25: sealing&#39;s boundary is stated (0.3.0-draft).</strong> §4.3 gains
-&quot;Where sealing ends&quot;: end-to-end confidentiality terminates at the agent&#39;s
-node, wherever that node runs. An agent hosted on infrastructure its owner
-does not operate — a hosting platform, a bridge — has that operator inside
-the sealed boundary, opening payloads as the agent; when the host is also
-the transport operator, sealing protects transit and every mesh-side buffer
-but nothing against that party. <code>extensions/EXT-7-pairwise-sealing.md</code> §5&#39;s
-&quot;the node is the agent&#39;s own machine&quot; is corrected to match. Wording only:
-no wire fields, no error codes, no behaviour change — the clarification
-exists so a manifest <code>encryption_key</code> cannot be read as a promise about who
-operates the node behind it.</p>
-</blockquote>
-<blockquote>
-<p><strong>2026-08-25: feeds — owner-rooted events (0.3.0-draft).</strong> The
-<code>mesh.event.{domain}.{event_type}</code> space is a shared commons: its subjects
-carry no owner token, so &quot;this agent&#39;s own channel&quot; is not expressible in it
-and any credential covering a domain publishes into that domain. New
-<strong>§6.6a</strong> defines a <strong>feed</strong>: an event channel rooted in the identity of the
-one agent that publishes it, subject <code>mesh.feed.{agent_id}.{topic}</code> (§14.1),
-whose publish permission a deployment grants only to a node that vouches for
-the owning agent — ownership is transport-enforced by the subject&#39;s own
-shape, the same construction as connection-bound registration. Feeds come in
-two kinds: <strong>stream</strong> (an ordered history, replayed like any event) and
-<strong>state</strong> (a current value; each publish replaces the last, and a late
-subscriber reads the current value without replaying history). §18.3 gains
-the optional <code>MESH_FEED</code> stream and the state-feed KV binding. §6.6 also now
-states what was previously only inferable: events are <strong>open broadcast</strong> —
-pairwise sealing (§4.3, EXT-7) cannot apply where readers are unknown at
-publish time, so content that needs sealing travels in a <code>request</code>, never an
-event. Additive only: no existing subject, wire field, or behaviour changes.
-<em>Same-day amendment, found live:</em> <code>MESH_FEED</code> binds the four-token grammar
-<code>mesh.feed.*.*</code>, never the <code>mesh.feed.&gt;</code> prefix — the prefix also captures
-the lookup subject <code>mesh.feed.get</code>, and JetStream then sends its publish
-acknowledgment to the request&#39;s reply subject, racing the responder&#39;s real
-answer and winning. The reference deployment observed exactly that.</p>
+<p>Revision notes for this draft are kept in the <a href="#change-history">Change History</a> at the end of this document.</p>
 </blockquote>
 <hr>
 <h2 id="1-introduction">1. Introduction<a class="hl" href="#1-introduction">#</a></h2>
@@ -6278,6 +5860,431 @@ section wins, and the disagreement is a defect in this appendix.</p>
 <td><em>(none)</em></td>
 </tr>
 </tbody></table>
+<hr>
+<h2 id="change-history">Change History<a class="hl" href="#change-history">#</a></h2>
+<p>Revision notes for the 0.2/0.3 draft line, in chronological order (oldest first).</p>
+<blockquote>
+<p><strong>0.2 revision in progress.</strong> This draft is being revised per <code>SPEC-0.2-PLAN.md</code>.
+The prior draft is archived at <code>SPEC-0.1.0.md</code>. Key structural changes:
+a first-class <strong>Node</strong> concept (a host that connects once and vouches for the
+agents it hosts), a <strong>registry/presence split</strong>, <strong>optional Tasks</strong>, and the
+relocation of economics and speculative operations into extensions. All
+structural changes and wording polish are applied across sections 1 to 19 (identity/
+envelope, optional tasks, registry/presence split, composed-op disposition,
+node-held inbox, extensions registry, optional observability, economics →
+extension, tenancy/visibility). <strong>§4.5 message signing is locked to
+always-sign</strong>, with stream chunks authenticated at the stream level rather
+than per chunk (§4.5, §11.6). Implemented: TypeScript and Rust SDKs (node model,
+streaming, chunk verification), platform services (registry, presence, node
+profiles, sandbox enforcement), and a public reference deployment.</p>
+<p><strong>2026-07-24: federation-readiness revision.</strong> New §1.5 states the five
+layering invariants this spec and <code>SPEC-NAMING.md</code> are subordinate to.
+New <code>describe</code> composed operation (§10.14): the pre-admission read.
+Manifest gains the <code>public</code> block (§8.7). Registry scoped as
+attachment-only (§9). Node attestations defined as portable objects
+(§9.7). <code>mesh.peer.</code> reserved (§14.1). §21 federation constraints made
+normative-now. Companion changes in <code>SPEC-NAMING.md</code> 0.5-draft
+(resolution authority, re-homing, registrar obligations).</p>
+<p><strong>2026-07-25: identity-path clarifications.</strong> §4.4 clause (b) is named as a
+<strong>transport</strong> check and given the mechanism that satisfies it: the
+connection-bound registration subject <code>mesh.registry.register.{node_id}</code>
+(§14.1, §14.3). <code>UNAUTHORIZED</code> is added to <code>register</code> (§6.2) for a
+deployment that requires it. §10.10 states that the node a heartbeat
+speaks for is its subject token and that a payload <code>node</code> field MUST be
+ignored. Stale <code>§10.9</code> heartbeat cross-references corrected to §10.10
+(§9.6, §9.7). Companion changes in <code>extensions/EXT-2-usage.md</code> (per-caller
+read authorization), <code>EXT-5-rooms.md</code> (service-side membership checks),
+and <code>EXT-6-admission.md</code> (the guard handshake).</p>
+<p><strong>2026-07-26: inbound protections made normative.</strong> New <strong>§22</strong> states the five
+receiver-side obligations that previously existed only as TypeScript SDK
+behaviour: duplicate rejection (§22.2), a freshness window (§22.3), correct
+addressing (§22.4), an inbound sender-text cap (§22.5) and sender-text fencing
+(§22.6), with refusal channels pinned in §22.7. Paired with a new fixture,
+<code>conformance/inbound-protections.json</code>, because the divergences that matter
+here are one-byte ones (a marker string, a character count&#39;s unit, an empty
+line) that prose cannot pin. §22 adds no new wire fields and no new error
+codes.</p>
+</blockquote>
+<blockquote>
+<p><strong>2026-07-27: budget made core; economics re-cut around it.</strong> New <strong>§7.7</strong>
+defines the budget: an absolute deadline plus (via the Economics extension)
+a currency cost ceiling, attached to the <code>request</code> and inherited by the Task
+if one materializes. Admission is refuse-or-accept with typed refusals
+carrying estimates; revisions are absolute with a monotonic counter, parties
+only; the ceiling pauses into <code>input_required</code>, the deadline yields central
+overdue marking and a completed-late record. Tokens are deliberately not a
+budget unit (not fungible across agents). <code>negotiate</code> and
+<code>COST_LIMIT_EXCEEDED</code> are retired, subsumed by refuse-with-estimate; §19 is
+re-cut as the money axis (prices, <code>cost_ceiling</code>, spend reports, metering
+receipts without token counts). Settlement remains out of scope.</p>
+</blockquote>
+<blockquote>
+<p><strong>2026-07-27: the envelope signature is domain-separated and version-tagged.</strong>
+The bytes an envelope&#39;s <code>sig</code> covers are now the ASCII prefix
+<code>agentmesh-envelope-v1</code> followed by one newline (0x0A), then the canonical
+JSON of the envelope minus <code>sig</code> (§4.5, §5.3). The prefix exists only inside
+the signed bytes: no wire field changes, and the encoding of <code>sig</code> is
+unchanged. A signature over untagged bytes can be replayed into any other
+context that signs the same shape; the tag pins what the signature means and
+versions it. That is the argument §8.3 and §9.7 already made for every other
+signature in the system, now applied to the one on every message. Signers
+MUST emit the tagged form from protocol 0.2 on; receivers SHOULD also accept
+the legacy untagged form during the 0.2 draft window and MUST refuse it from
+0.3. The signed envelope vectors in <code>conformance/budget.json</code> and
+<code>conformance/inbound-protections.json</code> are regenerated accordingly (each
+block&#39;s <code>signed_bytes_prefix</code> field pins the prefix).</p>
+</blockquote>
+<blockquote>
+<p><strong>2026-07-27: canonical JSON is RFC 8785 (JCS).</strong> &quot;Sorted keys, minimal
+whitespace&quot; was the entire canonical-JSON definition, leaving number
+formatting, string escaping, and absent-versus-null to the implementation.
+That is a latent cross-SDK signature failure, because serde_json&#39;s number
+formatting differs from ECMAScript&#39;s exactly there (exponent-notation
+thresholds, negative zero, integral floats, integers above 2^53, and
+UTF-8-order key sort for beyond-BMP keys). §5.3 now defines canonical JSON
+by normative reference to RFC 8785, plus two stated rules: absent members
+are omitted
+(an unset member MUST NOT be serialized as null) and null, where present,
+is a value distinct from absent. The TypeScript SDK&#39;s output was verified
+against RFC 8785&#39;s rules and its Appendix B before adoption and is
+byte-identical to strict JCS, with <strong>zero TypeScript byte changes</strong>, so no
+existing signature moves; the Rust SDK adopts a JCS serializer and its
+divergences (all on values no protocol field carries) are fixed. New
+fixture <code>conformance/canonical-json.json</code> pins 52 vectors plus the whole
+of RFC 8785 Appendix B, asserted from both SDKs. The attestations (§4.4,
+§9.7) name §5.3 as their serialization; §8.3&#39;s key claim stays
+newline-joined, not JSON, as before.</p>
+</blockquote>
+<blockquote>
+<p><strong>2026-07-27: cancel gets reasons and transitive propagation.</strong> §10.8 is
+rewritten: a cancel now carries a REQUIRED <code>reason</code> from a closed six-value
+enum (<code>user_requested</code>, <code>superseded</code>, <code>deadline_exceeded</code>,
+<code>budget_exhausted</code>, <code>upstream_cancelled</code>, <code>policy</code>) and an optional
+free-text <code>note</code>. The enum, not the note, is what the record carries as
+meaning. An agent that delegated any part of a live Task MUST forward a
+cancel to each still-live delegate as <code>upstream_cancelled</code>; the MUST is
+honor-system inside the performer, in §7.7&#39;s pattern, and its teeth are
+central visibility: a canceled Task whose delegated children remain live
+is the <strong>stranded delegates</strong> condition, flagged on the child records and
+announced on <code>mesh.event.task.stranded</code>. Deliberately <strong>no bounded
+acknowledgement</strong>: for the requester, cancellation is effective when sent;
+delivery to the performer is on mailbox time. §7.3 adds the paused-state
+cancels (<code>input_required</code>/<code>auth_required</code> → <code>canceled</code>) that §7.7 already
+promised; §19.2&#39;s metering receipt extends to canceled Tasks
+(<code>mesh.event.metering.task_canceled</code>, carrying <code>cancel_reason</code>). New
+fixture <code>conformance/cancel.json</code> pins the six reason strings, both wire
+shapes, the propagated-cancel shape, and the reject cases.</p>
+</blockquote>
+<blockquote>
+<p><strong>2026-07-27: the remaining canonical-JSON signatures are domain-tagged.</strong>
+The tag-inside-the-signed-bytes scheme §5.3 gave the envelope now covers the
+three signatures that still signed bare canonical JSON: the node→agent vouch
+attestation signs <code>agentmesh-vouch-v1</code> + LF + the canonical JSON of the
+attestation minus <code>sig</code> (§4.4); the room descriptor signs
+<code>agentmesh-room-descriptor-v1</code> + LF + the canonical descriptor
+(<code>extensions/EXT-5-rooms.md</code> §2); the admission roster signs
+<code>agentmesh-admission-roster-v1</code> + LF + the canonical document
+(<code>extensions/EXT-6-admission.md</code> §3). Each prefix exists only inside the
+signed bytes: no wire field changes, and every signature keeps its existing
+encoding. Migration mirrors the envelope&#39;s: signers MUST emit the tagged form
+from protocol 0.2 on; verifiers SHOULD also accept the legacy untagged form
+during the 0.2 draft window and MUST refuse it from 0.3. The §9.7 trust
+attestation is already domain-separated by its in-object <code>type</code> tag and is
+unchanged; the PAN card signature is governed by <code>SPEC-NAMING.md</code> and is
+likewise unchanged here. New fixture <code>conformance/signature-tags.json</code> pins
+each prefix with a really-signed vector.</p>
+</blockquote>
+<blockquote>
+<p><strong>2026-07-27: the accept signal, sender pre-flight, and three companion
+rules.</strong> (1) <strong>The accept signal</strong> (new §6.4a): when a live handler admits a
+request (the §22 inbound checks and §7.7 budget admission passed), the
+responder&#39;s SDK MUST immediately emit a non-terminal <code>respond</code> with
+<code>payload.status</code> <code>&quot;accepted&quot;</code>, before invoking the handler, so a caller
+facing a cold agent&#39;s multi-second first token no longer waits blind against
+its own timeout. Mode is thereafter told by the first <em>substantive</em> respond
+(§6.4, §6.5 and §7.0 reworded to say so), and the node-level <code>queued</code>
+acknowledgement is distinguished as the buffered path&#39;s convention:
+<code>&quot;accepted&quot;</code> means a handler will run now, <code>queued</code> means a mailbox holds
+the message. Wire shape pinned in new <code>conformance/accept-signal.json</code>.
+(2) <strong>Sender pre-flight</strong> (new §6.4b): a sending SDK MUST enforce the
+recipient&#39;s published limits locally before publishing (sender-text cap,
+transport <code>max_payload</code>, content types) and refuse locally with the same
+error codes the recipient would answer with; the sender-side mirror of §22,
+sparing the round trip and the recipient&#39;s resources. The manifest gains an
+OPTIONAL <code>limits</code> block (§8.1) as the cap&#39;s declaration point. Cases pinned
+in new <code>conformance/sender-preflight.json</code>. (3) <strong>Subscribe before
+snapshot</strong> (§9.6): a consumer tracking liveness MUST subscribe to presence
+transitions before reading the presence snapshot, closing the race in the
+gap between the two. (4) <strong>Resolve, never construct</strong> (new §14.4): callers
+outside the SDKs MUST use resolved endpoint subjects and MUST NOT construct
+them from the naming convention, which is what makes a future renaming
+survivable;
+the manifest gains <code>endpoints</code> (§8.1), OPTIONAL on registration and
+registry-populated so old manifests never lack it. (5) <strong>The 0.3 subject
+tree</strong> (new §20.4): one declared migration mechanism. When 0.3 breaks the
+wire, incompatible deployments SHOULD occupy a versioned subject tree, at
+the same flag day that re-mints credentials anyway. Plus a new <strong>Appendix
+D</strong>, the per-role implementation checklist: a normative summary that adds
+no rules.</p>
+</blockquote>
+<blockquote>
+<p><strong>2026-07-28: the owner allowance (EXT-8).</strong> The budget (§7.7) gains its
+owner-side complement, the <strong>allowance</strong>: the ceiling an owner sets on what
+their <em>own</em> agent may spend, a signed, node-held policy document defined in
+<code>extensions/EXT-8-allowance.md</code> (<code>mesh://extensions/allowance/v1</code>,
+registered in §17.5). Core changes are deliberately small: §19.3 states that
+<code>BUDGET_INSUFFICIENT</code> is legal even against a request that offered no
+ceiling (the estimate is then a price quote; resubmitting at or above it is
+acceptance; the exchange reads identically on the wire), §7.7 names the
+allowance as the complementary ceiling composing through
+refusal-with-estimate, and EXT-3 gains the <code>allowance</code> event class. No new
+wire fields and no new error codes; the platform observes
+(<code>mesh.event.agent.allowance_exceeded</code>, spend rollups over §19.2 receipts)
+and never blocks. New fixture <code>conformance/allowance.json</code> pins the document
+shape, really-signed vectors under the <code>agentmesh-allowance-v1</code> tag,
+floor-rounded metering arithmetic, smallest-remaining ceiling precedence,
+the refusal shape, and both exhaustion behaviours.</p>
+</blockquote>
+<blockquote>
+<p><strong>2026-08-02: metering made first-class; economics re-cut as SKU, price,
+and agreement.</strong> New <strong>§13.5</strong> defines the metering substrate in core: a
+<strong>meter</strong> is a named unit of consumption in one of two classes, <em>observed</em>
+(counted by the platform from traffic it can attest: requests, bytes, task
+completions) and <em>declared</em> (measurable only inside the responder: tokens,
+model time, tool calls), and a <strong>meter event</strong> is the atom of usage:
+quantity, provider, consumer, the deriving envelope&#39;s id as the idempotency
+key. Declared usage rides <code>payload.usage</code> of the <code>respond</code>, which the
+envelope signature already covers. A usage report is a signed receipt with
+no new signature. Refusals are events too (quantity zero, carrying the
+code), so declined demand is as recorded as served demand. §19 is re-cut
+around it: the manifest <code>cost</code> block is retired in favour of <strong>SKUs</strong>
+(§19.1), which pair covered offerings with a <strong>price</strong> (<code>free</code> / <code>flat</code> /
+<code>per_unit</code> / <code>package</code> / <code>tiered</code>, rated against named meters) and a billing
+<strong>provider</strong> (§19.4), and whose commercial terms are pinned by a tagged
+SHA-256 <strong>digest</strong>;
+a signed, account-level <strong>agreement</strong> (§19.5) binds a consumer&#39;s owner key
+to that digest before paid work, enforced at admission by the new
+<code>AGREEMENT_REQUIRED</code> refusal (§12.2), which carries the approval URL and is
+the §1.3 &quot;payment required&quot; refusal, now typed; and <strong>rating</strong> (§19.6) is a
+deterministic, replayable fold of meter events × agreed price, bounded by
+the budget&#39;s ceiling. The task receipt (§19.2) becomes a derived view over
+§13.5 events, same subjects. Settlement remains out of scope. New fixtures
+<code>conformance/metering.json</code> and <code>conformance/commerce.json</code> pin the shapes,
+the rating arithmetic, the digest, and really-signed vectors under
+<code>agentmesh-agreement-v1</code>.</p>
+</blockquote>
+<blockquote>
+<p><strong>2026-08-03: <em>skill</em> renamed to <em>offering</em>; shared resources; the
+engagement contract.</strong> The unit of capability an agent advertises is renamed
+from <em>skill</em> to <strong>offering</strong> throughout, because the ecosystem has settled
+&quot;skill&quot; to mean a packaged procedure loaded <em>into</em> an agent, which is not
+this concept. The legacy field names (<code>skills</code>, <code>payload.skill</code>,
+<code>skill_details</code>, <code>SKILL_NOT_FOUND</code>) are accepted as inbound aliases for a
+deprecation window (§8.5). New <strong>§7.5.5</strong> distinguishes what every prior
+part type is (a copy: inline bytes outright, a <code>ref</code> as an immutable
+snapshot) from a <strong>shared resource</strong>: one live object both parties knowingly
+operate on, carried as <code>payload.resources</code> with <code>uri</code>, <code>kind</code> (<code>git</code>
+reserved), and declared <code>access</code>. It is exempt from digest and retention
+because no snapshot-shaped claim can honestly be made about a place, with
+access arranged in the resource&#39;s own auth domain and cleartext credentials
+forbidden. New <strong>§8.5.1</strong> adds the coarse engagement contract for
+general-purpose agents: <code>needs</code> (resources, files, or prose to have in hand)
+and <code>delivers</code> (final form, interim checkpoints, and whether the
+deliverable lands in the caller&#39;s resource), both registry-materialized into
+the storefront (§8.7).</p>
+</blockquote>
+<blockquote>
+<p><strong>2026-08-07: a ninth Task state, <code>exhausted</code>.</strong> §7.2 gains a terminal state
+for the way time-and-materials work ends: the governing engagement reaches
+the not-to-exceed cap that <a href="https://agentsow.com">Agent SoW</a> §5.5.5 makes
+mandatory, and the work concludes there with whatever artifacts exist
+attached and nothing past the cap billable. It is deliberately neither
+<code>failed</code> (no error occurred, and a runtime MUST NOT record it as one) nor
+<code>canceled</code>, which some party asked for; the money ran out. §7.3 adds the
+transition from each of the four non-terminal states and none out of it.
+Implemented in the TypeScript and Rust SDKs.</p>
+</blockquote>
+<blockquote>
+<p><strong>2026-08-07: settlement does not cross an instance boundary.</strong> §21 gains a
+seventh precondition and a subsection, &quot;What a visitor pays with&quot;, answering
+the question a second settlement binding made concrete: what a visiting agent
+pays with when the visited instance&#39;s unit is not its own. Value settles on
+the instance where the work was delivered, in the unit that instance&#39;s
+settlement binding declares. No instance converts between units and none
+settles on another&#39;s behalf, because a unit can have no exchange rate by
+construction: an internal chargeback unit is allocated by budget authority,
+cannot be bought at any price and cannot leave. Four outcomes are defined and
+MUST be distinguishable: paid locally, recorded and unsettled, declared free,
+and refused. Refusal reuses <code>AGREEMENT_REQUIRED</code> and <code>BUDGET_INSUFFICIENT</code>,
+so federation adds no error code, no wire field and no new state. A rate
+asserted by one party and uncheckable by the other is evidence and never
+enforcement, and a converted amount MUST record its rate, its source and its
+instant. The visitor&#39;s home instance records nothing and MUST NOT be billed.</p>
+</blockquote>
+<blockquote>
+<p><strong>2026-08-09: saying what you wrap, and what you will ask for.</strong> Two
+declarations for the agent that offers a better way to use a service it did
+not build. §8.5.1 gains a fourth <code>needs</code> kind, <code>credential</code>: the agent names
+the third-party service it will ask the caller to sign in to, and what the
+sign-in is for. A third party asking a person for a government or bank login
+is indistinguishable from phishing to the person being asked, so the
+declaration is what lets the honest case look honest, and renderers SHOULD
+give it more prominence than the other kinds. New <strong>§8.8</strong> adds <code>works_with</code>
+to the manifest: an array of external services the agent integrates with, and
+explicitly never a claim of affiliation or endorsement. &quot;Works with the
+Colorado DMV&quot; is allowed and useful; presenting as the Colorado DMV is
+impersonation. Nothing verifies either field, <code>domain</code> least of all, so a
+consumer MUST NOT display an entry as verified or as endorsement. Both are
+pre-admission data, carried into the storefront (§8.7).</p>
+</blockquote>
+<blockquote>
+<p><strong>2026-08-09: work that ends badly says whose fault it was.</strong> §10.8&#39;s reason
+enum grows from six values to eight, and the same vocabulary now rides a
+<code>failed</code> update as well as a <code>canceled</code> one, because three different endings
+used to look identical in the record: the provider did not deliver, the
+caller never furnished something the offering declared it needed, and an
+outside service the provider depends on stopped working. New
+<code>needs_not_furnished</code> names the second and MUST carry <code>unmet_need</code>, a
+<code>&lt;kind&gt;:&lt;value&gt;</code> reference to a need the offering declared under §8.5.1; new
+<code>dependency_failed</code> names the third and SHOULD carry <code>dependency</code>. A
+dependency failure is still the provider&#39;s, because the provider chose the
+dependency. New <strong>§10.8a</strong> defines <code>attribution</code>, which the platform
+COMPUTES rather than accepts: <code>client</code> only when the reason is
+<code>needs_not_furnished</code> and the named need is actually declared on the
+responder&#39;s registered manifest, <code>provider</code> in every other case including an
+unbacked claim. A reputation consumer MUST take attribution from the
+platform&#39;s own signed terminal event and MUST NOT take a party&#39;s word for it.
+<code>conformance/cancel.json</code> grows the two strings, the <code>unmet_need</code> rules, the
+failed-update shape, and the attribution cases.</p>
+</blockquote>
+<blockquote>
+<p><strong>2026-08-10: a statement says what it rested on.</strong> New <strong>§5.6</strong> adds
+<code>rests_on</code>, an OPTIONAL list of <code>{digest, ref?, name?, role?}</code> entries naming
+the bytes a signed statement was computed from. The gap it closes: a
+signature says who spoke and that the words are unchanged, and says nothing
+about whether the inputs underneath are still what they were, so a deliverable
+or a receipt keeps verifying long after it stopped being true. No new
+signature and no combined root value: <code>rests_on</code> sits inside the statement, so
+§5.3&#39;s signature already covers it, and the list stays explicit because a
+folded hash cannot say WHICH input moved. A verifier that can reach the cited
+bytes MUST compare; a mismatch is <strong>stale</strong>, which is a different fact from
+forged and MUST NOT be reported as a signature failure. A verifier that cannot
+reach them records unchecked, never agreement (§7.5.1&#39;s rule for a missing
+<code>digest</code>, applied again). Stale statements are re-issued, never edited.
+<strong>Countersigned agreements are excluded</strong>, normatively: an undertaking that
+voided when one side touched a file is one neither party could rely on, and
+agreements change only by both parties signing again. Carried today on an
+artifact (§7.5) and beside a usage report (§13); deliberately not on the
+envelope. No new envelope field and no new error code, because a stale
+statement is an input to somebody&#39;s decision, not a protocol failure.</p>
+</blockquote>
+<blockquote>
+<p><strong>2026-08-11: the five questions; self-description gets a consistency
+rule.</strong> New <strong>§3.3.1</strong> names the set every agent answers about itself: who
+are you, what do you do, how are you used, on what terms, and what do you
+refuse, each answer already living in operator-declared signed bytes (the
+card, offerings and their materialized details, schemas and modes, skus,
+<code>data_use</code>, <code>compliance</code>, <code>sealing</code>, admission). No new verb, envelope
+field, or handler: pre-admission the set is served by <code>describe</code> and §1.5&#39;s
+two-verb invariant stands; the <em>document, not a conversation</em> rule extends
+to the whole set. What is new is the <strong>consistency rule</strong>: an agent&#39;s
+spoken statements about itself are subordinate to its signed declarations,
+conflicts resolve to the signed bytes, and a persistent conflict is
+detectable non-conformance (ask, then diff), which turns a stale manifest
+from a nuisance into a checkable defect. The <strong>interview</strong> is the matching
+conformance procedure, runnable by code that holds no model; platforms MAY
+record results as evidence, and a self-run result is a claim, never
+verification. Stated boundaries: a tool is invoked, an agent is engaged;
+platform actors are the deliberate exception (never selling, judging, or
+holding reputation, they sit outside the five questions). Written as the
+mesh binding of the self-description work developed alongside Agent RFP
+0.6.0-draft (agent-shaped postings) and the planned A2A card extensions.</p>
+</blockquote>
+<blockquote>
+<p><strong>2026-08-12: the storefront says where a person can look.</strong> §8.7&#39;s public
+block gains <code>uis</code>, an operator-declared list of the agent&#39;s web surfaces:
+per entry a REQUIRED https <code>url</code> and <code>label</code>, optional <code>purpose</code>,
+<code>audience</code>, <code>access</code>, <code>kind</code>, and <code>offering</code> binding. Two rules travel
+with it: <code>audience</code>/<code>access</code> are labels, not access control (the door
+itself enforces), and every entry is an untrusted link (rendered plain,
+never embedded, cross-origin flagged). Pre-admission data for the same
+reason <code>skus</code> and <code>links</code> are: where an agent can be looked at is part of
+deciding whether to knock. Long-lived agents serve dashboards and status
+pages, not only inboxes, and the storefront had no way to say so. The
+member also feeds the UI links card extension
+(dev.agentmesh.ai/extensions/ui-links/v1), whose vocabulary it shares.</p>
+</blockquote>
+<blockquote>
+<p><strong>2026-08-18: the bare-mode reply path collapses to one shape (0.3.0-draft).</strong>
+Through 0.2 a bare response had two shapes: live, on the transport&#39;s private
+reply subject, and drained, at the sender&#39;s inbox (§16.4, §18.6). Now there
+is one: a <code>respond</code> to a bare-mode request MUST be published to the
+requester&#39;s <strong>inbox</strong> subject, resolved from the request&#39;s <code>from</code>, correlated
+by <code>in_reply_to</code>, and responders MUST NOT publish response data to a
+transport reply subject; requesters accept bare responds only via their inbox
+delivery paths, where the §22 protections already run, and ignore response
+data arriving on a reply subject (§6.4, §6.4a, §6.5, §18.7). The reply
+subject MAY still be set, reserved as a liveness signal: an unserved inbox
+draws the server&#39;s immediate no-responders error, distinguishing an offline
+agent from a slow one, and it never carries response data. Two deliberate
+exceptions, both platform plumbing, close the list: the registry liveness
+probe (<code>__registry_probe__</code>, §18.7) and a live delivery on an
+admission-guarded inbox (EXT-6, §18.7) are answered on the reply subject. The
+drain-bound rationale in §16.4, §18.6 and §22.2 is restated (both paths now
+answer the same destination), §13 states the capture consequence, and
+Appendices A, C and D follow. Hard cutover: no compatibility window.</p>
+</blockquote>
+<blockquote>
+<p><strong>2026-08-18: the events stream binding is made true (0.3.0-draft).</strong>
+§18.3&#39;s row <code>MESH_EVENTS | mesh.event.&gt; | Interest | 24h</code> stands exactly as
+written, and the binding prose now says how to live under it: a stream that
+needs its own retention over a slice of the event space (the reference
+binding&#39;s per-room records, the metering stream) MUST be a subject-less
+stream that <strong>sources</strong> from <code>MESH_EVENTS</code> with a subject filter, never a
+subject-bound stream, because the reference transport refuses a stream whose
+bound subject overlaps another stream&#39;s: one subject space, one owner.
+Interest retention means an event published while no consumer or source
+holds matching interest is not retained, so durable capture of a domain
+begins when its first durable consumer or source exists. <code>MESH_EVENTS</code>
+carries a duplicate-tracking window of at least the §18.8 two minutes.</p>
+</blockquote>
+<blockquote>
+<p><strong>2026-08-25: sealing&#39;s boundary is stated (0.3.0-draft).</strong> §4.3 gains
+&quot;Where sealing ends&quot;: end-to-end confidentiality terminates at the agent&#39;s
+node, wherever that node runs. An agent hosted on infrastructure its owner
+does not operate — a hosting platform, a bridge — has that operator inside
+the sealed boundary, opening payloads as the agent; when the host is also
+the transport operator, sealing protects transit and every mesh-side buffer
+but nothing against that party. <code>extensions/EXT-7-pairwise-sealing.md</code> §5&#39;s
+&quot;the node is the agent&#39;s own machine&quot; is corrected to match. Wording only:
+no wire fields, no error codes, no behaviour change — the clarification
+exists so a manifest <code>encryption_key</code> cannot be read as a promise about who
+operates the node behind it.</p>
+</blockquote>
+<blockquote>
+<p><strong>2026-08-25: feeds — owner-rooted events (0.3.0-draft).</strong> The
+<code>mesh.event.{domain}.{event_type}</code> space is a shared commons: its subjects
+carry no owner token, so &quot;this agent&#39;s own channel&quot; is not expressible in it
+and any credential covering a domain publishes into that domain. New
+<strong>§6.6a</strong> defines a <strong>feed</strong>: an event channel rooted in the identity of the
+one agent that publishes it, subject <code>mesh.feed.{agent_id}.{topic}</code> (§14.1),
+whose publish permission a deployment grants only to a node that vouches for
+the owning agent — ownership is transport-enforced by the subject&#39;s own
+shape, the same construction as connection-bound registration. Feeds come in
+two kinds: <strong>stream</strong> (an ordered history, replayed like any event) and
+<strong>state</strong> (a current value; each publish replaces the last, and a late
+subscriber reads the current value without replaying history). §18.3 gains
+the optional <code>MESH_FEED</code> stream and the state-feed KV binding. §6.6 also now
+states what was previously only inferable: events are <strong>open broadcast</strong> —
+pairwise sealing (§4.3, EXT-7) cannot apply where readers are unknown at
+publish time, so content that needs sealing travels in a <code>request</code>, never an
+event. Additive only: no existing subject, wire field, or behaviour changes.
+<em>Same-day amendment, found live:</em> <code>MESH_FEED</code> binds the four-token grammar
+<code>mesh.feed.*.*</code>, never the <code>mesh.feed.&gt;</code> prefix — the prefix also captures
+the lookup subject <code>mesh.feed.get</code>, and JetStream then sends its publish
+acknowledgment to the request&#39;s reply subject, racing the responder&#39;s real
+answer and winning. The reference deployment observed exactly that.</p>
+</blockquote>
 <hr>
 <p><em>End of specification.</em></p>
 

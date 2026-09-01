@@ -184,7 +184,7 @@
           <span>status <b>Working Draft</b></span>
           <span>date <b>2026-08-25</b></span>
         </div>
-        <p class="canon">Rendered 2026-09-01 from commit <span class="mono">e0f7c47</span>.
+        <p class="canon">Rendered 2026-09-01 from commit <span class="mono">72be8d3</span>.
           The canonical source is SPEC.md, published with the conformance suite at
           <a href="https://github.com/jeffrschneider/agentmesh-protocol">https://github.com/jeffrschneider/agentmesh-protocol</a>
           (the <span class="mono">conformance/</span> fixtures this specification cites live there).</p>
@@ -293,7 +293,7 @@
 </li>
 <li><p><strong>Resolution authority flows from the name&#39;s owner.</strong> A handle&#39;s anchor domain outranks any registrar; a registrar is a custodian, never an owner; and a custodian can be replaced by a statement signed with the agent&#39;s own key (SPEC-NAMING §5.5, §5.6).</p>
 </li>
-<li><p><strong>Strangers may read, never run.</strong> The entire pre-admission surface is two verbs: <code>describe</code> (read an operator-declared document, §10.14) and <code>knock</code> (a content-free admission request, EXT-6). Neither invokes the agent&#39;s model, tools, or memory.</p>
+<li><p><strong>Strangers may read, never run.</strong> The entire pre-admission surface is two verbs: <code>describe</code> (read an operator-declared document, §10.14) and <code>knock</code> (a content-free admission request, EXT-6). Neither invokes the agent&#39;s model, tools, or memory. This invariant is now also stated at the agent floor (Common Agent Specification §4.4), which governs the agent&#39;s side of it.</p>
 </li>
 <li><p><strong>Nothing trusts the wire.</strong> Every object that crosses a boundary (envelope, card, attestation) verifies on its own signature, independent of which connection, node, or instance carried it (§4.5). Federation (§21) is possible precisely because transit was never trusted.</p>
 </li>
@@ -366,6 +366,13 @@
 </ul>
 <p>The transport handles routing, delivery, persistence, and node-level security; the reference binding (Section 18) provides these via JetStream and the NATS credential chain. Agents do not need to know each other&#39;s network addresses, only their mesh identities. Whether a peer is remote or co-located is transparent to the agent (<strong>location transparency</strong>).</p>
 <h3 id="3-3-agent-surface-area">3.3. Agent Surface Area<a class="hl" href="#3-3-agent-surface-area">#</a></h3>
+<blockquote>
+<p><strong>The behavior is the floor&#39;s.</strong> The four handlers and what each owes
+are defined by the Common Agent Specification §4.5
+(<a href="https://agentdoc.net/common-agent.html">https://agentdoc.net/common-agent.html</a>), which governs. This section
+binds them to the mesh: the handler spellings below and the inbox
+subject naming.</p>
+</blockquote>
 <p>Every agent MUST implement four inbound handlers:</p>
 <table>
 <thead>
@@ -398,6 +405,11 @@
 </tbody></table>
 <p>Agents MAY implement additional handlers for composed operations but MUST NOT require counterparties to implement anything beyond these four.</p>
 <h3 id="3-3-1-the-five-questions-self-description-and-consistency">3.3.1. The Five Questions (Self-Description and Consistency)<a class="hl" href="#3-3-1-the-five-questions-self-description-and-consistency">#</a></h3>
+<blockquote>
+<p><strong>The five questions are the floor&#39;s.</strong> The Common Agent Specification
+§4.3 defines them and governs the obligation. This section binds them
+to the mesh: where each answer lives in this protocol&#39;s documents.</p>
+</blockquote>
 <p>The four handlers say how traffic reaches an agent. This section says what
 every agent answers about itself: five questions, each with its answer already
 living in operator-declared, signed bytes rather than in the agent&#39;s head.</p>
@@ -499,6 +511,13 @@ to them, because they are not in any seat a counterparty chooses.</p>
 </ul>
 <p>The node presents these at connection time. All of the node&#39;s hosted agents share this one connection. The concrete credential format (a NATS NKey + a User JWT) is defined in the reference binding (§18.2).</p>
 <h3 id="4-3-agent-identity">4.3. Agent Identity<a class="hl" href="#4-3-agent-identity">#</a></h3>
+<blockquote>
+<p><strong>The obligation to hold a signing identity, and where sealing ends,
+are the floor&#39;s.</strong> The Common Agent Specification §4.1 defines both and
+governs the agent&#39;s side. This section binds them to the mesh: the
+Ed25519 key as the agent ID, the node vouch, and the fields that
+publish the encryption key.</p>
+</blockquote>
 <p>Every agent MUST possess an Ed25519 keypair generated on (or provisioned to) its host. The public key is the immutable <strong>agent ID</strong>. Agent keys are <strong>not</strong> issued by the account and require no JWT: an agent&#39;s right to speak on the mesh comes entirely from its node&#39;s vouch (§4.4). This makes creating an agent a local, zero-round-trip operation.</p>
 <p><strong>Encryption key (OPTIONAL).</strong> An agent MAY additionally hold an X25519 keypair, distinct from its Ed25519 signing keypair, used only for receiving sealed content (never for signing). Its purpose is end-to-end confidentiality where the transport or its operator is not trusted to read payloads: a sender seals a symmetric key or a message to the agent&#39;s X25519 <strong>public</strong> key, and only the agent can open it. An agent that declares an encryption key publishes the public half in its manifest (§8) as <code>encryption_key</code> and, outside the mesh, on its PAN card. The signing key remains the agent&#39;s identity and address; the encryption key is a capability attached to it, and its absence simply means the agent participates only in cleartext. This field is the sole prerequisite for the <code>sealed</code> privacy grade of the Rooms extension (§17.5); it is declared here in core because identity fields cannot be retrofitted once agents are minted. Holding the key says only that the agent <em>can</em> be sealed to; whether callers <em>should</em> seal, and what happens to a request that arrives in the clear, is a separate declaration (<code>sealing</code>, §8.9).</p>
 <p><strong>Where sealing ends.</strong> Sealing terminates at the agent&#39;s node, because that is where the encryption seed lives — and &quot;provisioned to its host&quot; above includes a host the owner does not operate. An agent hosted on another party&#39;s infrastructure (a hosting platform; a bridge node vouching for an external party, <code>BRIDGE-A2A.md</code>) has that operator inside the sealed boundary: the operator opens payloads <em>as the agent</em>, which is not a violation of this section but the plain meaning of hosting. In particular, when the host is the same party that operates the transport, sealing still keeps payloads confidential in transit and in every mesh-side buffer, but it buys the sender nothing against that party. A manifest&#39;s <code>encryption_key</code> (§8.1) is a statement about a key, not about who operates the node behind it; a sender whose threat model includes the recipient&#39;s host must establish where the recipient&#39;s node runs by means outside this specification.</p>
@@ -919,6 +938,13 @@ binding provides publish-side deduplication (§18.8).</li>
 <li><code>INVALID_QUERY</code>: The query payload fails schema validation.</li>
 </ul>
 <h3 id="6-4-request">6.4. <code>request</code><a class="hl" href="#6-4-request">#</a></h3>
+<blockquote>
+<p><strong>The responder&#39;s behavior is the floor&#39;s.</strong> Whether a bare answer or a
+task comes back, and the mechanical refusal of anything outside the
+declared offerings, are Common Agent Specification §5.1 and §4.6, which
+govern. This section binds the exchange to the mesh: the subject, the
+envelope, and the response shapes.</p>
+</blockquote>
 <p>Sends a request to a specific agent, expecting a <code>respond</code>.</p>
 <p><strong>Subject:</strong> <code>mesh.agent.{agent_id}.inbox</code></p>
 <p><strong>Envelope:</strong></p>
@@ -979,6 +1005,12 @@ still create a Task (Section 7) for buffered work; nothing requires it, since
 <li><code>CONTENT_TYPE_NOT_SUPPORTED</code>: The requested output modes are not supported.</li>
 </ul>
 <h3 id="6-4a-the-accept-signal">6.4a. The Accept Signal<a class="hl" href="#6-4a-the-accept-signal">#</a></h3>
+<blockquote>
+<p><strong>The behavior is the floor&#39;s.</strong> The accept signal and the deferral
+threshold are part of Common Agent Specification §5.1 and §5.2, which
+govern. This section binds them to the mesh: the wire shape and the
+timing constants.</p>
+</blockquote>
 <p>A caller that has just sent a <code>request</code> learns which response shape it got
 from the first substantive reply (§6.4, §7.0), but a live agent whose
 handler is a cold process can take many seconds to produce that first word,
@@ -1235,6 +1267,15 @@ agent&#39;s feeds; <code>mesh.feed.{agent_id}.{topic}</code> matches one.</li>
 <hr>
 <h2 id="7-task-model">7. Task Model<a class="hl" href="#7-task-model">#</a></h2>
 <p>A Task is a stateful unit of work. Tasks provide the structure for tracking, resuming, and completing <strong>deferred</strong> work. They are not required for every request.</p>
+<blockquote>
+<p><strong>The task behavior is the floor&#39;s.</strong> Task creation, states and
+transitions, deliverables, the budget, usage reporting, and context are
+Common Agent Specification §5.1 through §5.6, which govern the agent&#39;s
+obligations. This chapter binds them to the mesh: the task object&#39;s
+wire shape, the KV and stream bindings, the artifact store rules
+(§7.5.2), the chunk encoding (§11), and the currency encodings and
+conformance vectors.</p>
+</blockquote>
 <h3 id="7-0-when-a-task-exists">7.0. When a Task Exists<a class="hl" href="#7-0-when-a-task-exists">#</a></h3>
 <p>A responder creates a Task <strong>only</strong> when a request cannot be answered with a single terminal reply, i.e. when the work is long-running, streamed, or needs another round (<code>input_required</code> / <code>auth_required</code>). See Section 6.4.</p>
 <ul>
@@ -1533,12 +1574,12 @@ agent&#39;s feeds; <code>mesh.feed.{agent_id}.{topic}</code> matches one.</li>
 <p>The rules of §7.5.3 apply unchanged: a receiver MUST NOT fetch, clone, or probe a resource implicitly, and SHOULD NOT touch it before deciding to accept the work.</p>
 <p><strong>Deliverables may land in the resource.</strong> When a responder holds <code>read-write</code> access, the natural output is often a change to the resource itself (a pushed branch, an opened pull request) rather than bytes returned through the mesh. That is a legitimate deliverable: the completing <code>respond</code> then carries a pointer to what changed and a summary of it, not a copy of the bytes. Task records stay truthful because the response says where the work went; they do not need to contain it.</p>
 <h3 id="7-6-context">7.6. Context<a class="hl" href="#7-6-context">#</a></h3>
-<p>A <code>context_id</code> groups related Tasks into a logical session. When a requester sends multiple related requests, they SHOULD use the same <code>context_id</code>. The responder MAY use the context to maintain conversational state, memory, or shared context across tasks.</p>
-<ul>
-<li>If a <code>request</code> does not include a <code>context_id</code>, the responder MUST generate one and include it in the <code>respond</code>.</li>
-<li>If a <code>request</code> includes both <code>task_id</code> and <code>context_id</code>, the responder MUST verify that the task belongs to the specified context.</li>
-<li>Context expiration and cleanup policies are implementation-defined. Agents SHOULD document their context retention policies in their manifest.</li>
-</ul>
+<p>A <code>context_id</code> groups related Tasks into a logical session. The behavior
+is Common Agent Specification §5.6, which governs: generation when a
+request carries none, verification that a named task belongs to its
+named context, and documented retention. <code>context_id</code> is that section&#39;s
+spelling on this mesh, and the manifest is where retention is
+documented.</p>
 <h3 id="7-7-budget">7.7. Budget<a class="hl" href="#7-7-budget">#</a></h3>
 <p>A budget is the requester&#39;s statement of the most a piece of work may cost and
 the latest it may finish. It is an <strong>offer, and acceptance means something</strong>: a
@@ -2011,6 +2052,12 @@ pins the canonical bytes and a reference signature; an implementation that
 reproduces them interoperates, and one that does not will silently refuse to seal
 to agents registered by the other.</p>
 <h3 id="8-3a-interaction-style">8.3a. Interaction Style<a class="hl" href="#8-3a-interaction-style">#</a></h3>
+<blockquote>
+<p><strong>The semantics are the floor&#39;s.</strong> What <code>interactive</code> and <code>service</code>
+mean to a caller, and the cautious reading of silence, are Common
+Agent Specification §6.9, which governs. This section binds the field:
+its spelling, values, and validation at registration.</p>
+</blockquote>
 <p><code>interaction</code> declares <strong>how inbound requests are handled</strong>, so a caller knows
 what reaching an agent means before it sends anything:</p>
 <table>
@@ -2073,6 +2120,13 @@ machine-readable; this field is.</p>
 <p>Presence is reported per <strong>node</strong> by default (one heartbeat covers all agents the node hosts); an agent MAY report a finer per-agent status. Missing heartbeats expire <em>presence</em> to <code>offline</code>; they never touch the manifest. Discovery joins manifest + presence at query time (Section 9.3).</p>
 <h3 id="8-5-offering-definitions">8.5. Offering Definitions<a class="hl" href="#8-5-offering-definitions">#</a></h3>
 <p>Offerings are the fine-grained units of work an agent advertises. Each offering is independently addressable in a <code>request</code>.</p>
+<blockquote>
+<p><strong>The declaration doctrine is the floor&#39;s.</strong> Modes resolution, needs
+and delivers, the reporting level, and silence-means-not-stated are
+Common Agent Specification §6.9 and §6.10, which govern how a consumer
+reads these declarations. This section binds the offering&#39;s fields and
+their validation at registration.</p>
+</blockquote>
 <blockquote>
 <p><strong>Renamed.</strong> Earlier drafts of this specification called an offering a <em>skill</em>, and the wire carried <code>skills</code>, <code>payload.skill</code>, <code>skill_details</code> and <code>SKILL_NOT_FOUND</code>. The agent ecosystem has since settled &quot;skill&quot; to mean something else entirely (a packaged procedure loaded <em>into</em> an agent), so this specification renamed the concept. During the deprecation window, implementations MUST accept the legacy field names as aliases on inbound messages and manifests, treat the error code <code>SKILL_NOT_FOUND</code> as <code>OFFERING_NOT_FOUND</code>, and MUST emit only the new names.</p>
 </blockquote>
@@ -2197,6 +2251,12 @@ attestation per agent. Person-level <em>naming</em> (a human handle resolving to
 owner key) is likewise out of core; it is specified in the companion naming
 specification, <code>SPEC-NAMING.md</code> (PAN).</p>
 <h3 id="8-7-the-public-block-the-storefront">8.7. The Public Block (the storefront)<a class="hl" href="#8-7-the-public-block-the-storefront">#</a></h3>
+<blockquote>
+<p><strong>The obligation behind it is the floor&#39;s.</strong> That an agent describes
+itself to anyone, pre-admission, is Common Agent Specification §4.2.
+This section binds the storefront: the <code>public</code> block&#39;s fields and how
+<code>describe</code> serves them.</p>
+</blockquote>
 <p>The OPTIONAL <code>public</code> block is the manifest&#39;s <strong>pre-admission</strong> content: it is
 what <code>describe</code> (§10.14) returns. It is the agent&#39;s homepage: written by the
 operator, served verbatim, and safe to hand to strangers precisely because
@@ -2328,6 +2388,14 @@ such integration exists. A later mechanism may let a named service confirm or
 contest what is said about it; until this specification defines one, there is no
 conformant way to show a <code>works_with</code> entry as anything but a claim.</p>
 <h3 id="8-9-sealing-whether-this-agent39s-inbox-reads-cleartext">8.9. Sealing: whether this agent&#39;s inbox reads cleartext<a class="hl" href="#8-9-sealing-whether-this-agent39s-inbox-reads-cleartext">#</a></h3>
+<blockquote>
+<p><strong>The declaration set&#39;s semantics are the floor&#39;s.</strong> Sealing posture,
+data use, compliance, and access are defined as declarations by the
+Common Agent Specification §6.9, and its declaration doctrine (§6.10)
+governs how a consumer reads them. Sections 8.9 through 8.12 bind them
+to the mesh: field spellings, JSON shapes, validation at registration,
+and where each travels.</p>
+</blockquote>
 <p><code>encryption_key</code> (§4.3) says an agent <em>can</em> be sealed to. It does not say
 whether anyone <em>should</em>, and it does not say what happens to a request that
 arrives in the clear. <code>sealing</code> is the OPTIONAL field that answers both, in one
@@ -2640,8 +2708,8 @@ where a reader who asked the mesh question finds it.</p>
 <hr>
 <h3 id="8-13-the-descriptor-pointer">8.13. The Descriptor Pointer<a class="hl" href="#8-13-the-descriptor-pointer">#</a></h3>
 <p>An agent that has an Agent Descriptor (its operator&#39;s standing description;
-the format is the Agent Descriptor specification at
-<a href="https://agentdoc.net/descriptor-spec.html">https://agentdoc.net/descriptor-spec.html</a>) SHOULD carry a pointer to it on
+the format is the Common Agent Specification&#39;s Descriptor chapter, §6 at
+<a href="https://agentdoc.net/common-agent.html">https://agentdoc.net/common-agent.html</a>) SHOULD carry a pointer to it on
 the manifest: <code>descriptor.digest</code>, the SHA-256 of the descriptor&#39;s served
 bytes. The pointer is derived from the document itself at registration,
 never typed, and it is a pointer only: the manifest does not restate
@@ -3062,6 +3130,12 @@ declared offerings; they simply decline open conversation. Rooms
 (<code>mesh://extensions/rooms/v1</code>) carry conversation among many agents; <code>chat</code>
 is the pairwise case.</p>
 <h3 id="10-8-cancel">10.8. <code>cancel</code><a class="hl" href="#10-8-cancel">#</a></h3>
+<blockquote>
+<p><strong>The refusal behavior is the floor&#39;s.</strong> That every refusal is an
+answer, with a reason, is Common Agent Specification §4.7, which
+governs. This section and §10.8a bind it to the mesh: the reason enum,
+the attribution values, and their byte-level encodings.</p>
+</blockquote>
 <p>Requests cancellation of an in-progress Task, with a stated reason.</p>
 <p><strong>Composed from:</strong> <code>request</code> (to the responder&#39;s inbox) + <code>respond</code> (on the task update subject)</p>
 <p><strong>Flow:</strong></p>
@@ -3298,6 +3372,12 @@ shape, the propagated-cancel note format, and the reject cases are pinned in
 <li>The agent proceeds only if approved.</li>
 </ol>
 <h3 id="10-14-describe">10.14. <code>describe</code><a class="hl" href="#10-14-describe">#</a></h3>
+<blockquote>
+<p><strong>The obligation is the floor&#39;s.</strong> Answering the pre-admission read is
+Common Agent Specification §4.2, and its entryway (§4.4) names it as
+exchange 1. This section binds it to the mesh: the reserved offering
+and the rules below.</p>
+</blockquote>
 <p>The pre-admission read: the one substantive request any agent may make of any other <strong>before</strong> admission, the mesh equivalent of an unauthenticated HTTP GET. It exists so that first contact between strangers can be informed rather than blind; without it, every introduction is a cold knock on a closed door, and no third party can ever build a map of what exists.</p>
 <p><strong>Composed from:</strong> <code>request</code> with the reserved offering <code>describe</code>.</p>
 <p><strong>Rules (all normative):</strong></p>
@@ -3379,6 +3459,12 @@ shape, the propagated-cancel note format, and the reject cases are pinned in
 }
 </code></pre>
 <h3 id="12-2-error-codes">12.2. Error Codes<a class="hl" href="#12-2-error-codes">#</a></h3>
+<blockquote>
+<p><strong>The budget&#39;s refusal behavior is the floor&#39;s.</strong> Refuse-with-estimate
+and the semantics behind <code>BUDGET_INSUFFICIENT</code> are Common Agent
+Specification §5.4. The codes and retryability below are the mesh
+binding.</p>
+</blockquote>
 <h4 id="transport-errors">Transport Errors<a class="hl" href="#transport-errors">#</a></h4>
 <table>
 <thead>
@@ -3780,6 +3866,11 @@ consent-gated.</p>
 <li><strong>Work-product visibility.</strong> Task artifacts (§7.5) and task status updates (§7) are the between-agents facts that the GenAI conventions do not yet cover. Emitting them as events per §13.1 gives generic tooling (dashboards, visualizers, replayers) a framework-neutral view of what a team of agents is producing and passing around, without payload inspection. A dedicated event vocabulary for artifact and progress rendering may be specified once there is a second independent consumer to validate it against.</li>
 </ul>
 <h3 id="13-5-metering">13.5. Metering<a class="hl" href="#13-5-metering">#</a></h3>
+<blockquote>
+<p><strong>The reporting obligation is the floor&#39;s.</strong> What a metering-capable
+agent reports is Common Agent Specification §5.5. The meter event
+subjects and shapes below are the mesh binding.</p>
+</blockquote>
 <blockquote>
 <p><strong>Core vs. money.</strong> Metering is the transport-level record of <em>who consumed
 what from whom</em>, a fact about traffic, not about money. Core defines the
@@ -4337,6 +4428,11 @@ suite, <code>docs/implementation-status.md</code>, not here.</p>
 <td>Durable, identity-resolved usage &amp; engagement store over the activity/heartbeat taps; operator read subjects <code>mesh.usage.*</code>. Operational layer, not core.</td>
 </tr>
 <tr>
+<td><code>mesh://extensions/systems-health/v1</code></td>
+<td><strong>Draft</strong> (see <code>extensions/EXT-12-systems-health.md</code>)</td>
+<td>How an agent&#39;s tool failures become knowledge at the right speed: a typed fault vocabulary (grant faults name the grantor&#39;s move; <code>rate_limited</code> and <code>unreachable</code> name nobody&#39;s), circuit state at the node (grant-class faults trip immediately and refuse grant-needing work fast with <code>DEPENDENCY_FAULT</code>; transient faults degrade and annotate), and a private per-agent health record the owner&#39;s surfaces and sibling instances read. Deliberately not a public broadcast by default; a public <code>systems</code> state feed is an operator&#39;s explicit choice. Nothing here carries a credential, a vendor name, an endpoint, or an upstream error body.</td>
+</tr>
+<tr>
 <td><code>mesh://extensions/contact/v1</code></td>
 <td><strong>Draft</strong> (see <code>extensions/EXT-3-contact.md</code>)</td>
 <td>Account contact channels (email, verified SMS) and notification preferences; API-layer, consent-gated.</td>
@@ -4743,6 +4839,13 @@ instance</strong> does. The RECOMMENDED written form for cross-context handles i
 instance the domain part is implicit and MAY be omitted.</p>
 <hr>
 <h2 id="19-economics-extension-not-core-in-0-2">19. Economics  <em>(extension, not core in 0.2)</em><a class="hl" href="#19-economics-extension-not-core-in-0-2">#</a></h2>
+<blockquote>
+<p><strong>The commercial semantics are the floor&#39;s.</strong> SKUs, price shapes,
+digest-pinned terms, agreements, metering receipts, and rating are
+Common Agent Specification §7.6, which governs. This chapter keeps the
+mesh binding: the billing provider rail (§19.4), the event subjects,
+and the ledger and clearing.</p>
+</blockquote>
 <blockquote>
 <p><strong>Moved out of core.</strong> In 0.2, economics (everything below) is the
 <strong>Economics extension</strong> (<code>mesh://extensions/economics/v1</code>, registered in
@@ -5387,6 +5490,12 @@ conversion may be described as enforced.</p>
 to</strong>. An inbound message is a stranger&#39;s text arriving at a process that may
 hold a model, tools, credentials and a filesystem, and the five obligations
 below are what stand between &quot;the envelope verified&quot; and &quot;the handler ran&quot;.</p>
+<blockquote>
+<p><strong>The obligations are the floor&#39;s.</strong> The five protections and the
+refusal behavior are Common Agent Specification §4.8 and §4.7, which
+govern. This chapter binds them to the mesh: the byte-level encodings,
+the window numbers, and the fixture-pinned formats below.</p>
+</blockquote>
 <p>They are stated here, normatively, for one reason: <strong>the specification for them
 used to be &quot;whatever the TypeScript SDK does.&quot;</strong> That is a workable arrangement
 with one implementation and a defensible one with two that share a lineage. It
@@ -5880,6 +5989,10 @@ section that binds it and, where one exists, the fixture that pins its bytes
 bytes, on §22.8&#39;s terms). If a line here ever disagrees with its section, the
 section wins, and the disagreement is a defect in this appendix.</p>
 <h3 id="d-1-an-agent-a-receiver-of-requests">D.1. An agent (a receiver of requests)<a class="hl" href="#d-1-an-agent-a-receiver-of-requests">#</a></h3>
+<blockquote>
+<p><strong>This checklist restates the floor.</strong> The obligations are Common Agent
+Specification §4, which governs; the fixtures pin their mesh encodings.</p>
+</blockquote>
 <table>
 <thead>
 <tr>
@@ -6564,6 +6677,20 @@ must verify and be the evaluator&#39;s own), and §14.1 maps the six subjects.
 The formats themselves stay where they live: the Descriptor at
 agentdoc.net/descriptor-spec.html, the AgentDoc at agentdoc.net/spec.html.
 Nothing on the wire changed with this entry; the words caught up.</p>
+</blockquote>
+<blockquote>
+<p><strong>The agent&#39;s side moves to the Common Agent Specification (2026-09-01).</strong>
+The Common Agent Specification (<a href="https://agentdoc.net/common-agent.html">https://agentdoc.net/common-agent.html</a>)
+now carries the agent-side obligations this document accumulated: the
+floor (identity, describe, the five questions, the entryway, the four
+handlers, mechanical refusal, refusal discipline, the inbound
+protections), the task and budget behavior, the declaration set, and the
+commercial semantics. Each affected section here gained a governing note
+naming its chapter there, and this document keeps what is the mesh&#39;s
+own: subjects, envelopes, field spellings, byte-level encodings, window
+numbers, and the fixture-pinned formats. EXT-6, EXT-7, EXT-8, EXT-10,
+and EXT-12 were cut the same way in the same pass. Nothing on the wire
+changed with this entry; the authority moved.</p>
 </blockquote>
 
       </div>

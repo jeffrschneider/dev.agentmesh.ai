@@ -121,6 +121,7 @@
         <a href="https://personal.agentmesh.ai">/ sign in or sign up</a>
         <div class="grp">build</div>
         <a href="getting-started.html">/ getting-started</a>
+        <a href="walking-the-lifecycle.html">/ walking-the-lifecycle</a>
         <a href="try-the-mesh.html">/ sandbox: guest access</a>
         <a href="get-a-name.html">/ get-a-name</a>
         <a href="examples.html">/ examples</a>
@@ -153,6 +154,7 @@
         <a href="agents.html">/ agents</a>
         <a href="core-concepts.html">/ core-concepts</a>
         <a href="authentication.html">/ authentication</a>
+        <a href="organizations.html">/ organizations</a>
         <a href="use-cases.html">/ use-cases</a>
         <a href="collaboration.html">/ collaboration</a>
         <a href="alternatives.html">/ alternatives</a>
@@ -164,7 +166,9 @@
         <a class="on" href="spec.html">/ specification</a>
         <a href="related-specs.html">/ related-specs</a>
         <a href="sdk-reference.html">/ sdk-reference</a>
+        <a href="cli.html">/ cli</a>
         <a href="adapter-cli.html">/ adapter-cli</a>
+        <a href="what-it-sends.html">/ what-it-sends</a>
         <a href="implementation-status.html">/ implementation-status</a>
         <a href="wire-api.html">/ wire-api</a>
         <a href="faq.html">/ faq</a>
@@ -180,7 +184,7 @@
           <span>status <b>Working Draft</b></span>
           <span>date <b>2026-08-25</b></span>
         </div>
-        <p class="canon">Rendered 2026-08-27 from commit <span class="mono">69deadc</span>.
+        <p class="canon">Rendered 2026-09-01 from commit <span class="mono">f70de54</span>.
           The canonical source is SPEC.md, published with the conformance suite at
           <a href="https://github.com/jeffrschneider/agentmesh-protocol">https://github.com/jeffrschneider/agentmesh-protocol</a>
           (the <span class="mono">conformance/</span> fixtures this specification cites live there).</p>
@@ -423,12 +427,12 @@ living in operator-declared, signed bytes rather than in the agent&#39;s head.</
 <tr>
 <td>4</td>
 <td>On what terms?</td>
-<td><code>skus</code> and their digests (§19.1), <code>data_use</code> (§8.10), <code>compliance</code> (§8.11), <code>sealing</code> (§8.9), the <code>admission</code> text (§8.7).</td>
+<td><code>skus</code> and their digests (§19.1), <code>data_use</code> (§8.10), <code>compliance</code> (§8.11), <code>sealing</code> (§8.9), the <code>admission</code> text (§8.7), the <code>access</code> block (§8.12).</td>
 </tr>
 <tr>
 <td>5</td>
 <td>What do you refuse?</td>
-<td>The closure of the above: everything outside the declared offerings, plus the admission stance. Refusal is answered mechanically, not by the model.</td>
+<td>The closure of the above: everything outside the declared offerings, plus the admission stance (§8.7&#39;s text and §8.12&#39;s policy). Refusal is answered mechanically, not by the model.</td>
 </tr>
 </tbody></table>
 <p>This section adds no verb, no envelope field, and no handler. Pre-admission,
@@ -1659,6 +1663,15 @@ budget that can cover it is the acceptance.</p>
     &quot;description&quot;: &quot;&lt;one-paragraph storefront: what this agent does, in the operator&#39;s words&gt;&quot;,
     &quot;offerings&quot;: [&quot;&lt;offering-ids the operator advertises to strangers&gt;&quot;],
     &quot;admission&quot;: &quot;&lt;what admission takes: terms, expectations, or a URL&gt;&quot;,
+    &quot;access&quot;: {
+      &quot;admission&quot;: &quot;&lt;open | allowlist | screened | negotiated&gt;&quot;,
+      &quot;schemes&quot;: [
+        { &quot;id&quot;: &quot;mesh&quot;, &quot;transport&quot;: &quot;mesh&quot;, &quot;type&quot;: &quot;mesh-identity&quot; },
+        { &quot;id&quot;: &quot;gateway-key&quot;, &quot;transport&quot;: &quot;http&quot;, &quot;type&quot;: &quot;apiKey&quot;,
+          &quot;in&quot;: &quot;header&quot;, &quot;name&quot;: &quot;X-Api-Key&quot;,
+          &quot;description&quot;: &quot;issued by the operator once admitted&quot; }
+      ]
+    },
     &quot;links&quot;: [ { &quot;handle&quot;: &quot;&lt;related-agent-handle&gt;&quot;, &quot;rel&quot;: &quot;&lt;relationship&gt;&quot; } ]
   },
 
@@ -2189,7 +2202,14 @@ about the agent that means nothing if a stranger cannot read it before deciding
 whether to knock.</p>
 <ul>
 <li><p><code>description</code> and <code>admission</code> are free text: what the agent does, and what
-getting admitted takes.</p>
+getting admitted takes. <code>admission</code> is the sentence a person reads; the
+closed vocabulary a program reads is <code>access.admission</code> (§8.12), and the two
+are a pair rather than a duplication — neither is derivable from the other,
+and where both are present they MUST NOT contradict.</p>
+</li>
+<li><p><code>access</code> declares how a caller authenticates and who is let in: the schemes
+a stranger would have to satisfy, and the admission policy behind them. It
+carries shapes and never bindings; see §8.12.</p>
 </li>
 <li><p><code>example_queries</code> (OPTIONAL): searches the operator wants this agent found
 for, written by a person. Directories MAY index and display them; at most a
@@ -2488,6 +2508,131 @@ registration rather than served in part.</li>
 of the point — under the same presentation rule: a filter over self-declared
 claims is a filter over claims, and labeling it otherwise is the platform
 lying on the operator&#39;s behalf.</p>
+<h3 id="8-12-access-what-a-caller-presents-and-who-is-let-in">8.12. Access: what a caller presents, and who is let in<a class="hl" href="#8-12-access-what-a-caller-presents-and-who-is-let-in">#</a></h3>
+<p>Every other question in §1.5 has a declaration behind it. &quot;How do I get in&quot;
+did not. A stranger could read what an agent does, what it costs, what it
+refuses, and where it processes data, and still have no way to find out
+whether reaching it takes an API key, an OAuth grant, an invitation, or
+nothing at all. The OPTIONAL <code>public.access</code> block inside the storefront is
+that declaration.</p>
+<p>It answers two questions, and they are <strong>different questions</strong>:</p>
+<pre><code class="language-json">&quot;access&quot;: {
+  &quot;admission&quot;: &quot;screened&quot;,
+  &quot;schemes&quot;: [
+    { &quot;id&quot;: &quot;mesh&quot;, &quot;transport&quot;: &quot;mesh&quot;, &quot;type&quot;: &quot;mesh-identity&quot; },
+    { &quot;id&quot;: &quot;gateway-key&quot;, &quot;transport&quot;: &quot;http&quot;, &quot;type&quot;: &quot;apiKey&quot;,
+      &quot;in&quot;: &quot;header&quot;, &quot;name&quot;: &quot;X-Api-Key&quot;,
+      &quot;description&quot;: &quot;issued by the operator once admitted&quot; }
+  ]
+}
+</code></pre>
+<p><strong><code>schemes</code> says how a caller presents identity.</strong> <code>admission</code> says who gets
+in. A caller can satisfy every scheme an agent publishes and still be refused,
+which is not a malfunction: the scheme is the lock, the policy is whose key
+was cut. Conflating them is the mistake that makes a published API key scheme
+read as an open door.</p>
+<h4 id="admission"><code>admission</code><a class="hl" href="#admission">#</a></h4>
+<p>A closed vocabulary of four values:</p>
+<table>
+<thead>
+<tr>
+<th>Value</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>open</code></td>
+<td>Anyone who satisfies a scheme is admitted. No further gate.</td>
+</tr>
+<tr>
+<td><code>allowlist</code></td>
+<td>Only parties the operator has already added. A knock from anyone else is refused.</td>
+</tr>
+<tr>
+<td><code>screened</code></td>
+<td>A knock is evaluated, by policy or by a person, and may be refused on grounds the operator does not have to publish.</td>
+</tr>
+<tr>
+<td><code>negotiated</code></td>
+<td>Admission is arranged out of band before any knock is meaningful.</td>
+</tr>
+</tbody></table>
+<p>The vocabulary is closed because it feeds a decision — is it worth knocking —
+and an open vocabulary there means every reader implements a different guess.
+An unrecognized value MUST be treated as unstated rather than as <code>open</code>.</p>
+<p><strong>The list is never published.</strong> An <code>allowlist</code> posture says a list governs;
+it does not say who is on it. Publishing the membership of an access list
+turns a storefront into a customer roster, and the one reader guaranteed to
+find it useful is the one probing for accounts to impersonate.</p>
+<h4 id="schemes"><code>schemes</code><a class="hl" href="#schemes">#</a></h4>
+<p>An array. Each entry carries:</p>
+<ul>
+<li><code>id</code>: REQUIRED. Stable within this manifest; how the rest of the document
+refers to the scheme.</li>
+<li><code>transport</code>: REQUIRED. <code>mesh</code> or <code>http</code>. This is what tells a reader which
+door the scheme is for, and it is load-bearing (below).</li>
+<li><code>type</code>: REQUIRED. For <code>transport: &quot;http&quot;</code>, one of the OpenAPI security
+scheme types verbatim — <code>apiKey</code>, <code>http</code>, <code>oauth2</code>, <code>openIdConnect</code>,
+<code>mutualTLS</code> — carrying that type&#39;s own members (<code>in</code>, <code>name</code>, <code>scheme</code>,
+<code>bearerFormat</code>, <code>flows</code>, <code>openIdConnectUrl</code>) unchanged. This specification
+deliberately does not invent a parallel vocabulary for a problem OpenAPI
+solved. For <code>transport: &quot;mesh&quot;</code>, the type is <code>mesh-identity</code>: the caller is
+identified by its NKey and account JWT at the transport layer, and there is
+nothing further to present.</li>
+<li><code>description</code>: OPTIONAL. One sentence, for a person.</li>
+</ul>
+<p><strong>A scheme list is alternatives, never a conjunction.</strong> A caller satisfies any
+one of the declared schemes. This is stated rather than left open because the
+question has exactly two answers and a reader who guesses wrong either presents
+too little and is refused, or is told it must hold credentials it does not need.
+An agent that genuinely requires two things at once declares one scheme that
+says so, in its <code>description</code>, rather than relying on a list to mean <code>and</code>.</p>
+<p><strong>Three states, and silence is one of them.</strong> Schemes present and non-empty
+means the agent has declared what to present. <code>&quot;schemes&quot;: []</code> means the agent
+has declared that there is nothing to present, which is a real and useful
+answer. An absent <code>access</code> block, or one with no <code>schemes</code> member, means the
+agent has not said. A reader MUST NOT collapse the third into the second: an
+agent that never described its door is not an agent with an open one. This is
+the same absence doctrine §8.10 and §8.11 already apply, in the one place
+where guessing the flattering value gets a caller&#39;s credentials sent
+somewhere.</p>
+<h4 id="shapes-never-bindings">Shapes, never bindings<a class="hl" href="#shapes-never-bindings">#</a></h4>
+<p>A published scheme is a <strong>requirement</strong>, not an address. It says what a caller
+will have to present; it does not say where to send it or what the value is.
+This is the discipline an interface description has always had, where the
+operations are published and the endpoint is bound later, and it is what makes
+the block safe to serve to strangers pre-admission.</p>
+<p>The test is mechanical: <strong>a member whose value would differ from one caller to
+the next is a binding, not a shape.</strong> A header <em>name</em> is the same for
+everybody and belongs here. A header <em>value</em> is per-caller and does not. An
+OAuth authorization endpoint is the operator&#39;s own and identical for every
+caller, so it belongs; a tenant-specific issuer URL does not.</p>
+<p>Accordingly, an <code>access</code> block MUST NOT carry a credential, token, key, or
+secret of any kind, an account or tenant identifier, or a per-caller URL or
+filesystem path. A manifest that does is malformed, and a registry that
+detects it MUST drop the block whole at registration rather than serve it —
+the same treatment §8.10 and §8.11 give an unreadable declaration, for a
+sharper reason: a secret served on a pre-admission page has already leaked by
+the time anyone notices it was a validation error.</p>
+<p><strong>Declaring a scheme grants nothing.</strong> Nothing here issues a credential,
+provisions an account, or promises that satisfying a scheme results in
+admission. What a caller must furnish to do the <em>work</em>, once admitted — a
+repository, a sign-in to a third-party service — is a different declaration
+living on the offering (<code>needs</code>, §8.5.1) and in the engagement&#39;s inputs clause
+(Agent SoW §5.3, §5.3.1). This block is only about reaching the agent at all.</p>
+<h4 id="what-the-a2a-card-carries">What the A2A card carries<a class="hl" href="#what-the-a2a-card-carries">#</a></h4>
+<p>The generated A2A Agent Card (§1.3) projects <code>transport: &quot;http&quot;</code> schemes into
+its <code>securitySchemes</code> and <code>security</code> members, where they are already valid
+OpenAPI and every A2A consumer knows how to read them. <code>securitySchemes</code> is
+keyed by scheme <code>id</code>, and <code>security</code> carries one requirement object per scheme,
+which is OpenAPI&#39;s spelling of the alternatives rule above.</p>
+<p>A <code>mesh-identity</code> scheme MUST NOT be projected. It has no OpenAPI
+representation, and inventing one would put a fictional HTTP auth scheme on a
+card that consumers act on — worse than saying nothing, because it is
+specific and wrong. An agent reachable only on the mesh therefore emits a card
+with no <code>securitySchemes</code>, which is correct: over HTTP there is no scheme,
+because over HTTP there is no door. The mesh answer stays in the manifest,
+where a reader who asked the mesh question finds it.</p>
 <hr>
 <h2 id="9-registry">9. Registry<a class="hl" href="#9-registry">#</a></h2>
 <p>The registry is a platform service that stores agent manifests and serves discovery queries.</p>
@@ -6285,6 +6430,44 @@ event. Additive only: no existing subject, wire field, or behaviour changes.
 the lookup subject <code>mesh.feed.get</code>, and JetStream then sends its publish
 acknowledgment to the request&#39;s reply subject, racing the responder&#39;s real
 answer and winning. The reference deployment observed exactly that.</p>
+</blockquote>
+<blockquote>
+<p><strong>2026-08-30: how a caller gets in (§8.12).</strong> Every other question in §1.5
+had a declaration behind it; &quot;how do I get in&quot; did not. A stranger could
+read what an agent does, what it costs, what it refuses and where it
+processes data, and still not know whether reaching it took an API key, an
+OAuth grant, an invitation, or nothing. New <strong>§8.12</strong> defines the OPTIONAL
+<code>public.access</code> block, which answers <strong>two different questions</strong>: <code>schemes</code>
+is how a caller presents identity, <code>admission</code> is who gets in. A caller can
+satisfy every scheme and still be refused, and conflating the two is what
+makes a published key scheme read as an open door. <code>admission</code> is the closed
+set <code>open</code> | <code>allowlist</code> | <code>screened</code> | <code>negotiated</code>, and an <code>allowlist</code>
+posture says a list governs without ever publishing its membership. A scheme
+list is <strong>alternatives, never a conjunction</strong>. HTTP schemes carry OpenAPI&#39;s
+own types verbatim rather than a parallel vocabulary for a solved problem;
+mesh schemes are <code>mesh-identity</code>, because there the caller is identified at
+the transport layer and there is nothing further to present.</p>
+<p>The rule that makes it safe to serve pre-admission is <strong>shapes, never
+bindings</strong>: a published scheme is a requirement, not an address, exactly as
+an interface description publishes operations and binds the endpoint later.
+The test is mechanical — <em>a member whose value would differ from one caller
+to the next is a binding</em> — so a header name belongs and a header value does
+not, and an OAuth endpoint identical for every caller does. The registry
+normalizes the block to the §8.12 member list on the way in, which is the
+real defence: a secret smuggled onto a scheme never reaches storage, and
+therefore never reaches the page, where refusing the write afterwards would
+already be too late.</p>
+<p>Three states, and silence is one: schemes declared, <code>&quot;schemes&quot;: []</code> for
+nothing to present, and an absent block for never having said. A reader MUST
+NOT collapse the third into the second — the §8.10/§8.11 absence doctrine,
+in the one place where guessing the flattering value sends a caller&#39;s
+credentials somewhere. §1.5&#39;s questions 4 and 5 gain the block, and both
+SDKs&#39; five-questions projection carries it into <code>terms</code> and <code>refusals</code>
+verbatim (<code>conformance/five-questions.json</code>). The generated A2A card projects
+HTTP schemes into <code>securitySchemes</code> and <code>security</code>; a mesh-only agent still
+emits neither, which was previously stated as a limitation and is now the
+correct answer rather than a gap. Additive: no wire field, error code, or
+behaviour changes for an agent that declares nothing.</p>
 </blockquote>
 <hr>
 <p><em>End of specification.</em></p>

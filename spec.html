@@ -180,11 +180,11 @@
         <span class="eyebrow"><span class="tag">agentmesh</span> · protocol specification</span>
         <h1>AgentMesh Protocol Specification</h1>
         <div class="metas">
-          <span>version <b>0.3.0-draft</b></span>
+          <span>version <b>0.4.0-draft</b></span>
           <span>status <b>Working Draft</b></span>
           <span>date <b>2026-08-25</b></span>
         </div>
-        <p class="canon">Rendered 2026-09-01 from commit <span class="mono">f70de54</span>.
+        <p class="canon">Rendered 2026-09-01 from commit <span class="mono">e0f7c47</span>.
           The canonical source is SPEC.md, published with the conformance suite at
           <a href="https://github.com/jeffrschneider/agentmesh-protocol">https://github.com/jeffrschneider/agentmesh-protocol</a>
           (the <span class="mono">conformance/</span> fixtures this specification cites live there).</p>
@@ -1659,6 +1659,10 @@ budget that can cover it is the acceptance.</p>
 
   &quot;sealing&quot;: &quot;&lt;required | preferred, OPTIONAL&gt;&quot;,
 
+  &quot;descriptor&quot;: {
+    &quot;digest&quot;: &quot;&lt;sha-256 hex of the current Agent Descriptor&#39;s served bytes, OPTIONAL&gt;&quot;
+  },
+
   &quot;public&quot;: {
     &quot;description&quot;: &quot;&lt;one-paragraph storefront: what this agent does, in the operator&#39;s words&gt;&quot;,
     &quot;offerings&quot;: [&quot;&lt;offering-ids the operator advertises to strangers&gt;&quot;],
@@ -2634,6 +2638,17 @@ with no <code>securitySchemes</code>, which is correct: over HTTP there is no sc
 because over HTTP there is no door. The mesh answer stays in the manifest,
 where a reader who asked the mesh question finds it.</p>
 <hr>
+<h3 id="8-13-the-descriptor-pointer">8.13. The Descriptor Pointer<a class="hl" href="#8-13-the-descriptor-pointer">#</a></h3>
+<p>An agent that has an Agent Descriptor (its operator&#39;s standing description;
+the format is the Agent Descriptor specification at
+<a href="https://agentdoc.net/descriptor-spec.html">https://agentdoc.net/descriptor-spec.html</a>) SHOULD carry a pointer to it on
+the manifest: <code>descriptor.digest</code>, the SHA-256 of the descriptor&#39;s served
+bytes. The pointer is derived from the document itself at registration,
+never typed, and it is a pointer only: the manifest does not restate
+descriptor members, because a fact spelled twice drifts. A consumer that
+holds the manifest fetches the descriptor from the registry (§9.2) or from
+the subject, and checks the digest against what a signature or a citation
+named.</p>
 <h2 id="9-registry">9. Registry<a class="hl" href="#9-registry">#</a></h2>
 <p>The registry is a platform service that stores agent manifests and serves discovery queries.</p>
 <p>The registry is <strong>attachment-scoped</strong>: it records which agents are on <em>this</em> mesh instance and what they offer here. It is not an identity authority: who an agent is, and which key a name resolves to, is the naming layer&#39;s question (<code>SPEC-NAMING.md</code>), and the registry defers to it (§1.5). Two consequences are normative for crawlers and directories: listings expose only <code>public</code>-visibility agents (§8.6), pageable and cacheable; and the per-agent read is <code>describe</code> (§10.14), which <code>unlisted</code> agents answer when addressed directly even though they never appear in a listing.</p>
@@ -2641,6 +2656,11 @@ where a reader who asked the mesh question finds it.</p>
 <p>The registry is implemented as a service agent within the mesh, backed by:</p>
 <ul>
 <li>A <strong>NATS KV bucket</strong> (<code>mesh_registry</code>) for manifest storage, keyed by agent ID.</li>
+<li>Two KV buckets per stored document family: current-per-subject and
+every-version-by-digest, for Agent Descriptors (<code>mesh_descriptors</code>,
+<code>mesh_descriptor_archive</code>) and evaluation records (<code>mesh_eval_records</code>,
+<code>mesh_eval_record_archive</code>). Exact bytes are stored, because both formats
+define their digests over the bytes as served.</li>
 <li>A <strong>JetStream consumer</strong> on <code>mesh.registry.register</code> for ingesting registrations.</li>
 <li>A <strong>NATS request-reply</strong> listener on <code>mesh.registry.discover</code> for serving queries.</li>
 </ul>
@@ -2677,6 +2697,36 @@ where a reader who asked the mesh question finds it.</p>
 <td>Watch</td>
 <td>KV watch on <code>mesh_registry</code> bucket</td>
 <td>Subscribe to manifest changes (additions, updates, deletions).</td>
+</tr>
+<tr>
+<td>Descriptor put</td>
+<td><code>mesh.registry.descriptor.put</code></td>
+<td>Store the SENDER&#39;s current Agent Descriptor. The registry MUST refuse a draft (no subject), a subject other than the sender, and a descriptor-statement signature that does not verify; it keeps the current version per subject and every stored version by digest, and SHOULD emit <code>mesh.event.registry.descriptor_updated</code> on replacement.</td>
+</tr>
+<tr>
+<td>Descriptor get</td>
+<td><code>mesh.registry.descriptor.get.{agent_id}</code></td>
+<td>The subject&#39;s current descriptor, exact bytes with their digest.</td>
+</tr>
+<tr>
+<td>Descriptor by digest</td>
+<td><code>mesh.registry.descriptor.digest.{sha256}</code></td>
+<td>Any stored descriptor version, by digest.</td>
+</tr>
+<tr>
+<td>Eval put</td>
+<td><code>mesh.registry.eval.put</code></td>
+<td>Store a signed evaluation record. The record&#39;s <code>agent-eval-record-v1</code> signature MUST verify and MUST be BY the sender, who is the evaluator, not the subject; latest is kept per subject, every record by digest, and the registry SHOULD emit <code>mesh.event.registry.eval_record_updated</code> on replacement.</td>
+</tr>
+<tr>
+<td>Eval get</td>
+<td><code>mesh.registry.eval.get.{agent_id}</code></td>
+<td>The subject&#39;s latest evaluation record.</td>
+</tr>
+<tr>
+<td>Eval by digest</td>
+<td><code>mesh.registry.eval.digest.{sha256}</code></td>
+<td>Any stored evaluation record, by digest.</td>
 </tr>
 </tbody></table>
 <p>On <code>register</code>, the registry MUST verify the node vouch (Section 4.4) before storing the manifest. <strong>The registry never removes a manifest due to missed heartbeats</strong>: transient staleness is presence&#39;s concern (Section 9.6), not the registry&#39;s. A manifest persists until explicitly deregistered, with two housekeeping exceptions:</p>
@@ -3914,6 +3964,36 @@ events MUST deduplicate on the idempotency key.</p>
 <tr>
 <td><code>mesh.registry.get.{agent_id}</code></td>
 <td>Manifest lookup (request-reply)</td>
+<td>Core NATS</td>
+</tr>
+<tr>
+<td><code>mesh.registry.descriptor.put</code></td>
+<td>Agent Descriptor submission (request-reply)</td>
+<td>Core NATS, stored in KV</td>
+</tr>
+<tr>
+<td><code>mesh.registry.descriptor.get.{agent_id}</code></td>
+<td>Current descriptor lookup (request-reply)</td>
+<td>Core NATS</td>
+</tr>
+<tr>
+<td><code>mesh.registry.descriptor.digest.{sha256}</code></td>
+<td>Descriptor version by digest (request-reply)</td>
+<td>Core NATS</td>
+</tr>
+<tr>
+<td><code>mesh.registry.eval.put</code></td>
+<td>Evaluation record submission (request-reply)</td>
+<td>Core NATS, stored in KV</td>
+</tr>
+<tr>
+<td><code>mesh.registry.eval.get.{agent_id}</code></td>
+<td>Latest evaluation record lookup (request-reply)</td>
+<td>Core NATS</td>
+</tr>
+<tr>
+<td><code>mesh.registry.eval.digest.{sha256}</code></td>
+<td>Evaluation record by digest (request-reply)</td>
 <td>Core NATS</td>
 </tr>
 <tr>
@@ -6471,6 +6551,20 @@ behaviour changes for an agent that declares nothing.</p>
 </blockquote>
 <hr>
 <p><em>End of specification.</em></p>
+<blockquote>
+<p><strong>2026-09-01: the spec catches up with the registry&#39;s stored documents
+(0.4.0-draft).</strong> The Agent Descriptor and evaluation-record doors shipped
+ahead of this document, which is the failure mode this changelog exists to
+record rather than repeat. §8.1 and the new §8.13 define the manifest&#39;s
+<code>descriptor.digest</code> pointer: derived from the document at registration,
+never typed, a pointer and never a restatement. §9 gains the six stored-
+document operations with their refusal rules (a draft is refused; a
+descriptor&#39;s subject must be the sender; an evaluation record&#39;s signature
+must verify and be the evaluator&#39;s own), and §14.1 maps the six subjects.
+The formats themselves stay where they live: the Descriptor at
+agentdoc.net/descriptor-spec.html, the AgentDoc at agentdoc.net/spec.html.
+Nothing on the wire changed with this entry; the words caught up.</p>
+</blockquote>
 
       </div>
       <footer>

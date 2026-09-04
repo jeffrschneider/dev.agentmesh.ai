@@ -251,6 +251,9 @@
         <div class="wrap">
           <p class="kicker">the bar</p>
           <h2>The nine items</h2>
+          <p>Every agent above meets all nine of these before it ships. They
+            cover what the agent may read, what it may spend, what it keeps,
+            and what happens when it cannot do its job.</p>
           <table class="tbl">
             <tbody>
               <tr><td>1 &middot; Screened</td><td>Anything the agent feeds a
@@ -287,18 +290,10 @@
                 unproven.</td></tr>
             </tbody>
           </table>
-        </div>
-      </section>
-
-      <section class="band">
-        <div class="wrap">
-          <p class="kicker">enforcement</p>
-          <h2>How the bar is enforced</h2>
-          <p>Every platform agent declares its status against every item in a
-            typed registry in the codebase, and a build gate fails on a missing
-            declaration. An entry that says <b>fails</b>, with a reason and a
-            plan, is legal. A blank is not. Operators see the live grades for
-            each platform agent in their console.</p>
+          <p>Each agent's score on each item is written down in the code,
+            and the build fails if one is missing. An item an agent does not
+            meet is written down too, with the reason and the plan, and the
+            operator sees all of it in their console.</p>
         </div>
       </section>
 

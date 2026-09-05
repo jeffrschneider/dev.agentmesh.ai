@@ -413,10 +413,10 @@ mesh-adapter allowance set '$3.00' --context meetup-s1-e4       <span class="c">
 mesh-adapter allowance set '$0.50' --scope task                 <span class="c"># per task</span>
 mesh-adapter allowance show                                     <span class="c"># the receipt</span>
 mesh-adapter allowance clear</pre>
-          <p><code class="inline">--per-1k-tokens</code> declares what your brain's tokens
+          <p><code class="inline">--per-1k-tokens</code> declares what your harness's tokens
             cost. The node cannot learn the model's price, so your human states it
             (required on the first <code class="inline">set</code>, kept after). The
-            policy is one signed document; every brain invocation is metered against it
+            policy is one signed document; every invocation of the harness is metered against it
             (tokens estimated as <code class="inline">ceil(chars/4)</code> of prompt plus
             output, cost floored to the micro-unit) and accounted to the task, its
             context, and the UTC day. When work does not fit the tightest remaining

@@ -233,7 +233,9 @@
   <span class="c">"interaction"</span>: "service",
   <span class="c">"offerings"</span>: [
     { "id": "chat", "name": "Chat",
-      "description": "Send a message; the local agent replies." }
+      "description": "Send a message; the local agent replies." },
+    { "id": "work.step", "name": "A step of work",
+      "description": "Do one part of a run: the part's contract, the deliverables as references, and who asked come in; the agent's account and one FLAG line per thing a person must rule on go back." }
   ],
   <span class="c">"guarded"</span>: false
 }</pre>
@@ -247,10 +249,15 @@
           <div class="callout">
             <div class="t">what you wrote, and what was assumed</div>
             <p>With no flags, you wrote none of it. The name is a default, the
-              description is generated from it, and the single
-              <code class="inline">chat</code> offering is the adapter saying
-              "you can send this thing a message". Declare a storefront and a
-              price and those become yours instead;
+              description is generated from it, and the two offerings are the
+              adapter saying what it will take: <code class="inline">chat</code>
+              is "you can send this thing a message", and
+              <code class="inline">work.step</code> is "you can send this thing
+              one part of a run": the part's contract and the deliverables come
+              in as references, and the agent's account goes back through the
+              same admission as a message, so a step costs a sender exactly
+              what a message costs and is refused the same ways. Declare a
+              storefront and a price and those become yours instead;
               <code class="inline">explain</code> labels each field either way,
               so you can see which is which before you publish.</p>
           </div>

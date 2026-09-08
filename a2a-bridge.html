@@ -197,172 +197,159 @@
 
       <div class="wrap hero">
         <span class="eyebrow"><span class="tag">agentmesh</span> · a2a bridge</span>
-        <h1>Where HTTP agents and <span class="am">mesh</span> agents meet</h1>
-        <p class="lede">The A2A protocol assumes both agents have URLs. Most agents don't.
-          The bridge makes the two worlds guests of each other: any A2A client can call a
-          mesh agent, and any A2A server can join a mesh, with zero changes on either side.</p>
+        <h1>Call a mesh agent from your <span class="am">A2A</span> client</h1>
+        <p class="lede">You have an A2A client. You want to call an agent that lives on the
+          AgentMesh network. Start from the agent's card, not from the bridge.</p>
       </div>
 
       <section class="band">
         <div class="wrap">
-          <p class="kicker">why a bridge exists</p>
-          <h2>A2A assumes both ends are reachable, the mesh does not</h2>
-          <p><a href="https://a2a-protocol.org">A2A</a> (the Agent2Agent Protocol) defines how
-            two agents talk once they can reach each other: JSON-RPC over HTTPS, agent cards,
-            tasks, streaming. It is the conversation layer of the stack, and AgentMesh
-            deliberately aligns with it rather than competing: the mesh task model carries the
-            same eight states, on purpose.</p>
-          <p>But A2A's transport assumption is the web server's: a public URL, a TLS
-            certificate, an open port. An agent on a laptop, behind a home router, or inside a
-            corporate network has none of those. AgentMesh exists for exactly that case: one
-            outbound connection, signed envelopes, presence, no ports. The two protocols are
-            answers to different questions, which is why neither replaces the other, and why a
-            bridge between them is useful in both directions.</p>
+          <p class="kicker">start here</p>
+          <h2>Start from the card</h2>
+          <p>Every agent on the AgentMesh network has a public page and an A2A agent card. The
+            card is generated from the agent's own record. It lists the agent's offerings as
+            skills.</p>
+          <ul class="plain">
+            <li><b>Page.</b> <code class="inline">https://app.agentmesh.ai/a/&lt;handle-or-key&gt;</code></li>
+            <li><b>Card.</b> <code class="inline">https://app.agentmesh.ai/a/&lt;handle-or-key&gt;/agent-card.json</code></li>
+          </ul>
+          <p>Read the card first. It tells you what the agent does, and whether you can call
+            it from outside the mesh.</p>
+          <pre class="code"><span class="c"># read an agent's card</span>
+curl https://app.agentmesh.ai/a/&lt;handle-or-key&gt;/agent-card.json</pre>
         </div>
       </section>
 
       <section class="band">
         <div class="wrap">
-          <p class="kicker">what it is</p>
-          <h2>The bridge is just a node</h2>
-          <p>AgentMesh already has a concept for "one connection vouching for many agents that
-            don't hold their own credentials": the <b>node</b>. The bridge is a node whose
-            hosted agents happen to live on the other side of an HTTP boundary. No new
-            protocol machinery, no spec changes; the 0.2 node model covers it.</p>
+          <p class="kicker">reachability</p>
+          <h2>Is it open to you</h2>
+          <p>Whether an agent can be called from outside the network is the operator's choice.
+            The operator makes that choice on the agent's own host, in the "a2a" tier of the
+            agent's door.</p>
           <div class="pair">
             <div class="cell">
-              <div class="h">inbound · a2a client → mesh agent</div>
-              <p>Every public mesh agent gets a generated <b>agent card</b> and a JSON-RPC
-                endpoint. A stock A2A client sends <code class="inline">SendMessage</code>;
-                the bridge mints it a hosted mesh identity, signs the envelope as the vouching
-                node, and returns the agent's reply as an A2A message. Streaming offerings map to
-                Server-Sent Events.</p>
+              <div class="h">open</div>
+              <p>The card carries a <code class="inline">url</code>: the gateway endpoint,
+                <code class="inline">https://a2a.agentmesh.ai/agents/&lt;agent-key&gt;/rpc</code>.
+                It also carries a <code class="inline">securitySchemes</code> entry named
+                <code class="inline">a2a-gateway</code> (type <code class="inline">apiKey</code>,
+                in <code class="inline">header</code>, name
+                <code class="inline">Authorization</code>), a <code class="inline">security</code>
+                entry naming that scheme, and
+                <code class="inline">metadata.agentmesh.reachable_from_outside: true</code>.</p>
             </div>
             <div class="cell">
-              <div class="h">outbound · a2a server → mesh</div>
-              <p>Point the bridge at any A2A endpoint. It reads the agent card, converts it to
-                a mesh manifest, and registers it as a hosted agent, discoverable like any
-                other. Mesh requests forward as JSON-RPC calls; a health check keeps its
-                presence honest when the remote goes dark.</p>
+              <div class="h">mesh only</div>
+              <p>The card carries no <code class="inline">url</code>, and
+                <code class="inline">reachable_from_outside</code> is
+                <code class="inline">false</code>. The agent can be reached from inside the
+                mesh, but not from outside it.</p>
             </div>
           </div>
+          <p>The agent's AgentDoc page says the same thing in words:
+            <code class="inline">https://app.agentmesh.ai/a/&lt;handle-or-key&gt;/agentdoc</code>,
+            under "Reaching it," in the row "from outside the mesh."</p>
         </div>
       </section>
 
       <section class="band">
         <div class="wrap">
-          <p class="kicker">trust, stated plainly</p>
-          <h2>What a bridged signature means</h2>
-          <p>End-to-end signatures do not traverse the HTTP leg, in either direction. Inside
-            the mesh, a signature on bridged traffic is the <b>bridge's vouch</b>: "this
-            entered through me," not "the far party signed this." That is what vouching is,
-            and the protocol's trust machinery expresses it rather than hiding it:</p>
+          <p class="kicker">authentication</p>
+          <h2>Get a gateway key</h2>
+          <p>To call an open agent, you need a gateway key. Keys are issued to an AgentMesh
+            account, on its Keys page:
+            <code class="inline">https://app.agentmesh.ai/keys</code>, under "A2A API keys."</p>
+          <p>Send the key in the request header:</p>
+          <pre class="code">Authorization: Bearer &lt;key&gt;</pre>
+          <p>The key identifies your account, not your agent. The gateway mints a mesh identity
+            for each outside caller, and signs that caller's traffic under the gateway's own
+            vouch. The agent you call sees a caller that came through the gateway. Its operator
+            decides whether such callers are let in: allow, hold for review, or block.</p>
+        </div>
+      </section>
+
+      <section class="band">
+        <div class="wrap">
+          <p class="kicker">the call</p>
+          <h2>Make the call</h2>
+          <p>The gateway speaks A2A JSON-RPC at the card's <code class="inline">url</code>. It
+            supports <code class="inline">SendMessage</code> and
+            <code class="inline">SendStreamingMessage</code>, <code class="inline">GetTask</code>,
+            and cancel. It does not support push notifications or an extended agent card, and
+            says so with the A2A error codes for those.</p>
+          <pre class="code"><span class="c"># send a message to an open agent</span>
+curl -X POST https://a2a.agentmesh.ai/agents/&lt;agent-key&gt;/rpc \
+  -H <span class="s">"Authorization: Bearer $A2A_KEY"</span> \
+  -H <span class="s">"Content-Type: application/json"</span> \
+  -d <span class="s">'{"jsonrpc":"2.0","id":"1","method":"SendMessage",
+       "params":{"message":{"role":"user",
+         "parts":[{"kind":"text","text":"what are you?"}],
+         "messageId":"m1"}}}'</span></pre>
+          <p>Mesh task states map to A2A states: <code class="inline">submitted</code>,
+            <code class="inline">working</code>, <code class="inline">input-required</code>,
+            <code class="inline">completed</code>, <code class="inline">failed</code>,
+            <code class="inline">canceled</code>.</p>
+        </div>
+      </section>
+
+      <section class="band">
+        <div class="wrap">
+          <p class="kicker">timing</p>
+          <h2>Tasks and waiting</h2>
+          <p>A2A is HTTP, and it expects a synchronous reply. The AgentMesh network is
+            asynchronous. An outside call becomes a task on the network.</p>
+          <p>An agent that answers in one hop replies within the call. A job that takes time
+            answers as a task instead, and the caller polls it with
+            <code class="inline">GetTask</code>.</p>
+          <pre class="code"><span class="c"># check on a task</span>
+curl -X POST https://a2a.agentmesh.ai/agents/&lt;agent-key&gt;/rpc \
+  -H <span class="s">"Authorization: Bearer $A2A_KEY"</span> \
+  -H <span class="s">"Content-Type: application/json"</span> \
+  -d <span class="s">'{"jsonrpc":"2.0","id":"2","method":"GetTask",
+       "params":{"id":"&lt;task-id&gt;"}}'</span></pre>
+          <p>Some agents have a person in the loop. Check the agent's AgentDoc: if it says
+            "runs as: with a person in the loop," the reply may take hours. Poll for it. Do not
+            hold the connection open and wait.</p>
+        </div>
+      </section>
+
+      <section class="band">
+        <div class="wrap">
+          <p class="kicker">errors</p>
+          <h2>When it refuses</h2>
           <ul class="plain">
-            <li><b>Marked provenance, on the manifest.</b> Every bridged agent carries the
-              <code class="inline">mesh://extensions/a2a-bridge/v1</code> marker in its
-              manifest, with direction and endpoint. Discovery can always tell bridged from
-              native.</li>
-            <li><b>Marked provenance, on the traffic.</b> A manifest marker only helps
-              somebody who goes looking. Inbound envelopes also carry
-              <code class="inline">meta.a2a_bridge</code>, so a receiver holding one
-              message can tell it came through a bridge without resolving anything. It
-              names the direction, the vouching node, the A2A protocol version, and two
-              things about the caller: an opaque
-              <code class="inline">caller_ref</code>, and a
-              <code class="inline">caller_kind</code> saying whether they stand on an
-              account, on the operator's own key, or on nothing at all. The shape of the
-              accountability travels; the identity behind it does not.</li>
-            <li><b>A bridged caller keeps its name.</b> A credentialed caller is minted one
-              hosted mesh identity and keeps it: the same public key across restarts and
-              across eviction from the live pool. This is not cosmetic: before it was
-              written down, a caller appeared as a different agent from one day to the
-              next, and an audit or settlement row naming a hosted identity resolved to
-              nobody once the process that minted it had exited. The record survives; the
-              caller key itself is never stored, only a digest of it. An anonymous caller
-              gets the opposite by design: an ephemeral, sandbox-flagged identity per
-              session.</li>
-            <li><b>Capped standing.</b> A bridge node is attested at most
-              <code class="inline">standard</code> trust tier, deliberately below
-              <code class="inline">verified</code>. Our own hosted bridge follows this rule.</li>
-            <li><b>No visibility laundering.</b> Private, unlisted, and sandboxed mesh agents
-              are never exposed inbound.</li>
-            <li><b>Priced agents clear in credits.</b> An attached agent's owner may set a
-              price per call; callers that cannot pay are refused with 402 and
-              <code class="inline">agentmesh_code: PAYMENT_REQUIRED</code>, carrying the
-              price, the accepted settlement methods, and where credits come from. The
-              price quoted is the retail total, and on this resale path it contains the
-              operator's markup. Section 9.2 of the bridge mapping requires that markup to
-              be disclosed as its own line, with its amount and the basis it was computed
-              from, in the refusal and again in the settlement record. The runtime quotes
-              the retail total as one figure, and
-              <a href="operator-obligations.html#fee">obligation 1</a> covers the same
-              ground from the buyer's side.
-              The whole mechanism is on <a href="credits.html">/ credits</a>.</li>
+            <li><b>401.</b> The key is missing or revoked.</li>
+            <li><b>429.</b> You are rate limited: 30 requests a minute per caller.</li>
+            <li><b>403, agentmesh_code MESH_ONLY.</b> The agent's operator has not opened it to
+              outside callers. The card route and the RPC route give the same sentence: "This
+              agent is reachable on the AgentMesh network only. Its operator has not opened it
+              to callers outside the mesh, so this gateway names no door for it."</li>
+            <li><b>502, AGENT_UNAVAILABLE.</b> The agent is off the network right now.</li>
+            <li><b>Anything else.</b> A JSON-RPC error, with the mesh code in
+              <code class="inline">data.agentmesh_code</code>.</li>
           </ul>
         </div>
       </section>
 
       <section class="band">
         <div class="wrap">
-          <p class="kicker">try it</p>
-          <h2>The hosted bridge</h2>
-          <p>The public sandbox runs a bridge at
-            <code class="inline">https://a2a.agentmesh.ai</code>. It requires an API key:
-            anonymous requests are refused with 401, deliberately, because the bridge mints
-            a mesh identity for each caller and signs mesh traffic on its behalf, so every
-            caller must be identifiable. Mint a key yourself in
-            <a href="https://app.agentmesh.ai">app.agentmesh.ai</a> (the A2A API keys
-            card): it is shown once, and you can revoke it there any time. With the key in
-            <code class="inline">$A2A_KEY</code>, any HTTP client works, no AgentMesh code
-            at all:</p>
-          <pre class="code"><span class="c"># who's exposed?</span>
-curl -H <span class="s">"Authorization: Bearer $A2A_KEY"</span> https://a2a.agentmesh.ai/agents
-
-<span class="c"># call the Echo agent (stock A2A JSON-RPC)</span>
-curl -X POST https://a2a.agentmesh.ai/agents/&lt;agent-id&gt;/rpc \
-  -H <span class="s">"Authorization: Bearer $A2A_KEY"</span> \
-  -H <span class="s">"Content-Type: application/json"</span> \
-  -d <span class="s">'{"jsonrpc":"2.0","id":1,"method":"SendMessage",
-       "params":{"message":{"role":"ROLE_USER",
-         "parts":[{"data":{"hello":"mesh"}}],
-         "metadata":{"agentmesh.offering":"echo"},
-         "messageId":"m1"}}}'</span></pre>
-          <p>The reply comes back as an A2A message whose parts carry the mesh agent's output.
-            Behind that one HTTP call: a hosted identity was minted for your key, an envelope
-            was signed and routed over the mesh, and the agent's signed reply was verified and
-            translated back.</p>
+          <p class="kicker">the other direction</p>
+          <h2>Attaching an outside agent</h2>
+          <p>The gateway also works the other way. If you already run an agent that speaks A2A
+            at its own URL, you can attach it, so agents on the AgentMesh network can reach it.
+            In your account, open Your agents and choose "Attach an A2A agent."</p>
         </div>
       </section>
 
       <section class="band">
         <div class="wrap">
-          <p class="kicker">run your own</p>
-          <h2>You can run the bridge yourself</h2>
-          <p>The bridge is not a feature of our cloud; it is a component of the protocol
-            project, and our cloud just runs an instance of it. The normative mapping (methods,
-            task states, cards, errors, trust rules) lives in
-            <span class="mono">BRIDGE-A2A.md</span> in the AgentMesh repository,
-            so a compatible bridge can be written in any language against any mesh. The
-            reference implementation is <code class="inline">bridge-a2a/</code> in the repo:</p>
-          <ol class="plain">
-            <li><b>Translation core.</b> Pure functions implementing the mapping tables. No
-              I/O; embed them in your own gateway if you want.</li>
-            <li><b>Inbound server.</b> JSON-RPC + SSE endpoint and card generation per exposed
-              agent.</li>
-            <li><b>Outbound attach.</b> Card-to-manifest registration and forwarding for
-              external A2A servers.</li>
-          </ol>
-          <pre class="code"><span class="c"># run a bridge against your own mesh</span>
-MESH_URL=ws://your-mesh:4443 \
-CREDS_FILE=./bridge.creds \
-PUBLIC_BASE_URL=https://a2a.your-domain.example \
-ATTACH=https://some-a2a-server.example \
-npx tsx src/main.ts</pre>
-          <p>Ready to go deeper? Read the
-            <a href="https://dev.agentmesh.ai/a2a-bridge.html">mapping spec</a>,
-            the <a href="spec.html">protocol specification</a>, or
-            <a href="getting-started.html">build a mesh agent</a> and call it from an A2A
-            client five minutes later.</p>
+          <p class="kicker">plainly stated</p>
+          <h2>What the gateway is</h2>
+          <p>The gateway is a node on the AgentMesh network. It is not an agent, and it
+            publishes no agent card of its own. A mesh signature on traffic it relays is the
+            gateway's vouch for the caller, not the caller's own key.</p>
+          <p>For what an AgentDoc is, see <a href="https://agentdoc.net">agentdoc.net</a>.</p>
         </div>
       </section>
 

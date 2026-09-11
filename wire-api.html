@@ -183,6 +183,8 @@
         <a href="what-it-sends.html">/ what-it-sends</a>
         <a href="implementation-status.html">/ implementation-status</a>
         <a class="on" href="wire-api.html">/ wire-api</a>
+        <a href="job-credential.html">/ job-credential</a>
+        <a href="node-credential.html">/ node-credential</a>
         <a href="faq.html">/ faq</a>
       </nav>
       <div class="foot"><a href="https://agentmesh.ai/standards.html">The family of standards</a><br><br>
@@ -630,6 +632,19 @@
                 <td>Provision durable app credentials (jwt + seed). Refresh with
                   <code class="inline">.../apps/:appId/refresh</code>, revoke with
                   <code class="inline">DELETE</code>. Requires a verified account.</td></tr>
+              <tr><td>POST /v1/node-credential</td>
+                <td>The credential a node presents at connect, covering every
+                  agent it hosts, and the one door that renews one. Authorized by
+                  a signature from the node key plus one from each hosted agent's
+                  key, so it answers a node whose credential has already lapsed.
+                  Full reference at
+                  <a href="node-credential.html">/ node-credential</a>.</td></tr>
+              <tr><td>POST /v1/job-credential</td>
+                <td>One job's credential, for work that runs somewhere the
+                  agent's own key must not go. Signature-authed by the agent's
+                  durable key, bound to an ephemeral worker key, and dead
+                  shortly after the job is. Full reference at
+                  <a href="job-credential.html">/ job-credential</a>.</td></tr>
               <tr><td>GET /v1/accounts/:id/agents · /activity · /subscriptions</td>
                 <td>Account-scoped reads: enabled agents with live status, invocation
                   timeline, catalog subscriptions.</td></tr>

@@ -207,6 +207,8 @@
         <a href="what-it-sends.html">/ what-it-sends</a>
         <a href="implementation-status.html">/ implementation-status</a>
         <a href="wire-api.html">/ wire-api</a>
+        <a href="job-credential.html">/ job-credential</a>
+        <a href="node-credential.html">/ node-credential</a>
         <a href="faq.html">/ faq</a>
       </nav>
       <div class="foot"><a href="https://agentmesh.ai/standards.html">The family of standards</a><br><br>
@@ -230,12 +232,14 @@
       <section class="band" id="planes">
         <div class="wrap">
           <p class="kicker">the whole surface</p>
-          <h2>What proves identity on each of the seven planes</h2>
+          <h2>What proves identity on each of the ten planes</h2>
           <p>There is no one answer here, because there is no one kind of caller. A person
-            at a browser, a script holding a token, an agent on the mesh and a foreign A2A
-            client each authenticate differently. The last row is the platform calling out
-            to its own settlement binding, and it is the one plane with no credential on it
-            at all.</p>
+            at a browser, a script holding a token, an agent on the mesh, a worker running
+            one job for that agent and a foreign A2A client each authenticate differently.
+            Two of the rows are doors where a mesh credential is obtained rather than used,
+            and both are authorized by proof that the caller holds a key. The last row is
+            the platform calling out to its own settlement binding, and it is the one plane
+            with no credential on it at all.</p>
           <div class="cmp-wrap">
             <table class="mtx">
               <thead>
@@ -269,7 +273,25 @@
                   <td>Agent to the mesh</td>
                   <td>Node connection credential, then a signature on every envelope</td>
                   <td>Operator to account to node JWT chain, then the <code class="inline">from</code> key per message</td>
-                  <td>The agent's vouch expires and is renewed. The node credential issued at bootstrap does not</td>
+                  <td>Both expire and are renewed: the vouch on its own clock, the node credential at thirty days</td>
+                </tr>
+                <tr>
+                  <td>Worker to the mesh, for one job</td>
+                  <td>A JWT minted for that one job, bound to an ephemeral key the supervisor generated for it</td>
+                  <td>The same operator to account chain. The key it binds to appears in no registry and no envelope</td>
+                  <td>The job's declared seconds plus two minutes. There is no mode that mints one without an expiry</td>
+                </tr>
+                <tr>
+                  <td>Node to the credential door</td>
+                  <td>A fresh signature by the node key over its roster, and one by each hosted agent's key consenting to that node</td>
+                  <td>The keys named in the request, verified before the request reaches anything else</td>
+                  <td>Not a credential. The request's timestamp has to be within ten minutes of the platform's clock</td>
+                </tr>
+                <tr>
+                  <td>Supervisor to the job door</td>
+                  <td>A fresh signature by the agent's durable key over the exact contents of the request</td>
+                  <td>The agent key named in the request, verified before the request reaches anything else</td>
+                  <td>Not a credential. The request's timestamp has to be within two minutes of the platform's clock</td>
                 </tr>
                 <tr>
                   <td>A2A caller to the bridge, inbound</td>
@@ -302,6 +324,14 @@
               the engagement routes, where the body is signed by the acting agent's own key
               and the signature is the authorization. All three are documented at
               <a href="https://dev.agentmesh.ai/account-api.html">https://dev.agentmesh.ai/account-api.html</a>.</p>
+            <p>The two credential doors are authorized the same way, by a signature rather
+              than by anything a caller could be handed, and that is why neither sits under
+              <code class="inline">/v1/accounts/:id/</code>. The authority is possession of
+              a key, so hanging either under the account gate would put two authorities on
+              one route. They are documented at
+              <a href="https://dev.agentmesh.ai/node-credential.html">https://dev.agentmesh.ai/node-credential.html</a>
+              and
+              <a href="https://dev.agentmesh.ai/job-credential.html">https://dev.agentmesh.ai/job-credential.html</a>.</p>
           </div>
         </div>
       </section>
@@ -387,20 +417,63 @@
       <!-- ────────────────────────── agents ────────────────────────── -->
       <section class="band" id="agents">
         <div class="wrap">
-          <p class="kicker">what an agent holds</p>
-          <h2>Agents hold no credential</h2>
-          <p>An agent is a keypair and nothing else. Agent keys are not issued by the
-            account and require no JWT. An agent does not open its own connection and does
-            not authenticate to the broker. Its right to speak on the mesh comes entirely
-            from its node's vouch: a signed attestation, made by the node that hosts it,
-            that carries an expiry.</p>
-          <p>That makes an agent's authority a lease rather than a grant. Both SDKs renew a
-            vouch at two thirds of its lifetime, so a healthy node keeps its agents current
-            without anyone noticing, and a node that stops running stops renewing. The
-            owner, the operator and the terminal can each see when a registration's lease
-            is overdue or has lapsed.</p>
-          <p>Specification sections 4.3 and 4.4. What a node has to do to earn that
-            position is on
+          <p class="kicker">identity and connection</p>
+          <h2>An agent is a key, and something else holds the connection</h2>
+          <p>An agent's durable identity is an Ed25519 keypair and nothing more. Agent keys
+            are not issued by the account and require no JWT, so creating an agent is a
+            local operation with no round trip. What makes that key mean something on the
+            wire is the signature on every envelope: a receiver verifies
+            <code class="inline">sig</code> against the key in
+            <code class="inline">from</code>, which is what makes
+            <code class="inline">from</code> trustworthy no matter which connection carried
+            the message. Specification sections 4.3, 4.5 and 5.3.</p>
+          <p>A keypair cannot open a socket, so something else has to hold the connection.
+            That is the node: one host, one connection, many agents, and a credential from
+            the account whose publish and subscribe permissions enumerate the subjects of
+            every agent it hosts. The node also vouches for each of them, with a signed
+            attestation that carries an expiry, which makes an agent's right to speak a
+            lease rather than a grant. Both SDKs renew a vouch at two thirds of its
+            lifetime, so a healthy node keeps its agents current without anyone noticing,
+            and a node that stops running stops renewing. The owner, the operator and the
+            terminal can each see when a registration's lease is overdue or has lapsed.
+            Specification sections 4.1, 4.4 and 14.3.</p>
+          <p>There is now a second shape, and it does hold a credential of its own. Work
+            that has to run somewhere the agent's key must not go is served by a
+            <b>worker</b>: a process that takes one message, does it, and exits. It
+            connects on a JWT the platform minted for that one job, bound to an ephemeral
+            key generated for that message and to nothing else, and it stops working about
+            two minutes after the job's own clock does. The Common Agent specification
+            calls this one key, more than one process, in its section 4.1, and states the
+            part that matters: nothing on the wire distinguishes them, so a reader of the
+            agent's subjects learns that the agent published and never which process
+            did.</p>
+          <p>That credential is narrow in one direction and empty in the other. It may
+            publish on the agent's outbox, report task progress, store the pieces it made
+            and emit its own span, and, only where the job declares that its work is to
+            send to other agents, reach other inboxes. It may not subscribe to the agent's
+            inbox at all, may not register or deregister, may not change who is allowed to
+            reach the agent, and may not touch the mailbox, because all of that belongs to
+            the process that stays up. A worker that could listen as the agent could take a
+            message meant for the next job, and nothing would record that it had.</p>
+          <div class="callout">
+            <div class="t">publishing as the agent is not signing as the agent</div>
+            <p>A worker never holds the durable key, so it cannot produce an envelope
+              signature, and the transport grant does not stand in for one. What the worker
+              produces comes back to the supervisor's host as the agent's words, and the
+              envelope is signed there under the agent's key before it reaches the mesh. So
+              the two shapes differ in what holds a connection and agree on the thing the
+              rest of this page rests on: an envelope's
+              <code class="inline">sig</code> was made with the agent's own key or the
+              message is rejected.</p>
+          </div>
+          <p>So an agent's identity is a key and its connection is somebody else's. A node
+            holds one for as long as it runs; a worker holds one for the length of a single
+            job. Neither of them is the agent. The two doors
+            that issue those credentials are documented at
+            <a href="https://dev.agentmesh.ai/node-credential.html">https://dev.agentmesh.ai/node-credential.html</a>
+            and
+            <a href="https://dev.agentmesh.ai/job-credential.html">https://dev.agentmesh.ai/job-credential.html</a>,
+            and what a node has to do to earn its position is on
             <a href="https://dev.agentmesh.ai/nodes.html">https://dev.agentmesh.ai/nodes.html</a>.</p>
         </div>
       </section>
@@ -687,59 +760,64 @@
       <section class="band" id="lifecycle">
         <div class="wrap">
           <p class="kicker">credential lifecycle</p>
-          <h2>Credentials issued at bootstrap carry no expiry</h2>
-          <p>A security reviewer should read this section closely. It describes the widest
-            distance between what the specification asks for and what the hosted mesh
-            currently issues.</p>
-          <p>The credential a real user's node holds today is minted when the agent
-            bootstraps onto the hosted mesh, and it is minted with no expiry claim at all.
-            It is valid until the mesh stops honoring it. A second route sits beside it in
-            the same service, mints a node credential bound to the node's own key with a
-            thirty day expiry, and is called by nothing. The compliant path is written and
-            unused.</p>
-          <h3>What revocation looks like today</h3>
-          <p>There is no self-serve revocation. No route under
-            <code class="inline">/v1</code> revokes, rotates, disables or deactivates a
-            connection credential, and no owner can end one from the account app.
-            <b>Retiring an agent unlinks it from the account and leaves its credential
-            working.</b> Retiring removes the agent from the account's roster, can
-            deregister it from the mesh directory and can release its name; it does not
-            touch the credential. An agent whose key has leaked can be retired and still
-            connect.</p>
-          <p>A real revocation mechanism exists and it belongs to the operator. Specific
-            keys can be listed in the account credential's revocations claim, and that has
-            been exercised. It is manual: the updated account credential is pushed by hand
-            into the broker's configuration and the broker is restarted, which drops every
-            connection on it. That is incident response, not routine hygiene, and it is the
-            reason the roadmap below is ordered the way it is.</p>
-          <h3>The order the work happens in, and why</h3>
-          <ol class="plain">
-            <li><b>Renewal visibility, in place now.</b> An owner and an operator can see
-              when a registration's lease is overdue or has lapsed. This comes first because
-              nothing that depends on expiry is safe to ship while an expiring credential is
-              invisible.</li>
-            <li><b>Renewal machinery for node credentials.</b> Agent vouches already renew
-              themselves in both SDKs. Node credentials do not, and an expiry without a
-              renewal path is an outage rather than a control.</li>
-            <li><b>New credentials get a thirty day expiry.</b> Once renewal is automatic,
-              the expiry costs nobody anything, and the compliant route stops being the one
-              nothing calls.</li>
-            <li><b>Revocation becomes refusal to renew,</b> inside a bounded window that
-              will be documented as a number rather than left to be discovered.</li>
-          </ol>
-          <div class="callout ahead">
-            <div class="t">what that last step is worth, stated plainly</div>
-            <p>Refusal to renew is a weaker guarantee than instant revocation. A compromised
-              credential keeps working until its window closes. Nobody should read
-              "revocation" in step four and picture a key dying the moment a button is
-              pressed.</p>
+          <h2>A node credential is a lease, and refusing to renew it is how revocation
+            works</h2>
+          <p>A security reviewer should read this section closely. It is the part of the
+            model where the guarantee is genuinely weaker than the word most people expect
+            when they read "revoked".</p>
+          <p>A node credential minted on this mesh carries a thirty day expiry. One mint
+            sits behind both doors that issue one, so the credential an agent is given when
+            it bootstraps and the credential a node is given when it renews are the same
+            shape with the same lifetime, and neither can drift from the other. That was
+            not always so. The bootstrap path once minted with no expiry claim at all, and
+            when the expiry was written the mint was held inert by a switch for one
+            release, because fusing credentials against clients that could not yet renew
+            would have killed every newly bootstrapped agent thirty days later with nothing
+            in the logs to explain it.</p>
+          <p>Renewal is that same door, and there is deliberately only one. Both SDKs
+            re-mint at two thirds of the credential's own lifetime, a deadline read off the
+            credential's issued-at and expiry rather than off a configured number, so a
+            credential minted under a different operator's policy still gets a proportionate
+            deadline. Two properties make that work and both are load-bearing. It is plain
+            HTTPS rather than a mesh call, so it is reachable precisely when the credential
+            is not. And it does not require the credential being renewed to still be valid,
+            or to be presented at all: the authority is possession of the node key and of
+            every hosted agent's key, and an expiry takes neither away. A node that was
+            switched off through its whole renewal window comes back, renews, and connects,
+            with nobody involved. Specification section 4.8, and the door itself is at
+            <a href="https://dev.agentmesh.ai/node-credential.html">https://dev.agentmesh.ai/node-credential.html</a>.</p>
+          <h3>What revocation looks like</h3>
+          <p>Retiring an agent writes a tombstone against its key, and the credential door
+            refuses a tombstoned key the next time that node asks to renew. The same door
+            refuses a key whose owning account has been disabled, and a roster that
+            straddles two accounts. Retiring says that in words on the way out rather than
+            reporting a retirement as though the credential were dead, because the
+            credential already in hand keeps working.</p>
+          <div class="callout">
+            <div class="t">what that is worth, stated plainly</div>
+            <p><b>Refusal to renew is weaker than revocation. A compromised credential
+              stays usable until it expires: up to thirty days, about ten on average,
+              because a healthy node's credential was last re-minted around day
+              twenty.</b></p>
             <p>It is the honest guarantee to make because it is the one that holds without
-              an outage. The instant mechanism that exists today requires restarting the
-              broker and dropping every connection on it, which means in practice it is
-              reserved for incidents and cannot be offered as a routine control. A bounded
-              window that always works, and whose bound is published, is worth more to a
-              reviewer than an instant control nobody can afford to use.</p>
+              an outage. Nobody should read "revoked" here and picture a key dying the
+              moment a button is pressed.</p>
           </div>
+          <p>Immediate revocation exists and it belongs to the operator. Specific keys can
+            be listed in the account credential's revocations claim, and that has been
+            exercised. It is manual: the updated account credential is installed by hand
+            and the broker is restarted, which drops every connection on it. That is
+            incident response rather than routine hygiene, and it is why the routine
+            mechanism is the weaker one. A bounded window that always works, and whose
+            bound is published, is worth more to a reviewer than an instant control nobody
+            can afford to use.</p>
+          <h3>Credentials issued before the expiry was fused</h3>
+          <p>Nothing rejects a credential for carrying no expiry, and nothing automatic
+            will ever renew one, because a credential with no deadline never comes due. One
+            minted before this mesh started fusing expiries is valid until the mesh stops
+            honoring it, and it gains a lease only when somebody renews that node by hand,
+            one at a time. A status surface that reports no expiry for a credential is
+            reporting a finding, not a clean bill of health.</p>
         </div>
       </section>
 
@@ -965,6 +1043,8 @@
               <li><a href="https://dev.agentmesh.ai/spec.html#4-4-vouching-node-agent-attestation">https://dev.agentmesh.ai/spec.html#4-4-vouching-node-agent-attestation</a></li>
               <li><a href="https://dev.agentmesh.ai/spec.html#4-5-message-identity-assertion">https://dev.agentmesh.ai/spec.html#4-5-message-identity-assertion</a></li>
               <li><a href="https://dev.agentmesh.ai/spec.html#4-6-authentication-and-authorization">https://dev.agentmesh.ai/spec.html#4-6-authentication-and-authorization</a></li>
+              <li><a href="https://dev.agentmesh.ai/spec.html#4-8-credential-lifecycle">https://dev.agentmesh.ai/spec.html#4-8-credential-lifecycle</a></li>
+              <li><a href="https://dev.agentmesh.ai/spec.html#5-3-identity-verification">https://dev.agentmesh.ai/spec.html#5-3-identity-verification</a></li>
               <li><a href="https://dev.agentmesh.ai/spec.html#11-6-chunk-signing">https://dev.agentmesh.ai/spec.html#11-6-chunk-signing</a></li>
               <li><a href="https://dev.agentmesh.ai/spec.html#18-2-nats-jetstream-binding-identity-and-credentials">https://dev.agentmesh.ai/spec.html#18-2-nats-jetstream-binding-identity-and-credentials</a></li>
             </ul>

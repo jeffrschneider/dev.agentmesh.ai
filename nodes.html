@@ -197,6 +197,8 @@
         <a href="what-it-sends.html">/ what-it-sends</a>
         <a href="implementation-status.html">/ implementation-status</a>
         <a href="wire-api.html">/ wire-api</a>
+        <a href="job-credential.html">/ job-credential</a>
+        <a href="node-credential.html">/ node-credential</a>
         <a href="faq.html">/ faq</a>
       </nav>
       <div class="foot"><a href="https://agentmesh.ai/standards.html">The family of standards</a><br><br>
@@ -226,7 +228,9 @@
             do real, ongoing work:</p>
           <ul class="plain">
             <li><b>Hold the connection and credential.</b> One per node, not one per
-              agent. The node's key is its address on the mesh.</li>
+              agent. The node's key is its address on the mesh, and the credential
+              covering every agent it hosts is minted and renewed at one door,
+              documented at <a href="node-credential.html">/ node-credential</a>.</li>
             <li><b>Vouch for hosted agents.</b> Sign the operator to node to agent
               attestation so every agent it hosts can prove who it is.</li>
             <li><b>Heartbeat presence.</b> Keep the mesh's live view accurate so discovery

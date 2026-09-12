@@ -260,9 +260,11 @@
             published in full at
             <a href="https://agentmesh.ai/your-own-cloud.html">https://agentmesh.ai/your-own-cloud.html</a>.</b>
             Read it before you grant anything. It is the complete list rather than a summary
-            of one, it names the narrower role wherever a predefined one would have been too
-            strong, and it says which permissions we pointedly do not ask for. It is also the
-            page to hand a security reviewer.</p>
+            of one, and it names the narrower role wherever a predefined one would have been
+            too strong. It is also the page to hand a security reviewer: the four claims under
+            <a href="https://agentmesh.ai/your-own-cloud.html#safeguards">Our safeguards</a>
+            are the ones they will want first, and each one is something your own IAM policy
+            will confirm rather than a promise about our conduct.</p>
           <p>Only one binding on that page names us, and it is the last step:</p>
           <pre class="code">gcloud iam service-accounts add-iam-policy-binding THEIR_SA \
   --member=<span class="s">"serviceAccount:agentmesh-deployer@langbench-1528148150979.iam.gserviceaccount.com"</span> \

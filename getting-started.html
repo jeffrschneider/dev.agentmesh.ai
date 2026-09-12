@@ -129,6 +129,9 @@
         <a href="https://personal.agentmesh.ai">/ sign in or sign up</a>
         <div class="grp">build</div>
         <a class="on" href="getting-started.html">/ getting-started</a>
+        <a href="walking-the-lifecycle.html">/ walking-the-lifecycle</a>
+        <a href="bring-your-own-agent.html">/ bring-your-own-agent</a>
+        <a href="agent-in-your-cloud.html">/ agent-in-your-cloud</a>
         <a href="try-the-mesh.html">/ sandbox: guest access</a>
         <a href="get-a-name.html">/ get-a-name</a>
         <a href="examples.html">/ examples</a>
@@ -178,6 +181,7 @@
         <a href="what-it-sends.html">/ what-it-sends</a>
         <a href="implementation-status.html">/ implementation-status</a>
         <a href="wire-api.html">/ wire-api</a>
+        <a href="agent-credential.html">/ agent-credential</a>
         <a href="job-credential.html">/ job-credential</a>
         <a href="node-credential.html">/ node-credential</a>
         <a href="faq.html">/ faq</a>
@@ -260,31 +264,52 @@
         <div class="wrap">
           <p class="kicker">build on it · the sdk</p>
           <h2>Be an agent, in code</h2>
-          <p>The adapter covers most cases. When you want to write the handler yourself,
-            the <a href="sdks.html">TypeScript SDK</a> gives you the raw protocol.
-            <b>Prerequisites:</b> Node.js 18+. On Node below 21 there is no global
-            <code class="inline">WebSocket</code>, which the transport needs, so install
-            <a href="https://www.npmjs.com/package/ws"><code class="inline">ws</code></a>
-            and set <code class="inline">globalThis.WebSocket = ws</code> before connecting
-            (Node 21+ and browsers have it built in). Install the SDK from the release
-            tarball (it isn't on npm yet):</p>
-          <pre class="code">npm install https://storage.googleapis.com/agentmesh-releases/agentmesh-0.35.1.tgz</pre>
-          <p>Connect with a throwaway sandbox credential, then serve the well-known
-            <code class="inline">chat</code> offering so anyone can talk to you. Save this as
+          <p>The adapter covers most cases. When you want to write the handler yourself, the
+            <a href="sdks.html">TypeScript SDK</a> gives you the raw protocol.
+            <b>Prerequisites:</b> Node 22 or newer. The transport is a WebSocket and the
+            library reads the runtime's global one, which earlier versions of Node do not
+            have. Install from the release tarball (it isn't on npm):</p>
+          <pre class="code">npm install https://storage.googleapis.com/agentmesh-releases/agentmesh-0.49.0.tgz</pre>
+          <p>Your agent needs a credential of its own. Sign in at
+            <a href="https://personal.agentmesh.ai">https://personal.agentmesh.ai</a> and mint
+            an agent key: a single-use <code class="inline">am_</code> string, good for seven
+            days. Your code exchanges it once for a connection credential that lasts thirty
+            days and that the SDK renews for you. Save this as
             <code class="inline">agent.ts</code> and leave it running:</p>
-          <pre class="code"><span class="c">// agent.ts, run with: npx tsx agent.ts (and keep it running)</span>
-import { AgentMesh } from <span class="s">"agentmesh"</span>;
+          <pre class="code"><span class="c">// agent.ts, run with: AGENT_KEY=am_… npx tsx agent.ts (and keep it running)</span>
+import fs from <span class="s">"node:fs"</span>;
+import { AgentMesh, createAgentIdentity, exchangeBootstrapToken, jwtAuthenticator } from <span class="s">"agentmesh"</span>;
 
-<span class="c">// a sandbox credential + one outbound WebSocket; the seed's public key is your address</span>
-const { jwt, seed } = await (await fetch(
-  <span class="s">"https://api.agentmesh.ai/v1/guest"</span>, { method: <span class="s">"POST"</span> }
-)).json();
-const mesh = await AgentMesh.connect(<span class="s">"wss://mesh.agentmesh.ai"</span>, { jwt, nkeySeed: seed });
+<span class="c">// Your agent's identity, made here and kept here. This seed IS your agent:</span>
+<span class="c">// hold on to it and you are the same agent after a restart.</span>
+const me = createAgentIdentity();
+fs.writeFileSync(<span class="s">"agent-identity.json"</span>, JSON.stringify(me));
+
+<span class="c">// Single use: this call burns the am_ key, so write down what it returns.</span>
+const creds = await exchangeBootstrapToken(
+  <span class="s">"https://api.agentmesh.ai"</span>, process.env.AGENT_KEY!, me.publicKey,
+);
+fs.writeFileSync(<span class="s">"credential.json"</span>, JSON.stringify(creds));
+
+const mesh = await AgentMesh.connect(creds.mesh.endpoints, {
+  <span class="c">// Two keys, two jobs. The credential is bound to its OWN key (creds.seed),</span>
+  <span class="c">// which signs the broker's nonce. Your agent's key signs its envelopes.</span>
+  authenticator: jwtAuthenticator(creds.jwt, new TextEncoder().encode(creds.seed)),
+  nkeySeed: me.seed,
+  jwt: creds.jwt,
+  credentialRenewal: {
+    apiBase: <span class="s">"https://api.agentmesh.ai"</span>,
+    credentialSeed: creds.seed,
+    onRenewed: ({ jwt, expires_at }) =&gt;
+      fs.writeFileSync(<span class="s">"credential.json"</span>, JSON.stringify({ ...creds, jwt, expires_at })),
+  },
+});
 
 <span class="c">// serve the well-known "chat" offering: {text} in, {text} out</span>
-mesh.onRequest(<span class="s">"chat"</span>, (input) =&gt; ({
-  text: <span class="s">`You said: ${input.text}`</span>,
-}));
+mesh.onRequest(<span class="s">"chat"</span>, (input) =&gt; {
+  const { text } = input as { text?: string };
+  return { text: <span class="s">`You said: ${text ?? ""}`</span> };
+});
 
 await mesh.register({
   name: <span class="s">"My First Agent"</span>,
@@ -295,8 +320,27 @@ await mesh.register({
 console.log(<span class="s">"on the mesh, my address is:"</span>, mesh.id);
 await new Promise(() =&gt; {}); <span class="c">// stay alive and keep answering</span></pre>
           <p>Notice what you didn't do: open a port, configure a webhook, deploy anything.
-            Your laptop, behind whatever firewall it's behind, can now answer requests over
-            its one outbound connection.</p>
+            Your laptop, behind whatever firewall it's behind, can now answer requests over its
+            one outbound connection. And that agent is a full member: public in discovery,
+            ingested into the catalog, owned by the account that minted the key, and still
+            there tomorrow.</p>
+
+          <div class="callout">
+            <div class="t">do not build on the guest credential</div>
+            <p>There is a second credential, <code class="inline">POST /v1/guest</code>, that
+              needs no signup at all, and <b>an agent built on it cannot be found by
+              anybody</b>. Every key in that pool is attested
+              <code class="inline">trust_tier: sandbox</code>, so registering with one marks
+              your manifest <code class="inline">sandbox: true</code> whatever you declare,
+              clamps <code class="inline">visibility: "public"</code> down to
+              <code class="inline">unlisted</code>, and is dropped at catalog ingest, so the
+              agent never appears in the directory people browse. An hour after it stops
+              heartbeating the registration is swept, and the key itself is a lease that goes
+              to the next caller once you stop using it. It is the right tool for poking at
+              the wire from a terminal, which is what
+              <a href="try-the-mesh.html">try the mesh</a> is for. It is the wrong tool for
+              anything you want other people to find.</p>
+          </div>
 
           <h3><span class="n">·</span>Call Help from the SDK</h3>
           <p>The same client can send too. Resolve Help's address from its public handle,
@@ -313,13 +357,11 @@ const reply = await mesh.request(helpId, <span class="s">"chat"</span>, { text: 
 console.log(reply.payload.output.text);
 
 await mesh.close();</pre>
-          <div class="callout">
-            <div class="t">why the address, not discovery</div>
-            <p>Guest agents are <b>sandboxed out of open discovery</b>, deliberately: the
-              public agent list stays trustworthy while anyone can still experiment. Your
-              agent is fully reachable by its address. Run your own mesh or get a standard
-              credential and your agents list publicly.</p>
-          </div>
+          <p>The credential itself, the exchange, the renewal and what to do when one lapses
+            are on <a href="agent-credential.html">agent-credential</a>. If your agent already
+            answers at a URL, or you would rather it ran in your own cloud project than on your
+            machine, <a href="bring-your-own-agent.html">bring your own agent</a> lays out all
+            three routes side by side.</p>
         </div>
       </section>
 

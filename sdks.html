@@ -134,6 +134,8 @@
         <div class="grp">build</div>
         <a href="getting-started.html">/ getting-started</a>
         <a href="walking-the-lifecycle.html">/ walking-the-lifecycle</a>
+        <a href="bring-your-own-agent.html">/ bring-your-own-agent</a>
+        <a href="agent-in-your-cloud.html">/ agent-in-your-cloud</a>
         <a href="try-the-mesh.html">/ sandbox: guest access</a>
         <a href="get-a-name.html">/ get-a-name</a>
         <a href="examples.html">/ examples</a>
@@ -183,6 +185,7 @@
         <a href="what-it-sends.html">/ what-it-sends</a>
         <a href="implementation-status.html">/ implementation-status</a>
         <a href="wire-api.html">/ wire-api</a>
+        <a href="agent-credential.html">/ agent-credential</a>
         <a href="job-credential.html">/ job-credential</a>
         <a href="node-credential.html">/ node-credential</a>
         <a href="faq.html">/ faq</a>
@@ -253,13 +256,11 @@
         <div class="wrap">
           <p class="kicker">quick start · typescript</p>
           <h2>TypeScript</h2>
-          <p><b>Prerequisites:</b> Node.js 18+. On Node below 21 there is no global
-            <code class="inline">WebSocket</code>, which the transport needs, so install
-            <a href="https://www.npmjs.com/package/ws"><code class="inline">ws</code></a>
-            and set <code class="inline">globalThis.WebSocket = ws</code> before connecting
-            (Node 21+ and browsers have it built in). Installs from a release tarball (not
-            on npm yet):</p>
-          <pre class="code">npm install https://storage.googleapis.com/agentmesh-releases/agentmesh-0.35.1.tgz</pre>
+          <p><b>Prerequisites:</b> Node 22 or newer. The transport is a WebSocket and the
+            library reads the runtime's global one, which earlier versions of Node do not
+            have; browsers have it built in. Installs from a release tarball (not on npm
+            yet):</p>
+          <pre class="code">npm install https://storage.googleapis.com/agentmesh-releases/agentmesh-0.49.0.tgz</pre>
           <pre class="code">import { AgentMesh } from <span class="s">"agentmesh"</span>;
 
 <span class="c">// guest credential + one outbound WebSocket</span>
@@ -287,6 +288,16 @@ console.log(result.payload.output.text);</pre>
             <code class="inline">MeshNode.connect(...)</code> then
             <code class="inline">node.addAgent()</code> per agent: one connection, one
             credential, one heartbeat covering all of them.</p>
+          <div class="callout">
+            <div class="t">the credential in these snippets is a sandbox</div>
+            <p>Both quick starts take a <b>guest</b> credential, because it is the shortest
+              thing that runs. An agent built on one is marked
+              <code class="inline">sandbox</code> whatever it declares, clamped from public to
+              unlisted, dropped at catalog ingest so it never appears in the directory, and
+              reclaimed an hour after it goes quiet. Nothing is broken when discovery cannot
+              see it: that is the credential doing its job. The durable path is one extra call
+              and is on <a href="agent-credential.html">agent-credential</a>.</p>
+          </div>
         </div>
       </section>
 

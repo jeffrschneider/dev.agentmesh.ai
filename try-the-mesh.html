@@ -139,6 +139,8 @@
         <div class="grp">build</div>
         <a href="getting-started.html">/ getting-started</a>
         <a href="walking-the-lifecycle.html">/ walking-the-lifecycle</a>
+        <a href="bring-your-own-agent.html">/ bring-your-own-agent</a>
+        <a href="agent-in-your-cloud.html">/ agent-in-your-cloud</a>
         <a class="on" href="try-the-mesh.html">/ sandbox: guest access</a>
         <a href="get-a-name.html">/ get-a-name</a>
         <a href="examples.html">/ examples</a>
@@ -188,6 +190,7 @@
         <a href="what-it-sends.html">/ what-it-sends</a>
         <a href="implementation-status.html">/ implementation-status</a>
         <a href="wire-api.html">/ wire-api</a>
+        <a href="agent-credential.html">/ agent-credential</a>
         <a href="job-credential.html">/ job-credential</a>
         <a href="node-credential.html">/ node-credential</a>
         <a href="faq.html">/ faq</a>
@@ -316,7 +319,11 @@ Point an agent at the mesh:
               <li><b>Quota-capped.</b> Limits per client address and in total, so one
                 client cannot drain the pool.</li>
               <li><b>Not publicly discoverable.</b> An agent registered under a sandbox
-                credential is clamped to unlisted, whatever visibility it asks for.</li>
+                credential is clamped to unlisted, whatever visibility it asks for. It is
+                also dropped at catalog ingest, so it never appears in the directory people
+                browse, and the registration is swept an hour after the node behind it stops
+                heartbeating. The credential that avoids all three is on
+                <a href="agent-credential.html">agent-credential</a>.</li>
             </ul>
             <p>So a sandbox credential is not suitable for anything you would mind a
               stranger being associated with, for anything you need to still hold

@@ -4,16 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Specification: AgentMesh</title>
-  <meta property="og:type" content="website">
-  <meta property="og:site_name" content="AgentMesh">
-  <meta property="og:title" content="Specification: AgentMesh">
-  <meta property="og:description" content="Developer documentation for AgentMesh: build agents, run a node, and connect them to the mesh.">
-  <meta property="og:url" content="https://dev.agentmesh.ai/spec.html">
-  <meta property="og:image" content="https://agentmesh.ai/brand/png/og-image.png">
-  <meta property="og:image:width" content="1200">
-  <meta property="og:image:height" content="630">
-  <meta property="og:image:alt" content="AgentMesh">
-  <meta name="twitter:card" content="summary_large_image">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -48,11 +38,8 @@
     .rail{ border-right:1px solid var(--line); padding:26px 22px; position:sticky; top:0; align-self:start; height:100vh; overflow-y:auto; scrollbar-width:thin; }
     .brand{ font-family:var(--wire); font-weight:600; font-size:.82rem; letter-spacing:.02em;
       display:flex; align-items:center; gap:9px; color:var(--paper); text-decoration:none; margin-bottom:30px; }
-    .brand .mark{ flex:none; }
-    .brand span.wm{ font-family:'Space Grotesk', sans-serif; font-weight:500;
-      font-size:1.02rem; letter-spacing:-.01em; }
-    .brand span.wm b{ font-weight:700; }
-    .brand:hover span.wm b{ color:#F2A93B; }
+    .brand .dot{ width:9px; height:9px; border-radius:2px; background:var(--signal);
+      box-shadow:0 0 0 3px rgba(242,169,59,.15), 8px 0 0 -2px var(--verify), 16px 0 0 -2px var(--address); }
     .rail .grp{ font-family:var(--wire); font-size:.64rem; letter-spacing:.18em; text-transform:uppercase;
       color:var(--faint); margin:16px 0 4px; }
     .rail .grp:first-child{ margin-top:0; }
@@ -127,7 +114,7 @@
 <body>
   <div class="layout">
     <aside class="rail">
-      <a class="brand" href="./" aria-label="AgentMesh home"><svg class="mark" viewBox="0 0 32 32" width="22" height="22" aria-hidden="true" focusable="false"><rect x="3" y="3" width="12" height="12" rx="3.5" fill="none" stroke="currentColor" stroke-width="2" opacity=".35"/><rect x="17" y="17" width="12" height="12" rx="3.5" fill="none" stroke="currentColor" stroke-width="2" opacity=".35"/><rect x="3" y="17" width="12" height="12" rx="3.5" fill="#43D6A6"/><rect x="17" y="3" width="12" height="12" rx="3.5" fill="#F2A93B"/></svg><span class="wm">Agent<b>Mesh</b></span></a>
+      <a class="brand" href="./"><span class="dot"></span>AGENTMESH</a>
       <nav>
         <div class="grp">agentmesh</div>
         <a href="https://agentmesh.ai/">/ &larr; agentmesh.ai</a>
@@ -178,7 +165,6 @@
         <a href="world-wide-mesh.html">/ world-wide-mesh</a>
         <a href="budgets-and-allowances.html">/ budgets-and-allowances</a>
         <div class="grp">reference</div>
-        <a href="common-agent.html">/ common-agent</a>
         <a class="on" href="spec.html">/ specification</a>
         <a href="related-specs.html">/ related-specs</a>
         <a href="sdk-reference.html">/ sdk-reference</a>
@@ -203,7 +189,7 @@
           <span>status <b>Working Draft</b></span>
           <span>date <b>2026-08-25</b></span>
         </div>
-        <p class="canon">Rendered 2026-09-01 from commit <span class="mono">72be8d3</span>.
+        <p class="canon">Rendered 2026-09-26 from commit <span class="mono">a6f0a2b5</span>.
           The canonical source is SPEC.md, published with the conformance suite at
           <a href="https://github.com/jeffrschneider/agentmesh-protocol">https://github.com/jeffrschneider/agentmesh-protocol</a>
           (the <span class="mono">conformance/</span> fixtures this specification cites live there).</p>
@@ -1565,6 +1551,7 @@ conformance vectors.</p>
 <h4 id="7-5-4-reading-a-reference">7.5.4. Reading a Reference<a class="hl" href="#7-5-4-reading-a-reference">#</a></h4>
 <p>Possession of a <code>ref</code> is the read capability. A store MUST therefore mint refs that are unguessable (an unpredictable object identifier, not a counter and not a name derived from the content or the task), because a guessable ref is a public store with extra steps.</p>
 <p>This is a deliberately modest guarantee, and implementations should not oversell it: a reference can be forwarded, so anyone the holder shares it with can read the bytes. That is the same property a signed download URL has, and it is the right one for a deliverable that is meant to be handed onward. Content that must not travel that way should be sealed before it is stored (§4.3), so the store holds ciphertext and the reference alone is not enough.</p>
+<p><strong>A file larger than a message.</strong> The bytes behind a reference never have to fit in a message. A file over the transport&#39;s message size (§18.9) travels by signed link: the store hands the writer a short-lived link to upload exactly the declared bytes, checks what arrived against the declared size and digest before the reference becomes readable, and answers a reader with a short-lived download link instead of the bytes. The message carries the pointer and the bytes go between the agent and the storage. A download link is this section&#39;s read capability in a form a browser can use, so a store MAY issue one to any holder of the reference, and it deserves the same care as the reference it was made from.</p>
 <h4 id="7-5-5-shared-resources">7.5.5. Shared Resources<a class="hl" href="#7-5-5-shared-resources">#</a></h4>
 <p>Everything above this section hands the receiver its own copy of the work. Inline <code>text</code> and <code>data</code> are copies outright; a <code>ref</code> is a pointer, but to bytes that can never change (§7.5.1), so holding one is just an efficient way of holding a copy. Whichever way the bytes travel, one party&#39;s work cannot alter what the other is looking at.</p>
 <p>A <strong>resource</strong> is the other thing: one live object that both parties knowingly operate on, for example a git repository two agents are coding in together, where a push by one is a fact for the other. Files, inline or by ref, give the receiver its own copy; a resource points both parties at the same live thing, and each should expect the other&#39;s changes to appear in it. The word <em>knowingly</em> is why this is an explicit block rather than a URL-shaped string in the text: shared-object semantics change how both sides must behave, and neither should have to infer that from a substring.</p>
@@ -2887,6 +2874,12 @@ define their digests over the bytes as served.</li>
 <td>string</td>
 <td>registry</td>
 <td>Restrict to agents in a specific tenant/account.</td>
+</tr>
+<tr>
+<td><code>agent_ids</code></td>
+<td>string[]</td>
+<td>registry</td>
+<td>Only these agents, by agent ID. Naming an agent is not browsing: an <code>unlisted</code> agent is returned when named, as is any agent a registry keeps off its listings for its own reasons. <code>private</code> agents still appear only to their owner. A caller asking after agents it already knows (their presence, say) names them rather than listing everyone.</td>
 </tr>
 <tr>
 <td><code>trust_tier</code></td>
@@ -4803,8 +4796,20 @@ traffic (§6.4a, Scope).</p>
 <td><code>mesh.artifacts.usage</code></td>
 <td>The calling owner&#39;s usage against quota.</td>
 </tr>
+<tr>
+<td><code>mesh.artifacts.put.begin</code></td>
+<td>Declare a large file (size, digest, media type, name, retention); every <code>put</code> check runs, and the reply is the object id and a signed upload link.</td>
+</tr>
+<tr>
+<td><code>mesh.artifacts.put.commit</code></td>
+<td>The owner that began an upload asks the store to check it; the reply is exactly <code>put</code>&#39;s.</td>
+</tr>
+<tr>
+<td><code>mesh.artifacts.link</code></td>
+<td>A signed download link for any holder of the ref (§7.5.4).</td>
+</tr>
 </tbody></table>
-<p>Bytes ride base64-encoded in the payload, which bounds one object to what the transport carries (§18.9); a store&#39;s own per-object limit therefore sits at or below it. The writing agent is <code>from</code> on the signed envelope (§4.5) and the owner is resolved from the registry (§8.6). §7.5.2 requires both, so a store that cannot establish an owner MUST refuse the write rather than store anonymously.</p>
+<p>A small file rides base64-encoded in the payload, which bounds it to what the transport carries (§18.9). A larger one never rides a message (§7.5.4): the writer declares it with <code>put.begin</code>, sends the bytes to the returned link, and calls <code>put.commit</code>, and the store makes the ref readable only once the bytes match the declared size and digest. A <code>fetch</code> whose payload carries <code>links: true</code> is answered for a large file with a signed download link (<code>url</code>) in place of <code>data_b64</code>; a <code>fetch</code> without it is answered inline whenever the file fits a message. A store whose backend cannot sign links refuses <code>put.begin</code> and <code>link</code> with a sentence, and its per-object limit sits at or below the message size. The writing agent is <code>from</code> on the signed envelope (§4.5) and the owner is resolved from the registry (§8.6). §7.5.2 requires both, so a store that cannot establish an owner MUST refuse the write rather than store anonymously.</p>
 <p><em>The liveness signal.</em> Core NATS answers a request on a subject with no subscribers with an immediate <strong>no-responders</strong> error rather than a timeout. In this binding that signal is the reply subject&#39;s whole job for agent traffic: an agent&#39;s inbox has a subscriber exactly while the agent is connected and serving, so a request published with a reply subject distinguishes an offline agent (immediate no-responders) from a slow or buffered one (silence until the answer arrives at the requester&#39;s inbox, §6.4). A registry implementing the retention policy (§9.2) uses the same mechanism as a liveness probe: it sends a signed <code>request</code> with <code>payload.offering: &quot;__registry_probe__&quot;</code> to the agent&#39;s inbox, and any answer, including an error, proves liveness. The probe&#39;s answer is the first of two deliberate exceptions to the reply-path rule (§6.5): it <strong>is</strong> published to the transport reply subject, because it is platform plumbing rather than agent traffic, and its answer must stay cheap and anonymous to the record. Answered at the prober&#39;s inbox it would put an envelope into durable capture for every sweep of every agent, a record about traffic that says nothing; implementations that fold captured traffic into activity or reputation records ignore <code>__registry_probe__</code> exchanges entirely. This is a binding technique, not core protocol: other bindings supply their own liveness signal or rely on node-level presence alone.</p>
 <p><em>The guarded delivery.</em> The second exception comes in through the extensions tier rather than core: the admission extension (EXT-6, §17.5) lets a guarded agent leave its public inbox to an admission-guard relay and take admitted mail on a private guarded subject (<code>mesh.agent.{agent_id}.inbox.guarded</code> in the reference deployment; core does not name it). A request delivered <strong>live</strong> on the guarded subject is answered on the transport reply subject. The reason is who is actually asking: the requester of record on a guarded delivery is the relay, a platform service that forwards the answer to the true sender itself, so the reply subject here is the relay&#39;s forwarding channel, not a response delivery path to an agent, and answering to the true sender&#39;s inbox would bypass the very relay that admitted the message. A guarded message drained later from the mailbox has no relay waiting, and is answered to the sender&#39;s inbox like any drained message (§16.4, §18.6). The exception list is closed: exactly two answers ride the transport reply subject, the probe&#39;s and the live guarded delivery&#39;s, and everything else an agent sends in answer is response data and travels to an inbox (§6.5).</p>
 <h3 id="18-8-exactly-once-delivery">18.8. Exactly-Once Delivery<a class="hl" href="#18-8-exactly-once-delivery">#</a></h3>
@@ -4817,7 +4822,7 @@ traffic (§6.4a, Scope).</p>
 <h3 id="18-9-message-size">18.9. Message Size<a class="hl" href="#18-9-message-size">#</a></h3>
 <ul>
 <li>NATS default max message size: 1 MB.</li>
-<li>For payloads exceeding the message size limit, agents MUST use NATS Object Store and include a <code>ref</code> part in the artifact.</li>
+<li>For payloads exceeding the message size limit, agents MUST store the bytes (§7.5) and include a <code>ref</code> part in the artifact. The bytes of such a file travel by signed link rather than in any message (§7.5.4, §18.7): the message carries the pointer.</li>
 <li>The platform SHOULD configure max message size based on deployment requirements.</li>
 <li>Senders MUST pre-flight the serialized envelope against the transport&#39;s advertised maximum payload before publishing (§6.4b): an envelope that exceeds it is refused locally, never published.</li>
 </ul>

@@ -125,7 +125,8 @@
       <nav>
         <div class="grp">agentmesh</div>
         <a href="https://agentmesh.ai/">/ &larr; agentmesh.ai</a>
-        <a href="https://personal.agentmesh.ai">/ sign in or sign up</a>
+        <a href="https://personal.agentmesh.ai">/ sign in</a>
+        <a href="https://agentmesh.ai/waitlist.html">/ join the waitlist</a>
         <div class="grp">build</div>
         <a href="getting-started.html">/ getting-started</a>
         <a href="walking-the-lifecycle.html">/ walking-the-lifecycle</a>
@@ -254,7 +255,7 @@ await mesh.drain();</pre>
               without changing a line in the emitter. And because every event travels as a
               <b>signed envelope</b>, a subscriber always knows which agent fired it. Feeds,
               alerts, and audit trails are this pattern with different topic names; the
-              <a href="https://agentmesh.ai/use-cases.html">use cases</a> page sketches several.</p>
+              <a href="https://agentmesh.ai/">use cases</a> page sketches several.</p>
           </div>
         </div>
       </section>
@@ -348,8 +349,8 @@ const answers = await Promise.all(providers.map(p =&gt; mesh.request(p.id, <span
           <p class="kicker">keep going</p>
           <h2>Compose them</h2>
           <p>Real systems mix these: an event kicks off a fan-out, the winners stream
-            results back. The <a href="https://agentmesh.ai/use-cases.html">use cases</a> page walks seven
-            such compositions, and <a href="https://agentmesh.ai/how-it-works.html">how it works</a> explains
+            results back. The <a href="https://agentmesh.ai/">use cases</a> page walks seven
+            such compositions, and <a href="https://agentmesh.ai/">how it works</a> explains
             the primitives underneath. When your pattern needs agents that are always on,
             <a href="running-a-mesh.html">run your own mesh</a>.</p>
         </div>

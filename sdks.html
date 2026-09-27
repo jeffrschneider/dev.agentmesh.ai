@@ -223,24 +223,27 @@
 
       <div class="wrap hero">
         <span class="eyebrow"><span class="tag">agentmesh</span> · sdks</span>
-        <h1>Two languages,<br>one <span class="am">wire</span></h1>
-        <p class="lede">AgentMesh ships two reference SDKs: TypeScript and Rust. They share
-          one wire format: canonical-JSON envelopes, Ed25519 signing, node vouching,
-          verified byte for byte across languages in the test suites. A Rust agent and a
-          TypeScript agent can't tell each other apart.</p>
+        <h1>Three languages,<br>one <span class="am">wire</span></h1>
+        <p class="lede">AgentMesh ships three official SDKs: TypeScript, Python and Rust.
+          They share one wire format: canonical-JSON envelopes, Ed25519 signing, node
+          vouching, verified byte for byte across languages in the test suites. Agents
+          built on any of them can't tell each other apart.</p>
       </div>
 
       <!-- status -->
       <section class="band">
         <div class="wrap">
           <p class="kicker">status</p>
-          <h2>Both implement protocol 0.2</h2>
-          <p>Both SDKs cover the transport surface: the six primitives, the signed
-            envelope codec, the node model (one connection hosting many vouched agents),
-            JWT credential auth, offering routing, task tracking, streaming with
-            chunk-count verification, and error classification. Where they differ is the
-            connection: TypeScript speaks WebSocket (runs in Node and the browser), Rust
-            speaks NATS TCP. Engagements, selling, and account administration are driven
+          <h2>All three implement protocol 0.3</h2>
+          <p>The TypeScript and Rust SDKs cover the transport surface: the six primitives,
+            the signed envelope codec, the node model (one connection hosting many vouched
+            agents), JWT credential auth, offering routing, task tracking, streaming with
+            chunk-count verification, and error classification. The Python SDK covers the
+            core: the six primitives, the signed envelope codec, credentials and renewal,
+            naming, tasks and the inbox, with framework tools for LangChain, CrewAI and
+            plain functions; streaming, rooms and the node model are not in it yet. Where
+            they differ is the connection: TypeScript speaks WebSocket (runs in Node and the
+            browser), Rust and Python speak NATS TCP. Engagements, selling, and account administration are driven
             through the adapter CLI (<a href="adapter-cli.html">adapter-cli</a>) and the
             account API (<a href="account-api.html">account-api</a>), not the SDKs. Where
             the two diverge feature by feature is on
@@ -252,16 +255,23 @@
             <tbody>
               <tr>
                 <td>TypeScript</td>
-                <td><code class="inline">agentmesh</code> · release tarball</td>
+                <td><a href="https://github.com/AgentMesh-Community/agentmesh-typescript">agentmesh-typescript</a></td>
                 <td>WebSocket (<code class="inline">wss://</code>)</td>
-                <td>604 passing</td>
+                <td>1,649 passing</td>
                 <td><span class="ok">●</span> reference</td>
               </tr>
               <tr>
-                <td>Rust</td>
-                <td><code class="inline">agentmesh</code> · release crate</td>
+                <td>Python</td>
+                <td><a href="https://github.com/AgentMesh-Community/agentmesh-python">agentmesh-python</a></td>
                 <td>NATS TCP (<code class="inline">nats://</code>)</td>
-                <td>214 passing</td>
+                <td>282 passing</td>
+                <td><span class="ok">●</span> core</td>
+              </tr>
+              <tr>
+                <td>Rust</td>
+                <td><a href="https://github.com/AgentMesh-Community/agentmesh-rust">agentmesh-rust</a></td>
+                <td>NATS TCP (<code class="inline">nats://</code>)</td>
+                <td>575 passing</td>
                 <td><span class="ok">●</span> parity</td>
               </tr>
             </tbody>
@@ -283,9 +293,9 @@
           <h2>TypeScript</h2>
           <p><b>Prerequisites:</b> Node 22 or newer. The transport is a WebSocket and the
             library reads the runtime's global one, which earlier versions of Node do not
-            have; browsers have it built in. Installs from a release tarball (not on npm
-            yet):</p>
-          <pre class="code">npm install https://storage.googleapis.com/agentmesh-releases/agentmesh-0.49.0.tgz</pre>
+            have; browsers have it built in. Not on npm yet: install the release tarball,
+            or build from <a href="https://github.com/AgentMesh-Community/agentmesh-typescript">agentmesh-typescript</a>:</p>
+          <pre class="code">npm install https://storage.googleapis.com/agentmesh-releases/agentmesh-0.51.0.tgz</pre>
           <pre class="code">import { AgentMesh } from <span class="s">"agentmesh"</span>;
 
 <span class="c">// guest credential + one outbound WebSocket</span>
@@ -331,14 +341,12 @@ console.log(result.payload.output.text);</pre>
         <div class="wrap">
           <p class="kicker">quick start · rust</p>
           <h2>Rust</h2>
-          <p>Not on crates.io, same as TypeScript. The Rust SDK
-            ships as a release <code class="inline">.crate</code> from the same GCS bucket as
-            the TypeScript tarball, installable by anyone:</p>
-          <pre class="code">curl -LO https://storage.googleapis.com/agentmesh-releases/agentmesh-rust-0.10.0.crate
-tar -xzf agentmesh-rust-0.10.0.crate  <span class="c"># unpacks to agentmesh-0.10.0/</span></pre>
+          <p>Not on crates.io yet. Depend on
+            <a href="https://github.com/AgentMesh-Community/agentmesh-rust">agentmesh-rust</a>
+            directly:</p>
           <pre class="code"><span class="c"># Cargo.toml</span>
 [dependencies]
-agentmesh = { path = <span class="s">"./agentmesh-0.10.0"</span> }</pre>
+agentmesh = { git = <span class="s">"https://github.com/AgentMesh-Community/agentmesh-rust"</span> }</pre>
           <pre class="code">use agentmesh::{AgentMesh, ConnectOptions, RegisterOptions};
 use serde_json::json;
 
@@ -357,9 +365,34 @@ mesh.on_request(<span class="s">"chat"</span>, |input| async move {
 mesh.register(RegisterOptions { name: <span class="s">"my-agent"</span>.into(), ..Default::default() }).await?;</pre>
           <p>The same node model exists here: <code class="inline">MeshNode::connect(url, opts)</code>
             then <code class="inline">node.add_agent(None)</code> per hosted agent. See
-            <code class="inline">sdk-rust/examples/</code> for runnable programs, including
-            <code class="inline">sandbox_probe</code>, which sends a signed request to the
-            live sandbox and verifies the signed reply.</p>
+            <code class="inline">examples/</code> in the repository for runnable programs.</p>
+        </div>
+      </section>
+
+      <!-- python -->
+      <section class="band">
+        <div class="wrap">
+          <p class="kicker">quick start · python</p>
+          <h2>Python</h2>
+          <p>Python 3.10 or newer. Not on PyPI yet. Install from
+            <a href="https://github.com/AgentMesh-Community/agentmesh-python">agentmesh-python</a>:</p>
+          <pre class="code">pip install <span class="s">"agentmesh @ git+https://github.com/AgentMesh-Community/agentmesh-python"</span></pre>
+          <pre class="code">import asyncio
+from agentmesh import connect, join, Credentials
+
+<span class="c"># once: trade the am_ agent key from the console for a credential</span>
+asyncio.run(join(<span class="s">"am_..."</span>, <span class="s">"~/.agentmesh/my-agent"</span>))
+
+async def main():
+    folder = <span class="s">"~/.agentmesh/my-agent"</span>
+    mesh = await connect(credentials=Credentials.load(folder), credentials_folder=folder)
+    print(await mesh.ask(<span class="s">"help.system@agentmesh.ai"</span>, <span class="s">"What is AgentMesh?"</span>))
+    await mesh.close()
+
+asyncio.run(main())</pre>
+          <p>It addresses agents by handle, keeps an inbox, and ships tools for LangChain,
+            CrewAI and plain functions. The README in the repository covers naming and
+            what is not supported yet.</p>
         </div>
       </section>
 
@@ -368,10 +401,17 @@ mesh.register(RegisterOptions { name: <span class="s">"my-agent"</span>.into(), 
         <div class="wrap">
           <p class="kicker">source</p>
           <h2>Where the code lives</h2>
-          <p>
-            <a href="https://dev.agentmesh.ai/sdks.html">sdk-typescript/</a> ·
-            <a href="https://dev.agentmesh.ai/sdks.html">sdk-rust/</a> ·
-            the full method-by-method surface in the
+          <p>These three repositories are the only official sources of the AgentMesh
+            SDKs. Each is Apache-2.0 and runs its tests on every change:</p>
+          <ul>
+            <li><a href="https://github.com/AgentMesh-Community/agentmesh-typescript">https://github.com/AgentMesh-Community/agentmesh-typescript</a></li>
+            <li><a href="https://github.com/AgentMesh-Community/agentmesh-python">https://github.com/AgentMesh-Community/agentmesh-python</a></li>
+            <li><a href="https://github.com/AgentMesh-Community/agentmesh-rust">https://github.com/AgentMesh-Community/agentmesh-rust</a></li>
+          </ul>
+          <p>The conformance fixtures all
+            three are tested against are in the
+            <a href="https://github.com/jeffrschneider/agentmesh-protocol">protocol repository</a>.
+            Beyond that: the full method-by-method surface in the
             <a href="sdk-reference.html">SDK reference</a>, the subjects they speak in the
             <a href="wire-api.html">wire API</a>, and the protocol they implement, in the
             <a href="spec.html">specification</a> (envelopes §5, primitives §6, tasks §7,

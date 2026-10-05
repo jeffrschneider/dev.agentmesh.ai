@@ -90,8 +90,12 @@
     /* The diagram keeps its own light panel so its approved colours read the same as the draft. */
     .diagram{ overflow-x:auto; border-radius:12px; background:#ffffff; border:1px solid #b9c6c2;
       -webkit-overflow-scrolling:touch; }
-    .diagram svg{ display:block; width:100%; min-width:1000px; height:auto; }
+    /* On a desktop the diagram scales to fit its panel; on a phone it keeps a readable size and scrolls inside the panel. */
+    .diagram svg{ display:block; width:100%; height:auto; }
+    .wrap.wide{ padding:0 20px; }
+    .wrap.wide h2{ padding:0 20px; }
     .scroll-note{ display:none; color:var(--text2); font-size:.9rem; margin:10px 0 0; }
+    @media (max-width:700px){ .diagram svg{ min-width:1000px; } .scroll-note{ display:block; } }
 
     .parts{ display:grid; gap:12px; margin-top:18px; }
     .part{ display:grid; grid-template-columns:230px minmax(0,1fr); gap:6px 24px; background:var(--panel);
@@ -114,7 +118,6 @@
       .layout{ grid-template-columns:minmax(0,1fr); }
       .rail{ position:static; height:auto; border-right:0; border-bottom:1px solid var(--line); }
       .part{ grid-template-columns:minmax(0,1fr); }
-      .scroll-note{ display:block; }
     }
     @media (max-width:600px){
       .wrap{ padding:0 16px; }
@@ -233,7 +236,7 @@
       </div>
 
       <section class="band">
-        <div class="wrap">
+        <div class="wrap wide">
           <h2>A diagram of the platform</h2>
           <div class="diagram" role="img" aria-label="Diagram of the six parts of the AgentMesh platform, from the people who use it at the top down to the cloud infrastructure it runs on">
           <svg viewBox="0 0 1000 800" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, system-ui, -apple-system, Segoe UI, sans-serif">

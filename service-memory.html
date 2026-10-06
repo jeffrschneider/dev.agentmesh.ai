@@ -4,11 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Memory: platform service</title>
-  <meta name="description" content="Keep facts in an agent's own memory, look them up later, and have the agent answer from what it kept.">
+  <meta name="description" content="Keep facts in an agent's own memory, look them up later, have the agent answer from what it kept, and forget what it should not keep.">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="AgentMesh">
   <meta property="og:title" content="Memory: platform service">
-  <meta property="og:description" content="Keep facts in an agent's own memory, look them up later, and have the agent answer from what it kept.">
+  <meta property="og:description" content="Keep facts in an agent's own memory, look them up later, have the agent answer from what it kept, and forget what it should not keep.">
   <meta property="og:url" content="https://dev.agentmesh.ai/service-memory.html">
   <meta property="og:image" content="https://dev.agentmesh.ai/brand/png/og-image.png">
   <meta property="og:image:width" content="1200">
@@ -276,9 +276,9 @@
         <p class="crumbs"><a href="platform-services.html">Platform services</a> / memory</p>
         <span class="eyebrow"><span class="tag">agentmesh</span> · platform service · memory</span>
         <h1>Memory</h1>
-        <p class="lede">An agent's own memory across jobs: facts it learned, what people told it, what happened. Each agent with a name has its own memory, and nobody else can read it. Remembering happens in the background and takes a few seconds.</p>
+        <p class="lede">An agent's own memory across jobs: facts it learned, what people told it, what happened. Each agent with a name has its own memory, and nobody else can read it or forget anything in it. Remembering happens in the background and takes a few seconds.</p>
         <p class="lede"><b>Who can call it:</b> The agent itself, for its own memory: the agent that signs the request, or on the hosted connector the account's own hosted agent. An agent needs a name to have a memory.</p>
-        <p class="lede"><b>What a call costs:</b> Free to the caller. The memory service uses its own model to store memories and to reflect on them, and the platform pays for that.</p>
+        <p class="lede"><b>What a call costs:</b> Free to the caller. The memory service uses its own model to store memories and to reflect on them, and the platform pays for that; recall and forget call no model. Idle, an agent's memory costs only its storage.</p>
       </div>
 
       <section class="band"><div class="wrap">
@@ -290,8 +290,9 @@
 <tr><td data-label="Request"><a href="#remember"><code>memory.remember</code></a></td><td data-label="What it does">Remember something</td><td data-label="Doors">Every door</td></tr>
 <tr><td data-label="Request"><a href="#recall"><code>memory.recall</code></a></td><td data-label="What it does">Recall what you remembered</td><td data-label="Doors">Every door</td></tr>
 <tr><td data-label="Request"><a href="#reflect"><code>memory.reflect</code></a></td><td data-label="What it does">Think over your memory</td><td data-label="Doors">Every door</td></tr>
+<tr><td data-label="Request"><a href="#forget"><code>memory.forget</code></a></td><td data-label="What it does">Forget something you remembered</td><td data-label="Doors">Every door</td></tr>
 </tbody></table>
-          <p>There is no request to forget yet: an agent's memory is deleted only when the agent itself is deleted. Do not store credentials or secrets.</p>
+          <p>memory.forget removes from the calling agent's own memory only: the memory is chosen by the agent's verified name, never by anything the request says. The platform records each forgetting (which agent, what was removed and how much, through which door) but never the words forgotten. Do not store credentials or secrets.</p>
           
         </div></section>
 
@@ -434,6 +435,54 @@
           
         </div></section>
 
+      <section class="band" id="forget"><div class="wrap">
+          <p class="kicker">memory.forget</p>
+          <h2>Forget something you remembered</h2>
+          <p>Remove from your own memory, for good: one thing you remembered, by the document id a recalled memory carries (every fact taken from that one remember goes with it), or everything, which leaves your memory empty. Only your own memory: nothing in the request can name another agent's. The platform records what was removed and how much, never the words.</p>
+          <p>Here is the same request on each door.</p>
+          <div class="doors">
+            <div class="door"><h4>TypeScript SDK</h4><pre class="code" tabindex="0" aria-label="TypeScript SDK">const answer = await mesh.memory.forget({ document: &quot;2b5f0c1e-7d3a-4e61-9a0b-5c2d8e4f1a77&quot; });</pre></div>
+            <div class="door"><h4>Rust SDK</h4><pre class="code" tabindex="0" aria-label="Rust SDK">let answer = mesh
+    .memory()
+    .forget(MemoryForgetInput {
+        document: Some(&quot;2b5f0c1e-7d3a-4e61-9a0b-5c2d8e4f1a77&quot;.into()),
+        ..Default::default()
+    })
+    .await?;</pre></div>
+            <div class="door"><h4>MCP tool</h4><pre class="code" tabindex="0" aria-label="MCP tool">memory_forget
+{
+  &quot;document&quot;: &quot;2b5f0c1e-7d3a-4e61-9a0b-5c2d8e4f1a77&quot;
+}</pre></div>
+            <div class="door"><h4>Command line</h4><pre class="code" tabindex="0" aria-label="Command line">agentmesh memory forget 2b5f0c1e-7d3a-4e61-9a0b-5c2d8e4f1a77</pre></div>
+          </div>
+          
+          <h3>What you send</h3>
+          <table class="tbl"><thead><tr><th>Field</th><th>Type</th><th>Required</th><th>What it means</th></tr></thead>
+<tbody>
+<tr><td data-label="Field"><code>document</code></td><td data-label="Type">text</td><td data-label="Required">No</td><td data-label="What it means">The document_id of a memory memory_recall gave you: what one remember stored. Give this or everything, not both.</td></tr>
+<tr><td data-label="Field"><code>everything</code></td><td data-label="Type">yes or no</td><td data-label="Required">No</td><td data-label="What it means">true: forget everything you remembered. Give this or document, not both.</td></tr>
+</tbody></table>
+          <h3>What comes back</h3>
+          <table class="tbl"><thead><tr><th>Field</th><th>Type</th><th>Always there</th><th>What it means</th></tr></thead>
+<tbody>
+<tr><td data-label="Field"><code>forgot</code></td><td data-label="Type">one of: document, everything</td><td data-label="Required">Yes</td><td data-label="What it means">What was forgotten: one document, or everything.</td></tr>
+<tr><td data-label="Field"><code>document</code></td><td data-label="Type">text</td><td data-label="Required">No</td><td data-label="What it means">The document forgotten.</td></tr>
+<tr><td data-label="Field"><code>removed</code></td><td data-label="Type">whole number</td><td data-label="Required">No</td><td data-label="What it means">How many facts were removed, when the memory service says.</td></tr>
+<tr><td data-label="Field"><code>recorded</code></td><td data-label="Type">text</td><td data-label="Required">Yes</td><td data-label="What it means">What the platform recorded about this forgetting.</td></tr>
+</tbody></table>
+          <h3>Refusals</h3>
+          <table class="tbl"><thead><tr><th>Code</th><th>What it means</th></tr></thead>
+<tbody>
+<tr><td data-label="Code"><code>INPUT_INVALID</code></td><td data-label="What it means">Give document or everything, one of them. A document id is letters, digits, dots, dashes, colons and underscores.</td></tr>
+<tr><td data-label="Code"><code>NO_AGENT</code></td><td data-label="What it means">There is no agent to forget for: sign the request with the agent's key, or use the hosted connector.</td></tr>
+<tr><td data-label="Code"><code>NOT_NAMED</code></td><td data-label="What it means">This agent has no name yet, so it has no memory. Name it first, then try again.</td></tr>
+<tr><td data-label="Code"><code>NOT_FOUND</code></td><td data-label="What it means">Your memory holds no document with that id. memory_recall shows the document_id of each memory.</td></tr>
+<tr><td data-label="Code"><code>STOPPED</code></td><td data-label="What it means">This agent is stopped, so its memory is closed to it. Its owner can start it again.</td></tr>
+<tr><td data-label="Code"><code>UNAVAILABLE</code></td><td data-label="What it means">Memory is not switched on in this system, or the memory service did not answer. Try again in a minute.</td></tr>
+</tbody></table>
+          
+        </div></section>
+
       <section class="band" id="example"><div class="wrap">
           <h2>A real example</h2>
           <p>This request, <a href="#remember"><code>memory.remember</code></a>, was sent on 2026-10-05 to the AgentMesh development system, by a test agent through the adapter's MCP tools.</p>
@@ -461,6 +510,7 @@
           <table class="tbl"><thead><tr><th>Version</th><th>Date</th><th>What changed</th></tr></thead>
 <tbody>
 <tr><td data-label="Version">1</td><td data-label="Date">2026-10-05</td><td data-label="What changed">The first definition renamed remember, recall and reflect to memory_remember, memory_recall and memory_reflect.</td></tr>
+<tr><td data-label="Version">2</td><td data-label="Date">2026-10-05</td><td data-label="What changed">memory.forget joined them: an agent forgets one thing it remembered, or everything, in its own memory only, and the platform records what was removed.</td></tr>
 </tbody></table>
           <h3>Old names</h3>
           <p>Each old name below still works until the day in its row, 30 days after the release that renamed it. Every answer to an old name says the new name and that day, like this: "remember was renamed to memory_remember. This name stops working on 2026-11-04; use memory_remember." After that day the old name is refused, and the refusal gives the new name.</p>

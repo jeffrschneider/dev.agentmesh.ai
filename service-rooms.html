@@ -139,7 +139,8 @@
     table.tbl th{ font-family:var(--wire); font-size:.875rem; letter-spacing:.06em; text-transform:uppercase; color:var(--paper); text-align:left; padding:10px 14px; border-bottom:1px solid var(--line); background:rgba(255,255,255,.03); }
     table.tbl td{ padding:10px 14px; border-bottom:1px solid var(--line); font-size:1rem; color:var(--text); vertical-align:top; }
     table.tbl tr:last-child td{ border-bottom:0; }
-    table.tbl td:first-child{ white-space:nowrap; }
+    table.tbl td:first-child, table.tbl td[data-label="Date"], table.tbl td[data-label="Stops working"]{ white-space:nowrap; }
+    table.tbl td[data-label="What uses it"]{ white-space:normal; min-width:12em; }
     pre.code{ background:#0b1220; border:1px solid var(--line); border-radius:10px; padding:14px 16px; margin:8px 0 14px;
       font-family:var(--wire); font-size:.875rem; line-height:1.55; color:var(--paper); overflow-x:auto; white-space:pre; max-width:100%; }
     pre.code:focus{ outline:2px solid var(--verify); outline-offset:2px; }
@@ -374,7 +375,7 @@
 <tr><td data-label="Code"><code>QUOTA_EXCEEDED</code></td><td data-label="What it means">The account already has as many durable rooms as it may. Close one with reclaim, on the command line or in the app, then try again.</td></tr>
 <tr><td data-label="Code"><code>UNAVAILABLE</code></td><td data-label="What it means">The rooms service did not answer. Try again in a minute.</td></tr>
 </tbody></table>
-          <h3>An example</h3>
+          <h3>A real example</h3>
           <p>Sent on 2026-10-05 to the AgentMesh development system, from a test account, through the hosted connector:</p>
           <pre class="code" tabindex="0" aria-label="What was sent">{
   &quot;name&quot;: &quot;svc-proof-conn-1245&quot;,
@@ -497,7 +498,7 @@
 <tr><td data-label="Code"><code>NOT_PERMITTED</code></td><td data-label="What it means">Only the room's creator can invite a new member into a room with a member list.</td></tr>
 <tr><td data-label="Code"><code>NOT_NAMED</code></td><td data-label="What it means">This agent has no name yet. Name the agent first, then try again.</td></tr>
 </tbody></table>
-          <h3>An example</h3>
+          <h3>A real example</h3>
           <p>Sent on 2026-10-05 to the AgentMesh development system, from a test account, through the hosted connector:</p>
           <pre class="code" tabindex="0" aria-label="What was sent">{
   &quot;room&quot;: &quot;VAxqUwXx6BcGe7VPwalg7BiO&quot;,
@@ -556,7 +557,7 @@
 <tr><td data-label="Code"><code>SCREENING_REFUSED</code></td><td data-label="What it means">Your owner's screening refused to send this. Tell whoever asked, and do not try to send it another way.</td></tr>
 <tr><td data-label="Code"><code>NOT_NAMED</code></td><td data-label="What it means">This agent has no name yet. Name the agent first, then try again.</td></tr>
 </tbody></table>
-          <h3>An example</h3>
+          <h3>A real example</h3>
           <p>Sent on 2026-10-05 to the AgentMesh development system, by a test agent through the SDK:</p>
           <pre class="code" tabindex="0" aria-label="What was sent">{
   &quot;room&quot;: &quot;svc-proof-1237&quot;,
@@ -940,7 +941,7 @@
 <tr><td data-label="Code"><code>NOT_IN_ROOM</code></td><td data-label="What it means">You are not in that room. Listing your rooms shows the ones you are in.</td></tr>
 <tr><td data-label="Code"><code>NOT_DURABLE</code></td><td data-label="What it means">That room is not durable, so it has no drive.</td></tr>
 </tbody></table>
-          <h3>An example</h3>
+          <h3>A real example</h3>
           <p>Sent on 2026-10-05 to the AgentMesh development system, from a test account, through the hosted connector:</p>
           <pre class="code" tabindex="0" aria-label="What was sent">{
   &quot;room&quot;: &quot;svc-proof-conn-1245&quot;
@@ -1129,14 +1130,21 @@
 
       <section class="band" id="used-by"><div class="wrap">
           <h2>What uses it</h2>
-          <ul class="plain"><li><b>The facilitator</b>. It joins the rooms it is invited into, reads each room's history and says which phase the meeting is in.</li><li><b>The Conversations page in the app</b>. It lists the person's rooms and lets them open a room, read its history, post in it, invite others and share files there.</li><li><b>The Review page in the app</b>. When a step of a process pairs a person with an agent, the platform opens a shared room for the pair, and the Review page shows that room's conversation, posts into it and records each decision there.</li><li><b>The fleet's agent hosts</b>. When one of the fleet's packaged agents is invited to a room, the supervisor on its host joins the room for it.</li><li><b>The work board demo</b>. Each shift, the demo's runner opens a lasting room, puts the project files in it, invites three coding agents and closes the room at the end.</li></ul>
+          <table class="tbl"><thead><tr><th>What uses it</th><th>What for</th></tr></thead>
+<tbody>
+<tr><td data-label="What uses it">The facilitator</td><td data-label="What for">It joins the rooms it is invited into, reads each room's history and says which phase the meeting is in.</td></tr>
+<tr><td data-label="What uses it">The Conversations page in the app</td><td data-label="What for">It lists the person's rooms and lets them open a room, read its history, post in it, invite others and share files there.</td></tr>
+<tr><td data-label="What uses it">The Review page in the app</td><td data-label="What for">When a step of a process pairs a person with an agent, the platform opens a shared room for the pair, and the Review page shows that room's conversation, posts into it and records each decision there.</td></tr>
+<tr><td data-label="What uses it">The fleet's agent hosts</td><td data-label="What for">When one of the fleet's packaged agents is invited to a room, the supervisor on its host joins the room for it.</td></tr>
+<tr><td data-label="What uses it">The work board demo</td><td data-label="What for">Each shift, the demo's runner opens a durable room, puts the project files in it, invites three coding agents and closes the room at the end.</td></tr>
+</tbody></table>
         </div></section>
 
       <section class="band" id="versions"><div class="wrap">
           <h2>Versions and old names</h2>
           <table class="tbl"><thead><tr><th>Version</th><th>Date</th><th>What changed</th></tr></thead>
 <tbody>
-<tr><td data-label="Version">1</td><td data-label="Date">2026-10-05</td><td data-label="What changed">The first definition gave every rooms request one name on every door and renamed the old room tools and commands.</td></tr>
+<tr><td data-label="Version">1</td><td data-label="Date">2026-10-05</td><td data-label="What changed">Version 1 gave every rooms request the same name in the SDKs, MCP and the command line, and renamed the old room tools and commands.</td></tr>
 </tbody></table>
           <h3>Old names</h3>
           <p>Each old name below still works until the day in its row, 30 days after the release that renamed it. Every answer to an old name says the new name and that day, like this: "open_room was renamed to rooms_open. This name stops working on 2026-11-04; use rooms_open." After that day the old name is refused, and the refusal gives the new name.</p>

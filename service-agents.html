@@ -139,7 +139,8 @@
     table.tbl th{ font-family:var(--wire); font-size:.875rem; letter-spacing:.06em; text-transform:uppercase; color:var(--paper); text-align:left; padding:10px 14px; border-bottom:1px solid var(--line); background:rgba(255,255,255,.03); }
     table.tbl td{ padding:10px 14px; border-bottom:1px solid var(--line); font-size:1rem; color:var(--text); vertical-align:top; }
     table.tbl tr:last-child td{ border-bottom:0; }
-    table.tbl td:first-child{ white-space:nowrap; }
+    table.tbl td:first-child, table.tbl td[data-label="Date"], table.tbl td[data-label="Stops working"]{ white-space:nowrap; }
+    table.tbl td[data-label="What uses it"]{ white-space:normal; min-width:12em; }
     pre.code{ background:#0b1220; border:1px solid var(--line); border-radius:10px; padding:14px 16px; margin:8px 0 14px;
       font-family:var(--wire); font-size:.875rem; line-height:1.55; color:var(--paper); overflow-x:auto; white-space:pre; max-width:100%; }
     pre.code:focus{ outline:2px solid var(--verify); outline-offset:2px; }
@@ -530,14 +531,21 @@
 
       <section class="band" id="used-by"><div class="wrap">
           <h2>What uses it</h2>
-          <ul class="plain"><li><b>The agent's AgentDoc page</b>. It shows the same AgentDoc at the agent's agentdoc address, using the documenter's signed copy while it still matches the records and the fuller version for the agent's owner.</li><li><b>The agent's public page</b>. It puts the agent's AgentDoc at the top of the page and adds a short summary of the reputation report.</li><li><b>The copywriter</b>. It writes an agent's storefront words from the documenter's signed AgentDoc, and the storefront words card on the agent's page reads the same signed copy.</li><li><b>The Reputation card on agent pages</b>. It shows the reputation bureau's report for one agent, asked for the same way this service asks for it.</li><li><b>The portfolio watch</b>. It interviews each portfolio line's agent again on a schedule so it can report when what the agent says has drifted from what it registered.</li></ul>
+          <table class="tbl"><thead><tr><th>What uses it</th><th>What for</th></tr></thead>
+<tbody>
+<tr><td data-label="What uses it">The agent's AgentDoc page</td><td data-label="What for">It shows the same AgentDoc at the agent's agentdoc address, using the documenter's signed copy while it still matches the records and the fuller version for the agent's owner.</td></tr>
+<tr><td data-label="What uses it">The agent's public page</td><td data-label="What for">It puts the agent's AgentDoc at the top of the page and adds a short summary of the reputation report.</td></tr>
+<tr><td data-label="What uses it">The copywriter</td><td data-label="What for">It writes an agent's storefront words from the documenter's signed AgentDoc, and the storefront words card on the agent's page reads the same signed copy.</td></tr>
+<tr><td data-label="What uses it">The Reputation card on agent pages</td><td data-label="What for">It shows the reputation bureau's report for one agent, asked for the same way this service asks for it.</td></tr>
+<tr><td data-label="What uses it">The portfolio watch</td><td data-label="What for">It interviews each portfolio line's agent again on a schedule so it can report when what the agent says has drifted from what it registered.</td></tr>
+</tbody></table>
         </div></section>
 
       <section class="band" id="versions"><div class="wrap">
           <h2>Versions and old names</h2>
           <table class="tbl"><thead><tr><th>Version</th><th>Date</th><th>What changed</th></tr></thead>
 <tbody>
-<tr><td data-label="Version">1</td><td data-label="Date">2026-10-05</td><td data-label="What changed">The first definition gave an agent's AgentDoc its first doors with agents.doc.</td></tr>
+<tr><td data-label="Version">1</td><td data-label="Date">2026-10-05</td><td data-label="What changed">Version 1 added agents.doc, which reads an agent's AgentDoc, on the SDKs, MCP and the command line.</td></tr>
 <tr><td data-label="Version">2</td><td data-label="Date">2026-10-05</td><td data-label="What changed">The interview, the check of claims and the reputation report joined the service as agents.interview, agents.check_claims and agents.reputation, renamed from interview_agent, interview_diff and reputation_report.</td></tr>
 </tbody></table>
           <h3>Old names</h3>

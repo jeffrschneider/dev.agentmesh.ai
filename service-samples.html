@@ -139,7 +139,8 @@
     table.tbl th{ font-family:var(--wire); font-size:.875rem; letter-spacing:.06em; text-transform:uppercase; color:var(--paper); text-align:left; padding:10px 14px; border-bottom:1px solid var(--line); background:rgba(255,255,255,.03); }
     table.tbl td{ padding:10px 14px; border-bottom:1px solid var(--line); font-size:1rem; color:var(--text); vertical-align:top; }
     table.tbl tr:last-child td{ border-bottom:0; }
-    table.tbl td:first-child{ white-space:nowrap; }
+    table.tbl td:first-child, table.tbl td[data-label="Date"], table.tbl td[data-label="Stops working"]{ white-space:nowrap; }
+    table.tbl td[data-label="What uses it"]{ white-space:normal; min-width:12em; }
     pre.code{ background:#0b1220; border:1px solid var(--line); border-radius:10px; padding:14px 16px; margin:8px 0 14px;
       font-family:var(--wire); font-size:.875rem; line-height:1.55; color:var(--paper); overflow-x:auto; white-space:pre; max-width:100%; }
     pre.code:focus{ outline:2px solid var(--verify); outline-offset:2px; }
@@ -394,14 +395,20 @@
 
       <section class="band" id="used-by"><div class="wrap">
           <h2>What uses it</h2>
-          <ul class="plain"><li><b>The agentcatalog.com home page</b>. Its Samples gallery reads every published sample from the same list, page by page, every two minutes.</li><li><b>The documenter and AgentDoc pages</b>. When the documenter or an agent's AgentDoc page builds an agent's document, it lists the samples of each of the agent's jobs from the same samples records.</li><li><b>The What uses this panels</b>. When someone asks what depends on an agent or a solution, the published samples made from it are read from the same records and listed.</li><li><b>Deleting a run</b>. Before a run is deleted, the same samples records are checked, and a published sample made from that run blocks the delete.</li></ul>
+          <table class="tbl"><thead><tr><th>What uses it</th><th>What for</th></tr></thead>
+<tbody>
+<tr><td data-label="What uses it">The agentcatalog.com home page</td><td data-label="What for">Its Samples gallery reads every published sample from the same list, page by page, every two minutes.</td></tr>
+<tr><td data-label="What uses it">The documenter and AgentDoc pages</td><td data-label="What for">When the documenter or an agent's AgentDoc page builds an agent's document, it lists the samples of each of the agent's jobs from the same samples records.</td></tr>
+<tr><td data-label="What uses it">The What uses this panels on agent and solution pages</td><td data-label="What for">When someone asks what depends on an agent or a solution, the published samples made from it are read from the same records and listed.</td></tr>
+<tr><td data-label="What uses it">Deleting a run</td><td data-label="What for">Before a run is deleted, the same samples records are checked, and a published sample made from that run blocks the delete.</td></tr>
+</tbody></table>
         </div></section>
 
       <section class="band" id="versions"><div class="wrap">
           <h2>Versions and old names</h2>
           <table class="tbl"><thead><tr><th>Version</th><th>Date</th><th>What changed</th></tr></thead>
 <tbody>
-<tr><td data-label="Version">1</td><td data-label="Date">2026-10-05</td><td data-label="What changed">The first definition gave samples its first doors.</td></tr>
+<tr><td data-label="Version">1</td><td data-label="Date">2026-10-05</td><td data-label="What changed">Version 1 put samples.list on the SDKs, MCP and the command line.</td></tr>
 </tbody></table>
           <p>None of its requests had another name before, so there are no old names to stop.</p>
         </div></section>

@@ -139,7 +139,8 @@
     table.tbl th{ font-family:var(--wire); font-size:.875rem; letter-spacing:.06em; text-transform:uppercase; color:var(--paper); text-align:left; padding:10px 14px; border-bottom:1px solid var(--line); background:rgba(255,255,255,.03); }
     table.tbl td{ padding:10px 14px; border-bottom:1px solid var(--line); font-size:1rem; color:var(--text); vertical-align:top; }
     table.tbl tr:last-child td{ border-bottom:0; }
-    table.tbl td:first-child{ white-space:nowrap; }
+    table.tbl td:first-child, table.tbl td[data-label="Date"], table.tbl td[data-label="Stops working"]{ white-space:nowrap; }
+    table.tbl td[data-label="What uses it"]{ white-space:normal; min-width:12em; }
     pre.code{ background:#0b1220; border:1px solid var(--line); border-radius:10px; padding:14px 16px; margin:8px 0 14px;
       font-family:var(--wire); font-size:.875rem; line-height:1.55; color:var(--paper); overflow-x:auto; white-space:pre; max-width:100%; }
     pre.code:focus{ outline:2px solid var(--verify); outline-offset:2px; }
@@ -508,14 +509,21 @@
 
       <section class="band" id="used-by"><div class="wrap">
           <h2>What uses it</h2>
-          <ul class="plain"><li><b>The Monitor page in the app</b>. Its Requested by card reads the same run records for the account and names who asked for each piece of work in the same words, such as you, a friend or a schedule.</li><li><b>The Run page in the app</b>. The page for one run shows it read only, with the same owner check, the same read, the same address and the same link to share that this service gives.</li><li><b>The X bot</b>. When a post on X starts a run, the bot replies with the run's view-only link and later reads where the run stands through the same run view.</li><li><b>The Replay a run page</b>. It reads the same job and cost records for a run to show what each agent spent in the replay.</li><li><b>Assistants sending messages</b>. When a message an assistant sends through the hosted connector starts a run, the answer carries the run's address in the same form this service gives.</li></ul>
+          <table class="tbl"><thead><tr><th>What uses it</th><th>What for</th></tr></thead>
+<tbody>
+<tr><td data-label="What uses it">The Monitor page in the app</td><td data-label="What for">Its Requested by card reads the same run records for the account and names who asked for each piece of work in the same words, such as you, a friend or a schedule.</td></tr>
+<tr><td data-label="What uses it">The Run page in the app</td><td data-label="What for">The page for one run shows it read only, with the same owner check, the same read, the same address and the same link to share that this service gives.</td></tr>
+<tr><td data-label="What uses it">The X bot</td><td data-label="What for">When a post on X starts a run, the bot replies with the run's view-only link and later reads where the run stands through the same run view.</td></tr>
+<tr><td data-label="What uses it">The Replay a run page</td><td data-label="What for">It reads the same job and cost records for a run to show what each agent spent in the replay.</td></tr>
+<tr><td data-label="What uses it">Assistants sending messages</td><td data-label="What for">When a message an assistant sends through the hosted connector starts a run, the answer carries the run's address in the same form this service gives.</td></tr>
+</tbody></table>
         </div></section>
 
       <section class="band" id="versions"><div class="wrap">
           <h2>Versions and old names</h2>
           <table class="tbl"><thead><tr><th>Version</th><th>Date</th><th>What changed</th></tr></thead>
 <tbody>
-<tr><td data-label="Version">1</td><td data-label="Date">2026-10-05</td><td data-label="What changed">The first definition gave runs.list its first doors.</td></tr>
+<tr><td data-label="Version">1</td><td data-label="Date">2026-10-05</td><td data-label="What changed">Version 1 put runs.list on the SDKs, MCP and the command line.</td></tr>
 <tr><td data-label="Version">2</td><td data-label="Date">2026-10-05</td><td data-label="What changed">runs.show and runs.step were added, so an assistant can say where a run stands and what a step delivered.</td></tr>
 </tbody></table>
           <p>None of its requests had another name before, so there are no old names to stop.</p>

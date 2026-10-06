@@ -4,11 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Debt: platform service</title>
-  <meta name="description" content="Read the debt the ledger holds against your agents and solutions, and what each item holds back until it is closed.">
+  <meta name="description" content="Read the debt items the ledger holds against your agents and solutions, and what each one blocks until it is closed.">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="AgentMesh">
   <meta property="og:title" content="Debt: platform service">
-  <meta property="og:description" content="Read the debt the ledger holds against your agents and solutions, and what each item holds back until it is closed.">
+  <meta property="og:description" content="Read the debt items the ledger holds against your agents and solutions, and what each one blocks until it is closed.">
   <meta property="og:url" content="https://dev.agentmesh.ai/service-debt.html">
   <meta property="og:image" content="https://dev.agentmesh.ai/brand/png/og-image.png">
   <meta property="og:image:width" content="1200">
@@ -139,7 +139,8 @@
     table.tbl th{ font-family:var(--wire); font-size:.875rem; letter-spacing:.06em; text-transform:uppercase; color:var(--paper); text-align:left; padding:10px 14px; border-bottom:1px solid var(--line); background:rgba(255,255,255,.03); }
     table.tbl td{ padding:10px 14px; border-bottom:1px solid var(--line); font-size:1rem; color:var(--text); vertical-align:top; }
     table.tbl tr:last-child td{ border-bottom:0; }
-    table.tbl td:first-child{ white-space:nowrap; }
+    table.tbl td:first-child, table.tbl td[data-label="Date"], table.tbl td[data-label="Stops working"]{ white-space:nowrap; }
+    table.tbl td[data-label="What uses it"]{ white-space:normal; min-width:12em; }
     pre.code{ background:#0b1220; border:1px solid var(--line); border-radius:10px; padding:14px 16px; margin:8px 0 14px;
       font-family:var(--wire); font-size:.875rem; line-height:1.55; color:var(--paper); overflow-x:auto; white-space:pre; max-width:100%; }
     pre.code:focus{ outline:2px solid var(--verify); outline-offset:2px; }
@@ -598,14 +599,21 @@
 
       <section class="band" id="used-by"><div class="wrap">
           <h2>What uses it</h2>
-          <ul class="plain"><li><b>The Debt ledger page</b>. Mesh admins read every debt item by kind, state and asset there, and open one to see its words and each change of its state.</li><li><b>The What is owed card</b>. An owner sees the debt filed against their agent on the agent's page, and against their solution on the solution's Overview, read from the same ledger.</li><li><b>Renaming AgentMesh's own agents</b>. When the operator renames or moves an agent on the AgentMesh's agents page, the platform files a debt item for each user still reaching it by its old name.</li><li><b>The technical debt file script</b>. The script loads docs/technical-debt.md into the ledger once per environment and writes the file back out from the ledger, and a check refuses hand edits to that file.</li><li><b>The deployment manager</b> (not built yet). The plan is for it to check the ledger before it promotes, rolls back or retires an agent, and to refuse when an open item blocks that step.</li></ul>
+          <table class="tbl"><thead><tr><th>What uses it</th><th>What for</th></tr></thead>
+<tbody>
+<tr><td data-label="What uses it">The Debt ledger page</td><td data-label="What for">Mesh admins read every debt item by kind, state and asset there, and open one to see its words and each change of its state.</td></tr>
+<tr><td data-label="What uses it">The What is owed card</td><td data-label="What for">An owner sees the debt filed against their agent on the agent's page, and against their solution on the solution's Overview, read from the same ledger.</td></tr>
+<tr><td data-label="What uses it">Renaming AgentMesh's own agents</td><td data-label="What for">When the operator renames or moves an agent on the page that lists AgentMesh's own agents, the platform files a debt item for each user still reaching it by its old name.</td></tr>
+<tr><td data-label="What uses it">The technical debt file script</td><td data-label="What for">The script loads docs/technical-debt.md into the ledger once per environment and writes the file back out from the ledger, and a check refuses hand edits to that file.</td></tr>
+<tr><td data-label="What uses it">The deployment manager (planned)</td><td data-label="What for">The plan is for it to check the ledger before it promotes, rolls back or retires an agent, and to refuse when an open item blocks that step.</td></tr>
+</tbody></table>
         </div></section>
 
       <section class="band" id="versions"><div class="wrap">
           <h2>Versions and old names</h2>
           <table class="tbl"><thead><tr><th>Version</th><th>Date</th><th>What changed</th></tr></thead>
 <tbody>
-<tr><td data-label="Version">1</td><td data-label="Date">2026-10-05</td><td data-label="What changed">The first definition gave the ledger its first doors.</td></tr>
+<tr><td data-label="Version">1</td><td data-label="Date">2026-10-05</td><td data-label="What changed">Version 1 put the ledger's requests on the SDKs, MCP and the command line.</td></tr>
 </tbody></table>
           <p>None of its requests had another name before, so there are no old names to stop.</p>
         </div></section>

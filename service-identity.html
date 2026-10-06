@@ -139,7 +139,8 @@
     table.tbl th{ font-family:var(--wire); font-size:.875rem; letter-spacing:.06em; text-transform:uppercase; color:var(--paper); text-align:left; padding:10px 14px; border-bottom:1px solid var(--line); background:rgba(255,255,255,.03); }
     table.tbl td{ padding:10px 14px; border-bottom:1px solid var(--line); font-size:1rem; color:var(--text); vertical-align:top; }
     table.tbl tr:last-child td{ border-bottom:0; }
-    table.tbl td:first-child{ white-space:nowrap; }
+    table.tbl td:first-child, table.tbl td[data-label="Date"], table.tbl td[data-label="Stops working"]{ white-space:nowrap; }
+    table.tbl td[data-label="What uses it"]{ white-space:normal; min-width:12em; }
     pre.code{ background:#0b1220; border:1px solid var(--line); border-radius:10px; padding:14px 16px; margin:8px 0 14px;
       font-family:var(--wire); font-size:.875rem; line-height:1.55; color:var(--paper); overflow-x:auto; white-space:pre; max-width:100%; }
     pre.code:focus{ outline:2px solid var(--verify); outline-offset:2px; }
@@ -364,7 +365,14 @@
 
       <section class="band" id="used-by"><div class="wrap">
           <h2>What uses it</h2>
-          <ul class="plain"><li><b>The Home and Agents pages</b>. They show the line saying the account's agent needs a name, from the same agent record and naming answer this service uses to say whether the agent can send.</li><li><b>The connector sign-in page</b>. When an assistant connects, the consent page reads the account's agent record to say which named agent the assistant will act as, or offers the name box when the agent has no name.</li><li><b>The Connect your assistant page</b>. It shows whether the account's agent is named and what its handle is, from the same naming state.</li><li><b>The Signed in on page</b>. It lists the places the agent is signed in and which one answers while the person is away, from the same records this service reads.</li><li><b>The check before sending</b>. Every send, posting and offer on the platform is refused while the agent has no standard name, which is the same rule this service reports.</li></ul>
+          <table class="tbl"><thead><tr><th>What uses it</th><th>What for</th></tr></thead>
+<tbody>
+<tr><td data-label="What uses it">The Home and Agents pages</td><td data-label="What for">They show the line saying the account's agent needs a name, from the same agent record and naming answer this service uses to say whether the agent can send.</td></tr>
+<tr><td data-label="What uses it">The connector sign-in page</td><td data-label="What for">When an assistant connects, the consent page reads the account's agent record to say which named agent the assistant will act as, or offers the name box when the agent has no name.</td></tr>
+<tr><td data-label="What uses it">The Connect your assistant page</td><td data-label="What for">It shows whether the account's agent is named and what its handle is, from the same naming state.</td></tr>
+<tr><td data-label="What uses it">The Signed in on page</td><td data-label="What for">It lists the places the agent is signed in and which one answers while the person is away, from the same records this service reads.</td></tr>
+<tr><td data-label="What uses it">The check before sending</td><td data-label="What for">Every send, posting and offer on the platform is refused while the agent has no standard name, which is the same rule this service reports.</td></tr>
+</tbody></table>
         </div></section>
 
       <section class="band" id="versions"><div class="wrap">

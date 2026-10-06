@@ -139,7 +139,8 @@
     table.tbl th{ font-family:var(--wire); font-size:.875rem; letter-spacing:.06em; text-transform:uppercase; color:var(--paper); text-align:left; padding:10px 14px; border-bottom:1px solid var(--line); background:rgba(255,255,255,.03); }
     table.tbl td{ padding:10px 14px; border-bottom:1px solid var(--line); font-size:1rem; color:var(--text); vertical-align:top; }
     table.tbl tr:last-child td{ border-bottom:0; }
-    table.tbl td:first-child{ white-space:nowrap; }
+    table.tbl td:first-child, table.tbl td[data-label="Date"], table.tbl td[data-label="Stops working"]{ white-space:nowrap; }
+    table.tbl td[data-label="What uses it"]{ white-space:normal; min-width:12em; }
     pre.code{ background:#0b1220; border:1px solid var(--line); border-radius:10px; padding:14px 16px; margin:8px 0 14px;
       font-family:var(--wire); font-size:.875rem; line-height:1.55; color:var(--paper); overflow-x:auto; white-space:pre; max-width:100%; }
     pre.code:focus{ outline:2px solid var(--verify); outline-offset:2px; }
@@ -362,7 +363,14 @@
 
       <section class="band" id="used-by"><div class="wrap">
           <h2>What uses it</h2>
-          <ul class="plain"><li><b>The catalog search</b>. When the catalog is not set up or does not answer, the catalog search lists the live registry by tags instead.</li><li><b>The Agents running page</b>. It asks the registry for every agent on the mesh, then marks which of the account's agents are online now.</li><li><b>The Buying and Build pages</b>. The Buying page's list to browse and the Build page's ready-made and cost checks read one listing of every registered agent, built from the whole registry.</li><li><b>The A2A bridge</b>. It lists the agents on the mesh and keeps the public ones for the bridge's index page.</li><li><b>The catalog agent</b> (not built yet). The plan says it will list the registry as well as search the catalog when it looks for an existing agent; today it only searches the catalog.</li></ul>
+          <table class="tbl"><thead><tr><th>What uses it</th><th>What for</th></tr></thead>
+<tbody>
+<tr><td data-label="What uses it">The catalog search</td><td data-label="What for">When the catalog is not set up or does not answer, the catalog search lists the live registry by tags instead.</td></tr>
+<tr><td data-label="What uses it">The Agents running page</td><td data-label="What for">It asks the registry for every agent on the mesh, then marks which of the account's agents are online now.</td></tr>
+<tr><td data-label="What uses it">The Buying and Build pages</td><td data-label="What for">The Buying page's list to browse and the Build page's ready-made and cost checks read one listing of every registered agent, built from the whole registry.</td></tr>
+<tr><td data-label="What uses it">The A2A bridge</td><td data-label="What for">It lists the agents on the mesh and keeps the public ones for the bridge's index page.</td></tr>
+<tr><td data-label="What uses it">The catalog agent (planned)</td><td data-label="What for">The plan says it will list the registry as well as search the catalog when it looks for an existing agent; today it only searches the catalog.</td></tr>
+</tbody></table>
         </div></section>
 
       <section class="band" id="versions"><div class="wrap">

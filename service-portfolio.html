@@ -139,7 +139,8 @@
     table.tbl th{ font-family:var(--wire); font-size:.875rem; letter-spacing:.06em; text-transform:uppercase; color:var(--paper); text-align:left; padding:10px 14px; border-bottom:1px solid var(--line); background:rgba(255,255,255,.03); }
     table.tbl td{ padding:10px 14px; border-bottom:1px solid var(--line); font-size:1rem; color:var(--text); vertical-align:top; }
     table.tbl tr:last-child td{ border-bottom:0; }
-    table.tbl td:first-child{ white-space:nowrap; }
+    table.tbl td:first-child, table.tbl td[data-label="Date"], table.tbl td[data-label="Stops working"]{ white-space:nowrap; }
+    table.tbl td[data-label="What uses it"]{ white-space:normal; min-width:12em; }
     pre.code{ background:#0b1220; border:1px solid var(--line); border-radius:10px; padding:14px 16px; margin:8px 0 14px;
       font-family:var(--wire); font-size:.875rem; line-height:1.55; color:var(--paper); overflow-x:auto; white-space:pre; max-width:100%; }
     pre.code:focus{ outline:2px solid var(--verify); outline-offset:2px; }
@@ -616,14 +617,18 @@
 
       <section class="band" id="used-by"><div class="wrap">
           <h2>What uses it</h2>
-          <ul class="plain"><li><b>The Jobs for agents page</b>. An account reads its portfolio there, drafts and adds lines, edits a line and moves it to a new state, through the same code the service uses.</li><li><b>The six-hourly portfolio watch</b>. A scheduled check reads every account's portfolio, emails the owner about what it finds, and suspends a line whose spend has crossed its ceiling.</li></ul>
+          <table class="tbl"><thead><tr><th>What uses it</th><th>What for</th></tr></thead>
+<tbody>
+<tr><td data-label="What uses it">The Jobs for agents page</td><td data-label="What for">An account reads its portfolio there, drafts and adds lines, edits a line and moves it to a new state, through the same code the service uses.</td></tr>
+<tr><td data-label="What uses it">The six-hourly portfolio watch</td><td data-label="What for">A scheduled check reads every account's portfolio, emails the owner about what it finds, and suspends a line whose spend has crossed its ceiling.</td></tr>
+</tbody></table>
         </div></section>
 
       <section class="band" id="versions"><div class="wrap">
           <h2>Versions and old names</h2>
           <table class="tbl"><thead><tr><th>Version</th><th>Date</th><th>What changed</th></tr></thead>
 <tbody>
-<tr><td data-label="Version">1</td><td data-label="Date">2026-10-05</td><td data-label="What changed">The first definition gave each portfolio request one name on every door.</td></tr>
+<tr><td data-label="Version">1</td><td data-label="Date">2026-10-05</td><td data-label="What changed">Version 1 gave each portfolio request the same name in the SDKs, MCP and the command line.</td></tr>
 </tbody></table>
           <h3>Old names</h3>
           <p>Each old name below still works until the day in its row, 30 days after the release that renamed it. Every answer to an old name says the new name and that day, like this: "agentmesh portfolio was renamed to agentmesh portfolio read. This name stops working on 2026-11-04; use agentmesh portfolio read." After that day the old name is refused, and the refusal gives the new name.</p>

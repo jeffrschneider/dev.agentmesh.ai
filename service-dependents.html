@@ -139,7 +139,8 @@
     table.tbl th{ font-family:var(--wire); font-size:.875rem; letter-spacing:.06em; text-transform:uppercase; color:var(--paper); text-align:left; padding:10px 14px; border-bottom:1px solid var(--line); background:rgba(255,255,255,.03); }
     table.tbl td{ padding:10px 14px; border-bottom:1px solid var(--line); font-size:1rem; color:var(--text); vertical-align:top; }
     table.tbl tr:last-child td{ border-bottom:0; }
-    table.tbl td:first-child{ white-space:nowrap; }
+    table.tbl td:first-child, table.tbl td[data-label="Date"], table.tbl td[data-label="Stops working"]{ white-space:nowrap; }
+    table.tbl td[data-label="What uses it"]{ white-space:normal; min-width:12em; }
     pre.code{ background:#0b1220; border:1px solid var(--line); border-radius:10px; padding:14px 16px; margin:8px 0 14px;
       font-family:var(--wire); font-size:.875rem; line-height:1.55; color:var(--paper); overflow-x:auto; white-space:pre; max-width:100%; }
     pre.code:focus{ outline:2px solid var(--verify); outline-offset:2px; }
@@ -399,14 +400,21 @@
 
       <section class="band" id="used-by"><div class="wrap">
           <h2>What uses it</h2>
-          <ul class="plain"><li><b>The What uses this agent panel</b>. An agent's page lists the solutions, processes, schedules and accounts that are set up to use the agent or used it recently.</li><li><b>The What uses this solution panel</b>. A solution's Overview lists what depends on that solution, gathered the same way the service gathers it.</li><li><b>The Retire panel on agent pages</b>. Before an owner retires an agent the panel shows what still depends on it, and after the retirement the platform tells the owners of solutions that use it.</li><li><b>Agentcatalog.com agent pages</b>. An agent's public catalog page lists the public ready-made solutions that use the agent, which is the public part of the same list.</li><li><b>The impact analyst</b> (not built yet). The plan is for it to read what depends on an agent, decide which of those a change breaks, and file a debt item for each one.</li></ul>
+          <table class="tbl"><thead><tr><th>What uses it</th><th>What for</th></tr></thead>
+<tbody>
+<tr><td data-label="What uses it">The What uses this agent panel</td><td data-label="What for">An agent's page lists the solutions, processes, schedules and accounts that are set up to use the agent or used it recently.</td></tr>
+<tr><td data-label="What uses it">The What uses this solution panel</td><td data-label="What for">A solution's Overview lists what depends on that solution, gathered the same way the service gathers it.</td></tr>
+<tr><td data-label="What uses it">The Retire panel on agent pages</td><td data-label="What for">Before an owner retires an agent the panel shows what still depends on it, and after the retirement the platform tells the owners of solutions that use it.</td></tr>
+<tr><td data-label="What uses it">Agentcatalog.com agent pages</td><td data-label="What for">An agent's public catalog page lists the public ready-made solutions that use the agent, which is the public part of the same list.</td></tr>
+<tr><td data-label="What uses it">The impact analyst (planned)</td><td data-label="What for">The plan is for it to read what depends on an agent, decide which of those a change breaks, and file a debt item for each one.</td></tr>
+</tbody></table>
         </div></section>
 
       <section class="band" id="versions"><div class="wrap">
           <h2>Versions and old names</h2>
           <table class="tbl"><thead><tr><th>Version</th><th>Date</th><th>What changed</th></tr></thead>
 <tbody>
-<tr><td data-label="Version">1</td><td data-label="Date">2026-10-05</td><td data-label="What changed">The first definition gave dependents its first doors.</td></tr>
+<tr><td data-label="Version">1</td><td data-label="Date">2026-10-05</td><td data-label="What changed">Version 1 put dependents.list on the SDKs, MCP and the command line.</td></tr>
 </tbody></table>
           <p>None of its requests had another name before, so there are no old names to stop.</p>
         </div></section>

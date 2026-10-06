@@ -4,11 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Jobs: platform service</title>
-  <meta name="description" content="Read the jobs agents delivered to your account, have one changed, or copy its pieces to your own storage.">
+  <meta name="description" content="Read the jobs agents delivered to your account, have one changed, or copy its files to your own storage.">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="AgentMesh">
   <meta property="og:title" content="Jobs: platform service">
-  <meta property="og:description" content="Read the jobs agents delivered to your account, have one changed, or copy its pieces to your own storage.">
+  <meta property="og:description" content="Read the jobs agents delivered to your account, have one changed, or copy its files to your own storage.">
   <meta property="og:url" content="https://dev.agentmesh.ai/service-jobs.html">
   <meta property="og:image" content="https://dev.agentmesh.ai/brand/png/og-image.png">
   <meta property="og:image:width" content="1200">
@@ -139,7 +139,8 @@
     table.tbl th{ font-family:var(--wire); font-size:.875rem; letter-spacing:.06em; text-transform:uppercase; color:var(--paper); text-align:left; padding:10px 14px; border-bottom:1px solid var(--line); background:rgba(255,255,255,.03); }
     table.tbl td{ padding:10px 14px; border-bottom:1px solid var(--line); font-size:1rem; color:var(--text); vertical-align:top; }
     table.tbl tr:last-child td{ border-bottom:0; }
-    table.tbl td:first-child{ white-space:nowrap; }
+    table.tbl td:first-child, table.tbl td[data-label="Date"], table.tbl td[data-label="Stops working"]{ white-space:nowrap; }
+    table.tbl td[data-label="What uses it"]{ white-space:normal; min-width:12em; }
     pre.code{ background:#0b1220; border:1px solid var(--line); border-radius:10px; padding:14px 16px; margin:8px 0 14px;
       font-family:var(--wire); font-size:.875rem; line-height:1.55; color:var(--paper); overflow-x:auto; white-space:pre; max-width:100%; }
     pre.code:focus{ outline:2px solid var(--verify); outline-offset:2px; }
@@ -597,7 +598,14 @@
 
       <section class="band" id="used-by"><div class="wrap">
           <h2>What uses it</h2>
-          <ul class="plain"><li><b>The Job page in the app</b>. The page for one job shows it, prices a change, makes the change and copies the files to a storage place, through the same code the service uses.</li><li><b>The Conversations page in the app</b>. It lists the account's jobs beside each agent's conversation, from the same job list.</li><li><b>The Needs you page</b>. It reads the same job list to show the jobs that were answered or refused and are waiting on the person.</li><li><b>The Account page's places card</b>. Its card of places to copy to lists and adds the same storage places that a job's files are copied to.</li><li><b>Schedules that send a job</b>. A schedule that sends an agent a job reads the same job records to find the agent's answer and how long such a job usually takes.</li></ul>
+          <table class="tbl"><thead><tr><th>What uses it</th><th>What for</th></tr></thead>
+<tbody>
+<tr><td data-label="What uses it">The Job page in the app</td><td data-label="What for">The page for one job shows it, prices a change, makes the change and copies the files to a storage place, through the same code the service uses.</td></tr>
+<tr><td data-label="What uses it">The Conversations page in the app</td><td data-label="What for">It lists the account's jobs beside each agent's conversation, from the same job list.</td></tr>
+<tr><td data-label="What uses it">The Needs you page</td><td data-label="What for">It reads the same job list to show the jobs that were answered or refused and are waiting on the person.</td></tr>
+<tr><td data-label="What uses it">The Account page's places card</td><td data-label="What for">Its card of places to copy to lists and adds the same storage places that a job's files are copied to.</td></tr>
+<tr><td data-label="What uses it">Schedules that send a job</td><td data-label="What for">A schedule that sends an agent a job reads the same job records to find the agent's answer and how long such a job usually takes.</td></tr>
+</tbody></table>
         </div></section>
 
       <section class="band" id="versions"><div class="wrap">

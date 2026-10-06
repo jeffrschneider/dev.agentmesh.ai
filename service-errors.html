@@ -139,7 +139,8 @@
     table.tbl th{ font-family:var(--wire); font-size:.875rem; letter-spacing:.06em; text-transform:uppercase; color:var(--paper); text-align:left; padding:10px 14px; border-bottom:1px solid var(--line); background:rgba(255,255,255,.03); }
     table.tbl td{ padding:10px 14px; border-bottom:1px solid var(--line); font-size:1rem; color:var(--text); vertical-align:top; }
     table.tbl tr:last-child td{ border-bottom:0; }
-    table.tbl td:first-child{ white-space:nowrap; }
+    table.tbl td:first-child, table.tbl td[data-label="Date"], table.tbl td[data-label="Stops working"]{ white-space:nowrap; }
+    table.tbl td[data-label="What uses it"]{ white-space:normal; min-width:12em; }
     pre.code{ background:#0b1220; border:1px solid var(--line); border-radius:10px; padding:14px 16px; margin:8px 0 14px;
       font-family:var(--wire); font-size:.875rem; line-height:1.55; color:var(--paper); overflow-x:auto; white-space:pre; max-width:100%; }
     pre.code:focus{ outline:2px solid var(--verify); outline-offset:2px; }
@@ -275,7 +276,7 @@
         <p class="crumbs"><a href="platform-services.html">Platform services</a> / errors</p>
         <span class="eyebrow"><span class="tag">agentmesh</span> · platform service · errors</span>
         <h1>Errors</h1>
-        <p class="lede">The Unified Error Log: every error the platform and its agents report, grouped so the same fault is one entry with a count. Each entry has a status (open, acknowledged, resolved or ignored) that an operator changes as the fault is dealt with.</p>
+        <p class="lede">The Unified Error Log holds every error the platform and its agents report, and reports of the same fault are grouped into one entry with a count. Each entry has a status (open, acknowledged, resolved or ignored) that an operator changes as the fault is dealt with.</p>
         <p class="lede"><b>Who can call it:</b> Operators, with an operator key: reading needs the read or reports scope, reporting the error-intake or ci scope, and changing an error's status the moderate scope. The platform reports its own errors in process.</p>
         <p class="lede"><b>What a call costs:</b> No model is called. A call is a read or a write of the error log's database.</p>
       </div>
@@ -317,7 +318,7 @@
             <div class="door"><h4>MCP tool</h4><p class="missing">For operators only, who work from the command line and code; an agent's tools do not carry it.</p></div>
             <div class="door"><h4>Command line</h4><pre class="code" tabindex="0" aria-label="Command line">agentmesh errors report source-1 type-1 message-1</pre></div>
           </div>
-          <ul class="plain"><li>On the command line: The operator key is read from the AGENTMESH_SERVICE_KEY environment variable. It is never typed on the command line.</li><li>On the SDK: The operator key is the platformKey given to AgentMesh.connect().</li></ul>
+          <ul class="plain"><li>On the command line: The operator key is read from the AGENTMESH_SERVICE_KEY environment variable. It is never typed on the command line.</li><li>On the SDK: The operator key is the operatorKey given to AgentMesh.connect().</li></ul>
           <h3>What you send</h3>
           <table class="tbl"><thead><tr><th>Field</th><th>Type</th><th>Required</th><th>What it means</th></tr></thead>
 <tbody>
@@ -364,7 +365,7 @@
             <div class="door"><h4>MCP tool</h4><p class="missing">For operators only, who work from the command line and code; an agent's tools do not carry it.</p></div>
             <div class="door"><h4>Command line</h4><pre class="code" tabindex="0" aria-label="Command line">agentmesh errors list</pre></div>
           </div>
-          <ul class="plain"><li>On the command line: The operator key is read from the AGENTMESH_SERVICE_KEY environment variable. It is never typed on the command line.</li><li>On the SDK: The operator key is the platformKey given to AgentMesh.connect().</li></ul>
+          <ul class="plain"><li>On the command line: The operator key is read from the AGENTMESH_SERVICE_KEY environment variable. It is never typed on the command line.</li><li>On the SDK: The operator key is the operatorKey given to AgentMesh.connect().</li></ul>
           <h3>What you send</h3>
           <table class="tbl"><thead><tr><th>Field</th><th>Type</th><th>Required</th><th>What it means</th></tr></thead>
 <tbody>
@@ -415,7 +416,7 @@
             <div class="door"><h4>MCP tool</h4><p class="missing">For operators only, who work from the command line and code; an agent's tools do not carry it.</p></div>
             <div class="door"><h4>Command line</h4><pre class="code" tabindex="0" aria-label="Command line">agentmesh errors resolve id-1</pre></div>
           </div>
-          <ul class="plain"><li>On the command line: The operator key is read from the AGENTMESH_SERVICE_KEY environment variable. It is never typed on the command line.</li><li>On the SDK: The operator key is the platformKey given to AgentMesh.connect().</li></ul>
+          <ul class="plain"><li>On the command line: The operator key is read from the AGENTMESH_SERVICE_KEY environment variable. It is never typed on the command line.</li><li>On the SDK: The operator key is the operatorKey given to AgentMesh.connect().</li></ul>
           <h3>What you send</h3>
           <table class="tbl"><thead><tr><th>Field</th><th>Type</th><th>Required</th><th>What it means</th></tr></thead>
 <tbody>
@@ -451,7 +452,14 @@
 
       <section class="band" id="used-by"><div class="wrap">
           <h2>What uses it</h2>
-          <ul class="plain"><li><b>Every AgentMesh service process</b>. Every service process reports its own error lines and crashes to the error log, and the watches send their alert emails through the log so an alarm is mailed once while it stays open.</li><li><b>Agent hosts in the fleet</b>. A fleet host reports each failed job with the agent's name and what went wrong, and the platform files it in the error log under the run's account.</li><li><b>The solution runner</b>. When a run is stopped because a handoff between steps was over its size limit, that stop is recorded once in the error log.</li><li><b>The nightly test rig and monitors</b>. The nightly client test rig posts each failing check to the log, and failed GitHub workflow runs and uptime alerts come in as errors through two webhooks.</li><li><b>The Unified Error Log page</b>. Mesh admins read the grouped errors and each error's occurrences there, and mark each one acknowledged, resolved or ignored with a note and a technical debt number.</li></ul>
+          <table class="tbl"><thead><tr><th>What uses it</th><th>What for</th></tr></thead>
+<tbody>
+<tr><td data-label="What uses it">Every AgentMesh service process</td><td data-label="What for">Every service process reports its own error lines and crashes to the error log, and the watches send their alert emails through the log so an alarm is mailed once while it stays open.</td></tr>
+<tr><td data-label="What uses it">Agent hosts in the fleet</td><td data-label="What for">A fleet host reports each failed job with the agent's name and what went wrong, and the platform files it in the error log under the run's account.</td></tr>
+<tr><td data-label="What uses it">The solution runner</td><td data-label="What for">When a run is stopped because a handoff between steps was over its size limit, that stop is recorded once in the error log.</td></tr>
+<tr><td data-label="What uses it">The nightly test rig and monitors</td><td data-label="What for">The nightly client test rig posts each failing check to the log, and failed GitHub workflow runs and uptime alerts come in as errors through two webhooks.</td></tr>
+<tr><td data-label="What uses it">The Unified Error Log page</td><td data-label="What for">Mesh admins read the grouped errors and each error's occurrences there, and mark each one acknowledged, resolved or ignored with a note and a technical debt number.</td></tr>
+</tbody></table>
         </div></section>
 
       <section class="band" id="versions"><div class="wrap">

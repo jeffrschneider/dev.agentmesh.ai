@@ -139,7 +139,8 @@
     table.tbl th{ font-family:var(--wire); font-size:.875rem; letter-spacing:.06em; text-transform:uppercase; color:var(--paper); text-align:left; padding:10px 14px; border-bottom:1px solid var(--line); background:rgba(255,255,255,.03); }
     table.tbl td{ padding:10px 14px; border-bottom:1px solid var(--line); font-size:1rem; color:var(--text); vertical-align:top; }
     table.tbl tr:last-child td{ border-bottom:0; }
-    table.tbl td:first-child{ white-space:nowrap; }
+    table.tbl td:first-child, table.tbl td[data-label="Date"], table.tbl td[data-label="Stops working"]{ white-space:nowrap; }
+    table.tbl td[data-label="What uses it"]{ white-space:normal; min-width:12em; }
     pre.code{ background:#0b1220; border:1px solid var(--line); border-radius:10px; padding:14px 16px; margin:8px 0 14px;
       font-family:var(--wire); font-size:.875rem; line-height:1.55; color:var(--paper); overflow-x:auto; white-space:pre; max-width:100%; }
     pre.code:focus{ outline:2px solid var(--verify); outline-offset:2px; }
@@ -476,7 +477,14 @@
 
       <section class="band" id="used-by"><div class="wrap">
           <h2>What uses it</h2>
-          <ul class="plain"><li><b>The Join AgentMesh approval screen</b>. The link an assistant gets when it asks for a name opens this screen, where the person checks the name and presses Allow, and the account's agent is named.</li><li><b>Naming and renaming on agent pages</b>. An owner claims a name for one of their other agents, or renames one, on the agent's page, and both go through the same naming claim.</li><li><b>The deployment manager</b>. After it installs a container agent, it asks the platform to bind that agent's verified name before the agent starts.</li><li><b>The process runner</b>. It looks up the handle of each step's holder before a run starts, and stops the run if a name belongs to no agent.</li><li><b>The evaluator</b>. It turns the handle it was asked to evaluate into the agent's key, then checks that the agent is registered.</li></ul>
+          <table class="tbl"><thead><tr><th>What uses it</th><th>What for</th></tr></thead>
+<tbody>
+<tr><td data-label="What uses it">The Join AgentMesh approval screen</td><td data-label="What for">The link an assistant gets when it asks for a name opens this screen, where the person checks the name and presses Allow, and the account's agent is named.</td></tr>
+<tr><td data-label="What uses it">Naming and renaming on agent pages</td><td data-label="What for">An owner claims a name for one of their other agents, or renames one, on the agent's page, and both go through the same naming claim.</td></tr>
+<tr><td data-label="What uses it">The deployment manager</td><td data-label="What for">After it installs a container agent, it asks the platform to bind that agent's verified name before the agent starts.</td></tr>
+<tr><td data-label="What uses it">The process runner</td><td data-label="What for">It looks up the handle of each step's holder before a run starts, and stops the run if a name belongs to no agent.</td></tr>
+<tr><td data-label="What uses it">The evaluator</td><td data-label="What for">It turns the handle it was asked to evaluate into the agent's key, then checks that the agent is registered.</td></tr>
+</tbody></table>
         </div></section>
 
       <section class="band" id="versions"><div class="wrap">

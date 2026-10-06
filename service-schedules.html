@@ -4,11 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Schedules: platform service</title>
-  <meta name="description" content="Run a solution or send an agent a job on a repeating time, and run a schedule now or pause it.">
+  <meta name="description" content="Run a solution or send an agent a job on a repeating schedule, and run a schedule now or pause it.">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="AgentMesh">
   <meta property="og:title" content="Schedules: platform service">
-  <meta property="og:description" content="Run a solution or send an agent a job on a repeating time, and run a schedule now or pause it.">
+  <meta property="og:description" content="Run a solution or send an agent a job on a repeating schedule, and run a schedule now or pause it.">
   <meta property="og:url" content="https://dev.agentmesh.ai/service-schedules.html">
   <meta property="og:image" content="https://dev.agentmesh.ai/brand/png/og-image.png">
   <meta property="og:image:width" content="1200">
@@ -139,7 +139,8 @@
     table.tbl th{ font-family:var(--wire); font-size:.875rem; letter-spacing:.06em; text-transform:uppercase; color:var(--paper); text-align:left; padding:10px 14px; border-bottom:1px solid var(--line); background:rgba(255,255,255,.03); }
     table.tbl td{ padding:10px 14px; border-bottom:1px solid var(--line); font-size:1rem; color:var(--text); vertical-align:top; }
     table.tbl tr:last-child td{ border-bottom:0; }
-    table.tbl td:first-child{ white-space:nowrap; }
+    table.tbl td:first-child, table.tbl td[data-label="Date"], table.tbl td[data-label="Stops working"]{ white-space:nowrap; }
+    table.tbl td[data-label="What uses it"]{ white-space:normal; min-width:12em; }
     pre.code{ background:#0b1220; border:1px solid var(--line); border-radius:10px; padding:14px 16px; margin:8px 0 14px;
       font-family:var(--wire); font-size:.875rem; line-height:1.55; color:var(--paper); overflow-x:auto; white-space:pre; max-width:100%; }
     pre.code:focus{ outline:2px solid var(--verify); outline-offset:2px; }
@@ -591,14 +592,21 @@
 
       <section class="band" id="used-by"><div class="wrap">
           <h2>What uses it</h2>
-          <ul class="plain"><li><b>The Schedules page in the app</b>. It lists an organization's schedules, makes and edits them, pauses and resumes them, and starts one at once with Run now, through the same schedule code the service uses.</li><li><b>The Variations tab of solutions</b>. It lists one solution's variations and starts a run of one when the person presses Run now.</li><li><b>Competitor watches</b>. Approving a competitor watch creates the schedule that sends its brief daily or weekly.</li><li><b>The Build page in the app</b>. When a plan built from a prompt says it should repeat, the build puts the new solution on a schedule.</li><li><b>The watcher agent</b> (not built yet). The Agent SDLC plan says the watcher, which keeps an eye on agents and their cost, will be a platform agent woken every hour by a platform schedule.</li></ul>
+          <table class="tbl"><thead><tr><th>What uses it</th><th>What for</th></tr></thead>
+<tbody>
+<tr><td data-label="What uses it">The Schedules page in the app</td><td data-label="What for">It lists an organization's schedules, makes and edits them, pauses and resumes them, and starts one at once with Run now, through the same schedule code the service uses.</td></tr>
+<tr><td data-label="What uses it">The Variations tab of solutions</td><td data-label="What for">It lists one solution's variations and starts a run of one when the person presses Run now.</td></tr>
+<tr><td data-label="What uses it">Competitor watches</td><td data-label="What for">Approving a competitor watch creates the schedule that sends its brief daily or weekly.</td></tr>
+<tr><td data-label="What uses it">The Build page in the app</td><td data-label="What for">When a plan built from a prompt says it should repeat, the build puts the new solution on a schedule.</td></tr>
+<tr><td data-label="What uses it">The watcher agent (planned)</td><td data-label="What for">The Agent SDLC plan says the watcher, which watches agents and their cost, will be a platform agent that a platform schedule runs every hour.</td></tr>
+</tbody></table>
         </div></section>
 
       <section class="band" id="versions"><div class="wrap">
           <h2>Versions and old names</h2>
           <table class="tbl"><thead><tr><th>Version</th><th>Date</th><th>What changed</th></tr></thead>
 <tbody>
-<tr><td data-label="Version">1</td><td data-label="Date">2026-10-05</td><td data-label="What changed">The first definition gave schedules its first doors.</td></tr>
+<tr><td data-label="Version">1</td><td data-label="Date">2026-10-05</td><td data-label="What changed">Version 1 put the schedules requests on the SDKs, MCP and the command line.</td></tr>
 <tr><td data-label="Version">2</td><td data-label="Date">2026-10-05</td><td data-label="What changed">schedules.run_now answers with the address of the run it started.</td></tr>
 </tbody></table>
           <p>None of its requests had another name before, so there are no old names to stop.</p>

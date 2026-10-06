@@ -139,7 +139,8 @@
     table.tbl th{ font-family:var(--wire); font-size:.875rem; letter-spacing:.06em; text-transform:uppercase; color:var(--paper); text-align:left; padding:10px 14px; border-bottom:1px solid var(--line); background:rgba(255,255,255,.03); }
     table.tbl td{ padding:10px 14px; border-bottom:1px solid var(--line); font-size:1rem; color:var(--text); vertical-align:top; }
     table.tbl tr:last-child td{ border-bottom:0; }
-    table.tbl td:first-child{ white-space:nowrap; }
+    table.tbl td:first-child, table.tbl td[data-label="Date"], table.tbl td[data-label="Stops working"]{ white-space:nowrap; }
+    table.tbl td[data-label="What uses it"]{ white-space:normal; min-width:12em; }
     pre.code{ background:#0b1220; border:1px solid var(--line); border-radius:10px; padding:14px 16px; margin:8px 0 14px;
       font-family:var(--wire); font-size:.875rem; line-height:1.55; color:var(--paper); overflow-x:auto; white-space:pre; max-width:100%; }
     pre.code:focus{ outline:2px solid var(--verify); outline-offset:2px; }
@@ -447,7 +448,12 @@
 
       <section class="band" id="used-by"><div class="wrap">
           <h2>What uses it</h2>
-          <ul class="plain"><li><b>Installing an agent that remembers</b>. When a deploy succeeds for an agent package that asks for memory, the platform creates that agent's memory bank at install.</li><li><b>Erasing an agent or account</b>. When an agent or an account is erased, the agent's whole memory bank is deleted with it.</li><li><b>The dev environment</b>. The development system stores and reads memories in production's memory store through a door between the two, with every bank kept in a separate dev space.</li><li><b>Older adapter releases</b>. Adapters released before the services change send their signed remember, recall and reflect calls to the original memory address, which checks the kill switch and then uses the same memory store.</li></ul>
+          <table class="tbl"><thead><tr><th>What uses it</th><th>What for</th></tr></thead>
+<tbody>
+<tr><td data-label="What uses it">Installing an agent that remembers</td><td data-label="What for">When a deploy succeeds for an agent package that asks for memory, the platform creates that agent's memory bank at install.</td></tr>
+<tr><td data-label="What uses it">Erasing an agent or account</td><td data-label="What for">When an agent or an account is erased, the agent's whole memory bank is deleted with it.</td></tr>
+<tr><td data-label="What uses it">Older adapter releases</td><td data-label="What for">Adapters released before the services change send their signed remember, recall and reflect calls to the original memory address, which checks the kill switch and then uses the same memory store.</td></tr>
+</tbody></table>
         </div></section>
 
       <section class="band" id="versions"><div class="wrap">

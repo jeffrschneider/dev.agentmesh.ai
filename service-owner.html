@@ -139,7 +139,8 @@
     table.tbl th{ font-family:var(--wire); font-size:.875rem; letter-spacing:.06em; text-transform:uppercase; color:var(--paper); text-align:left; padding:10px 14px; border-bottom:1px solid var(--line); background:rgba(255,255,255,.03); }
     table.tbl td{ padding:10px 14px; border-bottom:1px solid var(--line); font-size:1rem; color:var(--text); vertical-align:top; }
     table.tbl tr:last-child td{ border-bottom:0; }
-    table.tbl td:first-child{ white-space:nowrap; }
+    table.tbl td:first-child, table.tbl td[data-label="Date"], table.tbl td[data-label="Stops working"]{ white-space:nowrap; }
+    table.tbl td[data-label="What uses it"]{ white-space:normal; min-width:12em; }
     pre.code{ background:#0b1220; border:1px solid var(--line); border-radius:10px; padding:14px 16px; margin:8px 0 14px;
       font-family:var(--wire); font-size:.875rem; line-height:1.55; color:var(--paper); overflow-x:auto; white-space:pre; max-width:100%; }
     pre.code:focus{ outline:2px solid var(--verify); outline-offset:2px; }
@@ -366,7 +367,12 @@
 
       <section class="band" id="used-by"><div class="wrap">
           <h2>What uses it</h2>
-          <ul class="plain"><li><b>The assistant panel in the app</b>. When one of the person's own agents asks a question, the panel shows it as a card with the choices as buttons, sends the answer back, and clears the card once the question is settled.</li><li><b>The Answer here page</b>. It lists questions from agents that are waiting in the account's mailbox and sends the person's typed answer back to the agent that asked.</li><li><b>The build-an-agent skill</b>. The Claude Code harness that builds agents puts each gate to the person through this request as well as in the chat, and settles the question once either answer arrives.</li></ul>
+          <table class="tbl"><thead><tr><th>What uses it</th><th>What for</th></tr></thead>
+<tbody>
+<tr><td data-label="What uses it">The assistant panel in the app</td><td data-label="What for">When one of the person's own agents asks a question, the panel shows it as a card with the choices as buttons, sends the answer back, and clears the card once the question is settled.</td></tr>
+<tr><td data-label="What uses it">The Answer here page</td><td data-label="What for">It lists questions from agents that are waiting in the account's mailbox and sends the person's typed answer back to the agent that asked.</td></tr>
+<tr><td data-label="What uses it">The build-an-agent skill</td><td data-label="What for">The Claude Code harness that builds agents puts each gate to the person through this request as well as in the chat, and settles the question once either answer arrives.</td></tr>
+</tbody></table>
         </div></section>
 
       <section class="band" id="versions"><div class="wrap">

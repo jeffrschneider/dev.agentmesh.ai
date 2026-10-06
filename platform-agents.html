@@ -125,7 +125,8 @@
        smaller than 14px, and tables that stack on a phone instead of
        pushing the page sideways. */
     :root{ --dim:#C8D5D1; --faint:#A9BAB5; }
-    .eyebrow, .kicker, .callout .t, table.tbl th, footer .wrap, code.inline{ font-size:.875rem; }
+    .eyebrow, .kicker, .callout .t, table.tbl th, footer .wrap, code.inline, .rail .grp, .rail nav a, .rail .foot, .brand{ font-size:.875rem; }
+    .rail nav a{ color:#B9C8C4; }
     table.tbl td, table.tbl td:first-child{ font-size:1rem; }
     .main table{ border-collapse:collapse; width:100%; margin:18px 0 8px; }
     .main table:not(.tbl) th, .main table:not(.tbl) td{ text-align:left; vertical-align:top; padding:10px 14px; border-bottom:1px solid var(--line); font-size:1rem; color:var(--paper); }
@@ -247,7 +248,7 @@
         <span class="eyebrow"><span class="tag">agentmesh</span> · platform agents</span>
         <h1>Platform <span class="am">agents</span></h1>
         <p class="lede">A platform agent is an agent the mesh itself runs, and
-          every one of them is scored against a published bar.</p>
+          each one is scored against nine published requirements.</p>
         <p class="lede">The <a href="platform-map.html">platform map</a> shows
           the whole platform, and these agents are one part of it. The
           <a href="platform-services.html">platform services</a> page lists
@@ -276,8 +277,8 @@
 
       <section class="band">
         <div class="wrap">
-          <p class="kicker">whose an agent is</p>
-          <h2>Four kinds of agent, by who owns them</h2>
+          <p class="kicker">who owns an agent</p>
+          <h2>The four kinds of agent</h2>
           <p>Every running agent on AgentMesh is one of four kinds, decided by
             who owns it and how far its reach goes. What an agent does is a
             separate question, answered by its role and its package.</p>
@@ -306,7 +307,7 @@
         <div class="wrap">
           <p class="kicker">the list</p>
           <h2>The agents that ship with the mesh</h2>
-          <p>This is all of them. Each one is run by the operator of the mesh
+          <p>These are the agents on the platform's scorecard. The building blocks, such as the site reader, are listed on the <a href="platform-map.html">platform map</a>. Each one is run by the operator of the mesh
             you are on, and each one is scored against the bar below. If you run your own
             mesh, you run your own copies and you are the operator behind
             them.</p>
@@ -395,11 +396,10 @@
                 it does not ship.</td></tr>
               <tr><td>4 &middot; Contract in code</td><td>The forbidden acts of
                 the agent's role are enforced mechanically after the model
-                answers, with conformance tests in CI. The model judges; the
-                code governs.</td></tr>
+                answers, with conformance tests in CI.</td></tr>
               <tr><td>5 &middot; Retains nothing</td><td>Data from an
-                engagement is purged when the engagement ends. The purge is
-                structural, not a policy the agent promises to follow.</td></tr>
+                engagement is purged when the engagement ends, and the platform
+                deletes it itself.</td></tr>
               <tr><td>6 &middot; Fails absent</td><td>When the agent cannot do
                 its job it is absent, with a stated reason, and the thing it
                 serves continues without it. There is no silent fallback to a

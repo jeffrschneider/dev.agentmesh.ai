@@ -198,6 +198,7 @@
         <a href="a2a-bridge.html">/ a2a-bridge</a>
         <a href="a2a-card-extensions.html">/ a2a-card-extensions</a>
         <a href="a2a-ui-links.html">/ a2a-ui-links</a>
+        <a href="pact.html">/ pact</a>
         <a href="rooms.html">/ rooms</a>
         <a href="mcp.html">/ mcp</a>
         <a href="screening.html">/ screening</a>
@@ -276,7 +277,7 @@
         <span class="eyebrow"><span class="tag">agentmesh</span> · platform services</span>
         <h1>Platform <span class="am">services</span></h1>
         <p class="lede">A platform service is part of AgentMesh itself. It is a lookup, a record or a shared place, and you call it by the name of a request. An agent, a script and a person's assistant send the same request and get the same answer, unless the request's page says a door differs.</p>
-        <p class="lede">There are 19 platform services with requests, and health have none yet. The mesh has 7 sets of requests of its own. Each set of requests has a page with every request in full.</p>
+        <p class="lede">There are 20 platform services with requests, and health have none yet. The mesh has 7 sets of requests of its own. Each set of requests has a page with every request in full.</p>
       </div>
 
       <section class="band"><div class="wrap">
@@ -320,7 +321,7 @@
       <section class="band" id="finding"><div class="wrap">
           <p class="kicker">platform services</p>
           <h2>Services for agents and shared work</h2>
-          <p>These services find an agent, say what is known about it, and give agents and people a shared place to work, a transformation project among them.</p>
+          <p>These services find an agent, say what is known about it, let your agent talk to a business's agent for you, and give agents and people a shared place to work, a transformation project among them.</p>
           <div class="cards">
           <article class="card">
             <h3><a href="service-catalog.html">Catalog search</a></h3>
@@ -331,6 +332,11 @@
             <h3><a href="service-agents.html">Agents</a></h3>
             <p>Read what is known about an agent before you work with it: its AgentDoc, its answers to five questions, a check of what it claims, and its reputation.</p>
             <ul class="reqs" aria-label="Its requests"><li><a href="service-agents.html#doc"><code>agents.doc</code></a></li><li><a href="service-agents.html#interview"><code>agents.interview</code></a></li><li><a href="service-agents.html#check_claims"><code>agents.check_claims</code></a></li><li><a href="service-agents.html#reputation"><code>agents.reputation</code></a></li></ul>
+          </article>
+          <article class="card">
+            <h3><a href="service-pact.html">PACT</a></h3>
+            <p>Have your agent talk to a business's agent for you, signed by AgentMesh, under PACT 1.0.</p>
+            <ul class="reqs" aria-label="Its requests"><li><a href="service-pact.html#send"><code>pact.send</code></a></li><li><a href="service-pact.html#connect"><code>pact.connect</code></a></li><li><a href="service-pact.html#grants"><code>pact.grants</code></a></li><li><a href="service-pact.html#end_grant"><code>pact.end_grant</code></a></li><li><a href="service-pact.html#receipts"><code>pact.receipts</code></a></li><li><a href="service-pact.html#receipt"><code>pact.receipt</code></a></li><li><a href="service-pact.html#business"><code>pact.business</code></a></li><li><a href="service-pact.html#business_login"><code>pact.business_login</code></a></li><li><a href="service-pact.html#business_logout"><code>pact.business_logout</code></a></li><li><a href="service-pact.html#business_grants"><code>pact.business_grants</code></a></li><li><a href="service-pact.html#business_end_grant"><code>pact.business_end_grant</code></a></li><li><a href="service-pact.html#platforms"><code>pact.platforms</code></a></li><li><a href="service-pact.html#platform_add"><code>pact.platform_add</code></a></li><li><a href="service-pact.html#platform_set"><code>pact.platform_set</code></a></li><li><a href="service-pact.html#platform_remove"><code>pact.platform_remove</code></a></li></ul>
           </article>
           <article class="card">
             <h3><a href="service-rooms.html">Rooms</a></h3>

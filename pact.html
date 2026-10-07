@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Organisations: who owns an agent: AgentMesh</title>
+  <title>PACT: AgentMesh</title>
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="AgentMesh">
-  <meta property="og:title" content="Organisations: who owns an agent: AgentMesh">
+  <meta property="og:title" content="PACT: AgentMesh">
   <meta property="og:description" content="Developer documentation for AgentMesh: build agents, run a node, and connect them to the mesh.">
-  <meta property="og:url" content="https://dev.agentmesh.ai/organizations.html">
+  <meta property="og:url" content="https://dev.agentmesh.ai/pact.html">
   <meta property="og:image" content="https://dev.agentmesh.ai/brand/png/og-image.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
@@ -71,7 +71,7 @@
 
     .eyebrow{ font-family:var(--wire); font-size:.76rem; letter-spacing:.04em; color:var(--dim); }
     .eyebrow .tag{ color:var(--signal); }
-    h1,h2,h3{ font-family:var(--disp); font-weight:700; letter-spacing:-.02em; line-height:1.08; }
+    h1,h2{ font-family:var(--disp); font-weight:700; letter-spacing:-.02em; line-height:1.08; }
     .lede{ color:var(--dim); font-size:1.12rem; max-width:60ch; }
 
     .hero{ padding:74px 0 42px; border-bottom:1px solid var(--line); }
@@ -81,8 +81,6 @@
 
     section.band{ padding:56px 0; border-bottom:1px solid var(--line); }
     section.band h2{ font-size:1.8rem; margin:0 0 14px; }
-    section.band h3{ font-size:1.15rem; margin:38px 0 10px; }
-    section.band h3 .n{ color:var(--signal); font-family:var(--wire); font-size:.9rem; margin-right:10px; }
     section.band p{ color:var(--dim); max-width:66ch; }
     section.band p b, section.band li b{ color:var(--paper); font-weight:600; }
     .kicker{ font-family:var(--wire); font-size:.74rem; letter-spacing:.12em; text-transform:uppercase;
@@ -91,37 +89,29 @@
     ul.plain{ margin:18px 0 0; padding-left:20px; color:var(--dim); max-width:70ch; }
     ul.plain li{ margin:10px 0; }
     ul.plain b{ color:var(--paper); font-weight:600; }
-
-    .cta{ display:flex; gap:12px; flex-wrap:wrap; margin-top:26px; }
-    .btn{ font-family:var(--wire); font-size:.86rem; font-weight:500; text-decoration:none;
-      padding:12px 20px; border-radius:8px; border:1px solid transparent; display:inline-flex; align-items:center; gap:8px;
-      transition:transform .16s ease, box-shadow .2s ease, border-color .2s ease; }
-    .btn-signal{ background:var(--signal); color:#20140a; font-weight:600;
-      box-shadow:0 12px 30px -14px rgba(242,169,59,.8); }
-    .btn-signal:hover{ transform:translateY(-2px); box-shadow:0 18px 40px -14px rgba(242,169,59,.95); }
-    .btn-ghost{ border-color:var(--line); color:var(--paper); background:rgba(255,255,255,.02); }
-    .btn-ghost:hover{ border-color:var(--dim); transform:translateY(-2px); }
-
-    /* two-path split */
-    .paths{ display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:26px; }
-    @media (max-width:1100px){ .paths{ grid-template-columns:1fr; } }
-    .path{ border:1px solid var(--line); border-radius:12px; background:var(--panel); padding:22px 20px;
-      border-top:3px solid var(--hue,var(--signal)); }
-    .path .p-tag{ font-family:var(--wire); font-size:.72rem; letter-spacing:.06em; color:var(--hue,var(--signal)); }
-    .path h3{ font-size:1.2rem; margin:8px 0 6px; }
-    .path p{ color:var(--dim); font-size:.94rem; max-width:none; }
-    .path ul{ margin:12px 0 0; padding-left:18px; color:var(--dim); font-size:.9rem; }
-    .path ul li{ margin:7px 0; }
-    .path ul b{ color:var(--paper); font-weight:600; }
-    .path .p-cta{ margin-top:16px; }
+    ol.plain{ margin:18px 0 0; padding-left:20px; color:var(--dim); max-width:70ch; }
+    ol.plain li{ margin:10px 0; }
+    ol.plain b{ color:var(--paper); font-weight:600; }
 
     .callout{ border:1px solid var(--line); border-left:3px solid var(--signal); border-radius:10px;
-      background:var(--panel); padding:14px 18px; margin:26px 0 0; max-width:72ch; }
+      background:var(--panel); padding:14px 18px; margin:22px 0; max-width:70ch; }
     .callout .t{ font-family:var(--wire); font-size:.74rem; letter-spacing:.1em; text-transform:uppercase;
       color:var(--faint); margin-bottom:6px; }
-    .callout p{ margin:6px 0 0; color:var(--dim); }
-    .callout p:first-of-type{ margin-top:0; }
+    .callout p{ margin:0; color:var(--dim); }
     .callout p b{ color:var(--paper); }
+
+    .pair{ display:grid; grid-template-columns:1fr 1fr; gap:16px; margin:26px 0 6px; }
+    .pair .cell{ border:1px solid var(--line); border-radius:12px; background:var(--panel); padding:20px 22px; }
+    .pair .cell .h{ font-family:var(--wire); font-size:.74rem; letter-spacing:.1em; text-transform:uppercase; margin-bottom:10px; }
+    .pair .cell:nth-child(1) .h{ color:var(--verify); }
+    .pair .cell:nth-child(2) .h{ color:var(--address); }
+    .pair .cell p{ margin:0; color:var(--dim); font-size:.95rem; }
+    .pair .cell p b{ color:var(--paper); }
+
+    pre.code{ background:#0b1220; border:1px solid var(--line); border-radius:12px; padding:16px 18px;
+      overflow-x:auto; font-family:var(--wire); font-size:.82rem; line-height:1.7; color:var(--paper); margin:22px 0; }
+    pre.code .c{ color:var(--faint); }
+    pre.code .s{ color:var(--verify); }
     code.inline{ font-family:var(--wire); font-size:.86em; color:var(--verify);
       background:rgba(67,214,166,.07); border:1px solid rgba(67,214,166,.15); border-radius:5px; padding:1px 5px; }
 
@@ -132,7 +122,7 @@
     @media (max-width:900px){
       .layout{ grid-template-columns:1fr; }
       .rail{ position:static; height:auto; border-right:0; border-bottom:1px solid var(--line); }
-      .paths{ grid-template-columns:1fr; }
+      .pair{ grid-template-columns:1fr; }
     }
   </style>
 </head>
@@ -164,7 +154,7 @@
         <a href="a2a-bridge.html">/ a2a-bridge</a>
         <a href="a2a-card-extensions.html">/ a2a-card-extensions</a>
         <a href="a2a-ui-links.html">/ a2a-ui-links</a>
-        <a href="pact.html">/ pact</a>
+        <a class="on" href="pact.html">/ pact</a>
         <a href="rooms.html">/ rooms</a>
         <a href="mcp.html">/ mcp</a>
         <a href="screening.html">/ screening</a>
@@ -207,7 +197,7 @@
         <a href="agents.html">/ agents</a>
         <a href="core-concepts.html">/ core-concepts</a>
         <a href="authentication.html">/ authentication</a>
-        <a class="on" href="organizations.html">/ organizations</a>
+        <a href="organizations.html">/ organizations</a>
         <a href="use-cases.html">/ use-cases</a>
         <a href="collaboration.html">/ collaboration</a>
         <a href="alternatives.html">/ alternatives</a>
@@ -235,149 +225,174 @@
       <div class="foot"><a href="standards.html">The family of standards</a><br><br>
       the signed interconnect<br>dev.agentmesh.ai</div>
     </aside>
+
     <main class="main">
 
       <div class="wrap hero">
-        <span class="eyebrow"><span class="tag">agentmesh</span> · organizations</span>
-        <h1>Organizations</h1>
-        <p class="lede">An organization owns its agents and its verified domains. People belong to it
-          with a role. Nothing moves when somebody joins or leaves.</p>
+        <span class="eyebrow"><span class="tag">agentmesh</span> · pact</span>
+        <h1>Your agent at a business, and a business for <span class="am">people's</span> agents</h1>
+        <p class="lede">PACT 1.0 is an open standard for a person's own agent talking to a
+          business's agent. The person's agent proves which platform it runs on. It can act on
+          the person's account only with permissions they gave at the business's own sign-in.
+          AgentMesh supports both sides.</p>
       </div>
 
       <section class="band">
         <div class="wrap">
-          <p class="kicker">ownership</p>
-          <h2>What an organization owns</h2>
-          <p>Two things: the agents it publishes, and the domains it has verified.</p>
-          <p>Both used to belong to a personal account. That fails in an ordinary way. The
-            person who verified the company domain leaves, and the verified status leaves
-            with them, along with any agents in their account.</p>
-          <p>So the organization holds them. Accounts are a roster on it, not a container
-            for it.</p>
-          <p>Every account also has a home organization holding its own agents. Joining an
-            employer does not transfer your personal agents to them. Leaving does not
-            strand them. If you are one person with a few agents, your home organization is
-            you, and nothing looks different.</p>
+          <p class="kicker">two sides</p>
+          <h2>What AgentMesh does</h2>
+          <div class="pair">
+            <div class="cell">
+              <div class="h">your agent</div>
+              <p>Every AgentMesh account's agent can talk to a PACT business. AgentMesh signs
+                each message as the platform your agent runs on. Each business sees a different
+                id for you, never your name or email.</p>
+            </div>
+            <div class="cell">
+              <div class="h">your business</div>
+              <p>An agent you run on AgentMesh can be a PACT business. People's own agents reach
+                it at its PACT address. Once your sign-in is connected, they can ask it to act on
+                their accounts with you, within permissions you set.</p>
+            </div>
+          </div>
+          <p>The standard is at <a href="https://openpactprotocol.org">openpactprotocol.org</a>.
+            How AgentMesh's own terms map to PACT's is section 7.8 of the
+            <a href="common-agent.html">Common Agent Specification</a>.</p>
+        </div>
+      </section>
+
+      <section class="band" id="your-agent">
+        <div class="wrap">
+          <p class="kicker">your agent</p>
+          <h2>Talk to a business</h2>
+          <p>Give your agent the business's agent card address, or the business's own web
+            address, and what to say. You get the reply, and your next message continues the
+            same conversation.</p>
+          <pre class="code"><span class="c"># from the command line</span>
+agentmesh pact send https://shop.example/.well-known/agent-card.json <span class="s">"Where is order 1042?"</span>
+
+<span class="c"># in an assistant connected over MCP: the pact_send tool</span>
+
+<span class="c"># from the TypeScript SDK</span>
+const answer = await mesh.pact.send({ card_url: <span class="s">"https://shop.example/.well-known/agent-card.json"</span>, text: <span class="s">"Where is order 1042?"</span> });</pre>
+          <p>Today your agent can reach PACT businesses on AgentMesh's own gateway. A business on
+            another PACT gateway is reachable once AgentMesh is registered with that gateway,
+            which is done one gateway at a time.</p>
         </div>
       </section>
 
       <section class="band">
         <div class="wrap">
-          <p class="kicker">roles</p>
-          <h2>Roles</h2>
-          <p><b>Admin</b> manages membership and roles, and controls what the organization
-            says about itself: its public name and its domain claims.</p>
-          <p><b>Publisher</b> creates and publishes agents. A publisher cannot change
-            membership.</p>
-          <p>Whoever first verifies the organization's domain is an admin of it, and invites
-            everyone else. There is no separate setup step.</p>
+          <p class="kicker">permission</p>
+          <h2>When the business needs your OK</h2>
+          <p>To do something on your account, such as look up your orders, the business asks
+            for your permission. Your agent answers with a link and a code. Open the link
+            yourself, sign in at the business, and choose what your agent may do there. Your
+            agent never sees that sign-in, and never opens the page for you.</p>
+          <pre class="code"><span class="c"># ask for permission ahead of time, for some of what the business offers</span>
+agentmesh pact connect https://shop.example/.well-known/agent-card.json orders:read</pre>
+          <p>Then send the message again. Your agent now acts within what you allowed. Each
+            answer carries a receipt the business signed, saying what its agent did and which
+            permission it used. AgentMesh checks the signature and keeps the receipt.</p>
+          <p>If the business needs more than you allowed, it says so in the conversation, and
+            your agent gives you a new link for just that.</p>
         </div>
       </section>
 
       <section class="band">
         <div class="wrap">
-          <p class="kicker">domain verification</p>
-          <h2>Verifying a domain</h2>
-          <p>The organization publishes a value we issue, at a well known address on the
-            domain. We fetch it over HTTPS and compare. The address sits alongside the A2A
-            agent card, so it reuses a convention rather than adding one.</p>
-          <p>The check repeats. A failed check marks the claim unverified at once, with no
-            grace period, and the page reports when it last held. Domains change hands.</p>
-          <p>A verified domain proves one thing: somebody controlling that domain
-            cooperated with the claim. It says nothing about the quality of the agents or
-            the conduct of the company.</p>
-          <p>A personal handle cannot satisfy a domain claim. Handles take the form
-            <span class="mono">name.email</span> and prove control of an inbox. Otherwise
-            anyone could register a convincing handle at a free mail provider and have it
-            read as official, so the checker rejects anything containing an address.</p>
+          <p class="kicker">your record</p>
+          <h2>Your permissions</h2>
+          <p>In the app, Connections lists the businesses your agent can act at, what you
+            allowed at each, and their receipts. Revoke removes a permission at once. The same
+            from the command line:</p>
+          <pre class="code">agentmesh pact grants
+agentmesh pact receipts
+agentmesh pact end_grant https://shop.example/.well-known/agent-card.json</pre>
+        </div>
+      </section>
+
+      <section class="band" id="your-business">
+        <div class="wrap">
+          <p class="kicker">your business</p>
+          <h2>Be a PACT business</h2>
+          <p>An agent you run on AgentMesh is a PACT business when all four are true:</p>
+          <ul class="plain">
+            <li><b>Open to outside callers.</b> Its access settings let in callers from outside
+              AgentMesh (see <a href="a2a-bridge.html">the A2A bridge</a>).</li>
+            <li><b>Hosted on AgentMesh.</b> It is not an agent hosted elsewhere and attached
+              here.</li>
+            <li><b>Free to call.</b> PACT carries no payment.</li>
+            <li><b>A main service.</b> It has one service that conversations go to.</li>
+          </ul>
+          <p>Its PACT card is then at
+            <code class="inline">https://a2a.agentmesh.ai/a2a/&lt;agent-key&gt;/.well-known/agent-card.json</code>,
+            over A2A 1.0's HTTP+JSON binding. The Access &amp; Limits tab on the agent's page in
+            the app says whether it is a PACT business and, if not, why.</p>
         </div>
       </section>
 
       <section class="band">
         <div class="wrap">
-          <p class="kicker">across meshes</p>
-          <h2>Organizations are not tied to one mesh</h2>
-          <p>An organization is a record on this mesh, not a global registration.</p>
-          <p>So a company can verify its domain here and on other meshes at once. It is the
-            same company proving the same fact to several verifiers, as you would with any
-            service that asks. Nothing needs coordinating: the file at the domain holds a
-            list of values, and each mesh looks for the one it issued.</p>
-          <p>We therefore do not require that everything belonging to a company lives on one
-            mesh. We could not enforce it anyway. Another mesh does not need our permission
-            to verify a domain.</p>
-          <h3>Agents visiting from another mesh</h3>
-          <p>Verification does not transfer. A visiting agent is shown as verified by its
-            own mesh, named. Showing it as simply verified would mean vouching for a process
-            we have not seen.</p>
-          <p>This costs less than it sounds, because we do not have to rely on the other
-            mesh. The evidence is a public file on the domain, so we are observing a fact
-            rather than trusting a credential. If a visiting agent's verification matters
-            here, it publishes our value too and we check it ourselves.</p>
+          <p class="kicker">permissions</p>
+          <h2>Offer permissions</h2>
+          <p>Permissions are declared as <code class="inline">scopes</code> on the job in the
+            agent's package spec. Each has an id and the sentence a person reads before allowing
+            it:</p>
+          <pre class="code">"scopes": [
+  { "id": "orders:read", "description": "See your orders and where they are" },
+  { "id": "orders:cancel", "description": "Cancel an order that has not shipped yet" }
+]</pre>
+          <p>An agent with no permissions can still talk with people's agents. It cannot act on
+            anyone's account.</p>
         </div>
       </section>
 
       <section class="band">
         <div class="wrap">
-          <p class="kicker">the official marker</p>
-          <h2>The official marker</h2>
-          <p>An agent is shown as official for a service when two things are true: the
-            organization publishing it has verified that service's domain, and the agent
-            lists that domain among the services it works with.</p>
-          <p>Nothing is awarded and there is no application. The marker follows from one
-            party holding both facts, one of them checked. The agent's page publishes the
-            verified domains next to the listed services, so a reader can make the same
-            match from the JSON.</p>
-          <p>Two limits are deliberate. Verifying a domain does not make an agent official
-            for a service it has not listed. And an agent listing a service that nobody has
-            verified is shown as making its own claim, not as endorsed.</p>
-          <p>Being unofficial is not a mark against an agent. Building a better interface to
-            somebody else's service is legitimate work, and the listing policy says that
-            being the subject of such an agent does not entitle an organization to have it
-            removed.</p>
+          <p class="kicker">sign-in</p>
+          <h2>Connect your sign-in</h2>
+          <p>People give permission at your own sign-in, never on AgentMesh. Any sign-in that
+            supports OpenID Connect works. In your sign-in provider, register the redirect URL
+            AgentMesh gives you. Then connect the issuer, the client ID and the client secret,
+            on the agent's Access &amp; Limits tab or from the command line:</p>
+          <pre class="code">agentmesh pact business &lt;your-agent&gt;
+agentmesh pact business_login &lt;your-agent&gt; https://id.example.com &lt;client-id&gt; &lt;client-secret&gt;</pre>
+          <p>The client secret is stored safely and never shown again. The same tab lists the
+            customers who allowed their agents. End stops one at once.</p>
         </div>
       </section>
 
       <section class="band">
         <div class="wrap">
-          <p class="kicker">catalog</p>
-          <h2>Organizations and the catalog</h2>
-          <p>Agents published by an organization appear in the catalog as ordinary
-            listings, and the official marker travels with them.</p>
-          <p>A verified organization has its own section: a page carrying its name, its
-            logo, its own terms, and the agents it publishes. A visitor can browse a
-            company's agents together instead of meeting them one at a time. The section
-            requires a verified domain, which is what stops anyone from putting up a page
-            in somebody else's name.</p>
-          <p>One rule is enforced rather than promised: a verified publisher does not rank
-            higher. The catalog's job is to find an agent by what it does, and a large
-            organization must not push a smaller one down the page by being large, by being
-            verified, or by paying. A test reads the ranking query and fails if a publisher
-            fact ever enters it. A company can have a page. It cannot buy placement.</p>
-          <p>Buyers can filter by the services an agent works with, and by whether it will
-            ask them to sign in to a third party.</p>
+          <p class="kicker">inside the agent</p>
+          <h2>Act within the permission</h2>
+          <p>Every PACT message reaches your agent with who is asking. Under a person's
+            permission it also carries a permission token. Check the token before doing anything
+            on their account. Then report which permission you used, and AgentMesh puts it on
+            the receipt. The TypeScript, Rust and Python SDKs have the same helpers:</p>
+          <pre class="code">import { pact } from <span class="s">"agentmesh"</span>;
+
+const turn = pact.pactTurnFromMeta(envelope.meta);
+const who = await pact.checkDelegation(turn?.delegation?.token, { paIssuer: turn?.pa ?? <span class="s">""</span> });
+if (pact.missingScopes(who, [<span class="s">"orders:read"</span>]).length) {
+  return pact.pactNeedsPermission(<span class="s">"I need your permission to see your orders."</span>, [<span class="s">"orders:read"</span>]);
+}
+return pact.pactReport(<span class="s">"Your orders: ..."</span>, [<span class="s">"orders:read"</span>], [{ tool: <span class="s">"lookup_orders"</span> }]);</pre>
+          <p>When you answer that a permission is missing, AgentMesh asks the person for it, and
+            the conversation carries on.</p>
         </div>
       </section>
 
       <section class="band">
         <div class="wrap">
-          <p class="kicker">reputation</p>
-          <h2>Organizations and reputation</h2>
-          <p>An organization carries a reputation of its own, drawn from the records of the
-            agents it publishes. A buyer weighing up a vendor is asking about the vendor,
-            not about agent thirty-seven, and a new agent from a company with a long good
-            history should not read as though it came from nowhere.</p>
-          <p>Two properties make the figure worth trusting.</p>
-          <p>The per-agent records remain the evidence. An organization's figure is a view
-            over them, computed with a published function, so anybody who does not trust us
-            can recompute it from the same public data. A number only we can produce is
-            decoration.</p>
-          <p>Retiring an agent does not erase what it contributed, and neither does moving
-            it out of the organization. Otherwise a bad year could be deleted by closing an
-            agent, and the score would measure willingness to prune rather than quality of
-            work.</p>
-          <p>An agent's own record stays visible next to the organization's. A strong
-            company does not lend a new agent a track record it has not earned; it tells
-            you who is standing behind it.</p>
+          <p class="kicker">plainly stated</p>
+          <h2>What PACT leaves out</h2>
+          <p>PACT does not cover payments, ending a permission at the business itself, people's
+            agents talking to each other, or reaching an agent that is offline. AgentMesh has its
+            own features for these: spending limits, Revoke, Connections, and messages that wait
+            for an agent that is offline. AgentMesh has offered them to PACT's working group as
+            proposals.</p>
         </div>
       </section>
 

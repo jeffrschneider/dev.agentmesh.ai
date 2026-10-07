@@ -198,6 +198,7 @@
         <a href="a2a-bridge.html">/ a2a-bridge</a>
         <a href="a2a-card-extensions.html">/ a2a-card-extensions</a>
         <a href="a2a-ui-links.html">/ a2a-ui-links</a>
+        <a href="pact.html">/ pact</a>
         <a href="rooms.html">/ rooms</a>
         <a href="mcp.html">/ mcp</a>
         <a href="screening.html">/ screening</a>
@@ -277,7 +278,7 @@
         <span class="eyebrow"><span class="tag">agentmesh</span> · platform service · catalog</span>
         <h1>Catalog search</h1>
         <p class="lede">Search the catalog for a solution or an agent by what it does, in plain words. A solution is several agents wired together to do a whole job, and a person starts one in the app; an agent does one part and is reached by a message. Business processes that match come back too, marked as descriptions of how work is done that nothing runs. Each agent says what it needs from you before it can work and whether anything about it was checked.</p>
-        <p class="lede"><b>Who can call it:</b> Anyone signed in.</p>
+        <p class="lede"><b>Who can call it:</b> Anyone, with or without an agent: a machine that has no agent yet may search before it joins.</p>
         <p class="lede"><b>What a call costs:</b> No model is called by the request. The catalog ranks the results itself.</p>
       </div>
 
@@ -412,10 +413,9 @@
           <table class="tbl"><thead><tr><th>What uses it</th><th>What for</th></tr></thead>
 <tbody>
 <tr><td data-label="What uses it">The Search the catalog page</td><td data-label="What for">A person's plain-words search goes to the same catalog search, and a search that finds nothing is counted for the What's missing page.</td></tr>
-<tr><td data-label="What uses it">The catalog agent</td><td data-label="What for">It answers requests sent over the mesh asking who can do something by calling the same catalog search.</td></tr>
-<tr><td data-label="What uses it">The solution planner</td><td data-label="What for">It searches agentcatalog.com for the agents AgentMesh provides and builds its plans only on agents it finds there.</td></tr>
+<tr><td data-label="What uses it">The catalog agent</td><td data-label="What for">It answers requests sent over the mesh asking who can do something by calling the same catalog search, and answers each step of a plan the same way at Source, checking each listing's declared offerings.</td></tr>
 <tr><td data-label="What uses it">Gap analysis on Jobs for agents</td><td data-label="What for">Analyzing a line on the Jobs for agents page searches the catalog for listings that could do that job.</td></tr>
-<tr><td data-label="What uses it">Prompt to prod's Source step (planned)</td><td data-label="What for">The plan is for each plan step in Prompt to prod to ask the catalog agent for an existing agent or solution, and for the catalog agent to answer by calling this service and the registry list.</td></tr>
+<tr><td data-label="What uses it">Prompt to prod's Source step</td><td data-label="What for">The Build page sends each step of the solution planner's plan to the catalog agent, which answers with an existing agent, a solution, or build one, by calling this service and reading each candidate's descriptor.</td></tr>
 </tbody></table>
         </div></section>
 
@@ -424,6 +424,7 @@
           <table class="tbl"><thead><tr><th>Version</th><th>Date</th><th>What changed</th></tr></thead>
 <tbody>
 <tr><td data-label="Version">1</td><td data-label="Date">2026-10-05</td><td data-label="What changed">The first definition renamed find_agent to catalog_search and put catalog search on the SDKs and the command line.</td></tr>
+<tr><td data-label="Version">2</td><td data-label="Date">2026-10-07</td><td data-label="What changed">Anyone may search, with no agent and no key: a new customer's first search, before joining, was refused with &quot;This machine has no agent yet&quot;. A machine with an agent still signs.</td></tr>
 </tbody></table>
           <h3>Old names</h3>
           <p>Each old name below still works until the day in its row, 30 days after the release that renamed it. Every answer to an old name says the new name and that day, like this: "find_agent was renamed to catalog_search. This name stops working on 2026-11-04; use catalog_search." After that day the old name is refused, and the refusal gives the new name.</p>

@@ -9,6 +9,9 @@ PROJECT=langbench-1528148150979
 GCLOUD="${GCLOUD:-/c/Users/jeffr/google-cloud-sdk-extract/google-cloud-sdk/bin/gcloud.cmd}"
 
 cd "$(dirname "$0")"
+# Refresh sitemap.xml and robots.txt from the tracked pages before staging, so
+# search engines are always handed the current list. Commit them if they change.
+node tools/build-sitemap.mjs . https://dev.agentmesh.ai
 STAGE=$(mktemp -d)
 trap 'rm -rf "$STAGE"' EXIT
 git ls-files | grep -v -e '^CNAME$' -e '^deploy\.sh$' | while read -r f; do

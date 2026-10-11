@@ -125,8 +125,10 @@
       .hero{ padding:40px 16px 28px; }
     }
   </style>
+  <link rel="stylesheet" href="theme.css">
+  <script src="theme.js"></script>
   <style>
-    /* Generated pages: high contrast, and nothing in the page's own text smaller than 14px. */
+    /* Generated pages: high contrast, and nothing in the page's own text smaller than 14px. Colours are the site's tokens only (its theme.css sets them for light and dark), never a fixed colour. */
     .main code{ font-family:var(--wire); font-size:.875rem; color:var(--verify); overflow-wrap:anywhere; }
     .main .kicker{ font-family:var(--wire); font-size:.875rem; letter-spacing:.08em; text-transform:uppercase; color:var(--text2); margin:0 0 10px; }
     .main h3{ font-size:1.25rem; margin:30px 0 10px; color:var(--paper); }
@@ -137,12 +139,12 @@
     .main .crumbs{ font-family:var(--wire); font-size:.875rem; color:var(--text2); margin:0 0 18px; }
     .main .crumbs a, .main a.more{ color:var(--verify); }
     table.tbl{ border-collapse:collapse; margin:14px 0 8px; width:100%; border:1px solid var(--line); border-radius:10px; overflow:hidden; }
-    table.tbl th{ font-family:var(--wire); font-size:.875rem; letter-spacing:.06em; text-transform:uppercase; color:var(--paper); text-align:left; padding:10px 14px; border-bottom:1px solid var(--line); background:rgba(255,255,255,.03); }
+    table.tbl th{ font-family:var(--wire); font-size:.875rem; letter-spacing:.06em; text-transform:uppercase; color:var(--paper); text-align:left; padding:10px 14px; border-bottom:1px solid var(--line); background:var(--panel); }
     table.tbl td{ padding:10px 14px; border-bottom:1px solid var(--line); font-size:1rem; color:var(--text); vertical-align:top; }
     table.tbl tr:last-child td{ border-bottom:0; }
     table.tbl td:first-child, table.tbl td[data-label="Date"], table.tbl td[data-label="Stops working"]{ white-space:nowrap; }
     table.tbl td[data-label="What uses it"]{ white-space:normal; min-width:12em; }
-    pre.code{ background:#0b1220; border:1px solid var(--line); border-radius:10px; padding:14px 16px; margin:8px 0 14px;
+    pre.code{ background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:14px 16px; margin:8px 0 14px;
       font-family:var(--wire); font-size:.875rem; line-height:1.55; color:var(--paper); overflow-x:auto; white-space:pre; max-width:100%; }
     pre.code:focus{ outline:2px solid var(--verify); outline-offset:2px; }
     .doors{ display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:14px; margin:18px 0 10px; }
@@ -150,8 +152,8 @@
     .door pre.code{ margin:0; }
     .door p.missing{ margin:0; color:var(--text2); }
     .cards{ display:grid; gap:12px; margin-top:16px; }
-    .card{ background:var(--panel); border:1px solid var(--line); border-left:6px solid #e0a52a; border-radius:10px; padding:16px 20px; }
-    .card.mesh{ border-left-color:#5aa2ea; }
+    .card{ background:var(--panel); border:1px solid var(--line); border-left:6px solid var(--signal); border-radius:10px; padding:16px 20px; }
+    .card.mesh{ border-left-color:var(--address); }
     .card h3{ margin:0 0 6px; font-size:1.2rem; }
     .card h3 a{ color:var(--paper); text-decoration-color:var(--verify); text-underline-offset:4px; }
     .card p{ margin:0 0 8px; }
@@ -174,102 +176,139 @@
 <body>
   <div class="layout">
 
-    <aside class="rail">
-      <a class="brand" href="./" aria-label="AgentMesh home"><svg class="mark" viewBox="0 0 32 32" width="22" height="22" aria-hidden="true" focusable="false"><rect x="3" y="3" width="12" height="12" rx="3.5" fill="none" stroke="currentColor" stroke-width="2" opacity=".35"/><rect x="17" y="17" width="12" height="12" rx="3.5" fill="none" stroke="currentColor" stroke-width="2" opacity=".35"/><rect x="3" y="17" width="12" height="12" rx="3.5" fill="#43D6A6"/><rect x="17" y="3" width="12" height="12" rx="3.5" fill="#F2A93B"/></svg><span class="wm">Agent<b>Mesh</b></span></a>
-      <nav>
-        <div class="grp">agentmesh</div>
-        <a href="https://agentmesh.ai/">/ &larr; agentmesh.ai</a>
-        <a href="https://personal.agentmesh.ai">/ sign in</a>
-        <a href="https://agentmesh.ai/waitlist.html">/ join the waitlist</a>
-        <div class="grp">build</div>
-        <a href="getting-started.html">/ getting-started</a>
-        <a href="platform-map.html">/ platform-map</a>
-        <a class="on" href="platform-services.html">/ platform-services</a>
-        <a href="walking-the-lifecycle.html">/ walking-the-lifecycle</a>
-        <a href="bring-your-own-agent.html">/ bring-your-own-agent</a>
-        <a href="agent-in-your-cloud.html">/ agent-in-your-cloud</a>
-        <a href="your-own-cloud.html">/ cloud-permissions</a>
-        <a href="try-the-mesh.html">/ sandbox: guest access</a>
-        <a href="get-a-name.html">/ get-a-name</a>
-        <a href="examples.html">/ examples</a>
-        <a href="sdks.html">/ sdks</a>
-        <a href="nodes.html">/ nodes</a>
-        <a href="audit.html">/ audit</a>
-        <a href="anchoring.html">/ anchoring</a>
-        <a href="a2a-bridge.html">/ a2a-bridge</a>
-        <a href="a2a-card-extensions.html">/ a2a-card-extensions</a>
-        <a href="a2a-ui-links.html">/ a2a-ui-links</a>
-        <a href="pact.html">/ pact</a>
-        <a href="rooms.html">/ rooms</a>
-        <a href="mcp.html">/ mcp</a>
-        <a href="screening.html">/ screening</a>
-        <a href="observability.html">/ observability</a>
-        <div class="grp">sell &amp; hire</div>
-        <a href="selling.html">/ selling</a>
-        <a href="catalog.html">/ catalog</a>
-        <a href="credits.html">/ credits</a>
-        <a href="spending-controls.html">/ spending-controls</a>
-        <a href="account-api.html">/ account-api</a>
-        <div class="grp">run your own</div>
-        <a href="running-a-mesh.html">/ running-a-mesh</a>
-        <a href="clouds.html">/ clouds</a>
-        <a href="platform-agents.html">/ platform-agents</a>
-        <a href="operator-obligations.html">/ operator-obligations</a>
-        <a href="operator-revenue.html">/ operator-revenue</a>
-        <a href="settlement.html">/ settlement</a>
-        <a href="clearing-interface.html">/ clearing-interface</a>
-        <div class="grp">run on google cloud</div>
-        <a href="for-google.html">/ overview</a>
-        <a href="for-google-instance.html">/ 01 your own mesh</a>
-        <a href="for-google-onramp.html">/ 02 on-ramp</a>
-        <a href="for-google-compute.html">/ 03 compute</a>
-        <a href="for-google-network.html">/ 04 network</a>
-        <a href="for-google-credential.html">/ 05 credentials</a>
-        <a href="for-google-traces.html">/ 06 traces</a>
-        <a href="for-google-screening.html">/ 07 screening</a>
-        <a href="for-google-example.html">/ worked example</a>
-        <div class="grp">run on azure</div>
-        <a href="for-microsoft.html">/ overview</a>
-        <a href="for-microsoft-instance.html">/ 01 your own mesh</a>
-        <a href="for-microsoft-onramp.html">/ 02 on-ramp</a>
-        <a href="for-microsoft-compute.html">/ 03 compute</a>
-        <a href="for-microsoft-network.html">/ 04 network</a>
-        <a href="for-microsoft-credential.html">/ 05 credentials</a>
-        <a href="for-microsoft-traces.html">/ 06 traces</a>
-        <a href="for-microsoft-screening.html">/ 07 screening</a>
-        <a href="for-microsoft-example.html">/ worked example</a>
-        <div class="grp">concepts</div>
-        <a href="agents.html">/ agents</a>
-        <a href="core-concepts.html">/ core-concepts</a>
-        <a href="authentication.html">/ authentication</a>
-        <a href="organizations.html">/ organizations</a>
-        <a href="use-cases.html">/ use-cases</a>
-        <a href="collaboration.html">/ collaboration</a>
-        <a href="alternatives.html">/ alternatives</a>
-        <a href="architecture.html">/ architecture</a>
-        <a href="topologies.html">/ topologies</a>
-        <a href="world-wide-mesh.html">/ world-wide-mesh</a>
-        <a href="budgets-and-allowances.html">/ budgets-and-allowances</a>
-        <div class="grp">reference</div>
-        <a href="common-agent.html">/ common-agent</a>
-        <a href="https://agentmessaging.ai/spec.html">/ specification ↗</a>
-        <a href="related-specs.html">/ related-specs</a>
-        <a href="standards.html">/ standards</a>
-        <a href="sdk-reference.html">/ sdk-reference</a>
-        <a href="cli.html">/ cli</a>
-        <a href="console.html">/ console</a>
-        <a href="adapter-cli.html">/ adapter-cli</a>
-        <a href="what-it-sends.html">/ what-it-sends</a>
-        <a href="implementation-status.html">/ implementation-status</a>
-        <a href="wire-api.html">/ wire-api</a>
-        <a href="agent-credential.html">/ agent-credential</a>
-        <a href="job-credential.html">/ job-credential</a>
-        <a href="node-credential.html">/ node-credential</a>
-        <a href="faq.html">/ faq</a>
+    <!-- BEGIN menu, written by tools/build-menu.mjs from tools/menu.mjs -->
+    <aside class="sidenav" id="sidenav">
+      <div class="sn-head">
+        <a class="sn-brand" href="./" aria-label="AgentMesh developer docs home"><svg class="sn-mark" viewBox="0 0 32 32" width="24" height="24" aria-hidden="true" focusable="false"><rect x="3" y="3" width="12" height="12" rx="3.5" fill="none" stroke="currentColor" stroke-width="2"/><rect x="17" y="17" width="12" height="12" rx="3.5" fill="none" stroke="currentColor" stroke-width="2"/><rect x="3" y="17" width="12" height="12" rx="3.5" fill="#1FA67A"/><rect x="17" y="3" width="12" height="12" rx="3.5" fill="#F2A93B"/></svg><span class="sn-wm">Agent<b>Mesh</b></span></a>
+        <button class="sn-btn" id="theme-toggle" type="button" aria-label="Switch between light and dark"><span class="sn-to-dark"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M13.5 9.6A5.6 5.6 0 0 1 6.4 2.5a5.6 5.6 0 1 0 7.1 7.1z" fill="currentColor"/></svg></span><span class="sn-to-light"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="3.2" fill="currentColor"/><g stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M8 1v1.8M8 13.2V15M1 8h1.8M13.2 8H15M3 3l1.3 1.3M11.7 11.7L13 13M3 13l1.3-1.3M11.7 4.3L13 3"/></g></svg></span><span class="sn-to-dark">Dark</span><span class="sn-to-light">Light</span></button>
+        <button class="sn-btn sn-menu" id="menu-toggle" type="button" aria-expanded="false" aria-controls="sidenav"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 4h12M2 8h12M2 12h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Menu</button>
+      </div>
+      <nav class="sn-nav" aria-label="Developer docs">
+        <details class="sn-sec" open>
+          <summary>AgentMesh<svg class="sn-chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+          <div class="sn-items">
+            <a href="https://agentmesh.ai/">Back to agentmesh.ai</a>
+            <a href="https://personal.agentmesh.ai">Sign in</a>
+            <a href="https://agentmesh.ai/waitlist.html">Join the waitlist</a>
+          </div>
+        </details>
+        <details class="sn-sec" open>
+          <summary>Build<svg class="sn-chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+          <div class="sn-items">
+            <a href="getting-started.html">Getting started</a>
+            <a href="platform-map.html">Platform map</a>
+            <a class="on" href="platform-services.html">Platform services</a>
+            <a href="walking-the-lifecycle.html">Walking the lifecycle</a>
+            <a href="bring-your-own-agent.html">Bring your own agent</a>
+            <a href="agent-in-your-cloud.html">Agent in your cloud</a>
+            <a href="your-own-cloud.html">Cloud permissions</a>
+            <a href="try-the-mesh.html">Sandbox guest access</a>
+            <a href="get-a-name.html">Get a name</a>
+            <a href="examples.html">Examples</a>
+            <a href="sdks.html">SDKs</a>
+            <a href="nodes.html">Nodes</a>
+            <a href="audit.html">Audit</a>
+            <a href="anchoring.html">Anchoring</a>
+            <a href="a2a-bridge.html">A2A bridge</a>
+            <a href="a2a-card-extensions.html">A2A card extensions</a>
+            <a href="a2a-ui-links.html">A2A UI links</a>
+            <a href="pact.html">PACT</a>
+            <a href="rooms.html">Rooms</a>
+            <a href="mcp.html">MCP</a>
+            <a href="screening.html">Screening</a>
+            <a href="observability.html">Observability</a>
+          </div>
+        </details>
+        <details class="sn-sec">
+          <summary>Sell and hire<svg class="sn-chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+          <div class="sn-items">
+            <a href="selling.html">Selling</a>
+            <a href="catalog.html">Catalog</a>
+            <a href="credits.html">Credits</a>
+            <a href="spending-controls.html">Spending controls</a>
+            <a href="account-api.html">Account API</a>
+          </div>
+        </details>
+        <details class="sn-sec">
+          <summary>Run your own<svg class="sn-chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+          <div class="sn-items">
+            <a href="running-a-mesh.html">Running a mesh</a>
+            <a href="clouds.html">Clouds</a>
+            <a href="platform-agents.html">Platform agents</a>
+            <a href="operator-obligations.html">Operator obligations</a>
+            <a href="operator-revenue.html">Operator revenue</a>
+            <a href="settlement.html">Settlement</a>
+            <a href="clearing-interface.html">Clearing interface</a>
+          </div>
+        </details>
+        <details class="sn-sec">
+          <summary>Run on Google Cloud<svg class="sn-chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+          <div class="sn-items">
+            <a href="for-google.html">Overview</a>
+            <a href="for-google-instance.html">1. Your own mesh</a>
+            <a href="for-google-onramp.html">2. On-ramp</a>
+            <a href="for-google-compute.html">3. Compute</a>
+            <a href="for-google-network.html">4. Network</a>
+            <a href="for-google-credential.html">5. Credentials</a>
+            <a href="for-google-traces.html">6. Traces</a>
+            <a href="for-google-screening.html">7. Screening</a>
+            <a href="for-google-example.html">Worked example</a>
+          </div>
+        </details>
+        <details class="sn-sec">
+          <summary>Run on Azure<svg class="sn-chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+          <div class="sn-items">
+            <a href="for-microsoft.html">Overview</a>
+            <a href="for-microsoft-instance.html">1. Your own mesh</a>
+            <a href="for-microsoft-onramp.html">2. On-ramp</a>
+            <a href="for-microsoft-compute.html">3. Compute</a>
+            <a href="for-microsoft-network.html">4. Network</a>
+            <a href="for-microsoft-credential.html">5. Credentials</a>
+            <a href="for-microsoft-traces.html">6. Traces</a>
+            <a href="for-microsoft-screening.html">7. Screening</a>
+            <a href="for-microsoft-example.html">Worked example</a>
+          </div>
+        </details>
+        <details class="sn-sec">
+          <summary>Concepts<svg class="sn-chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+          <div class="sn-items">
+            <a href="agents.html">Agents</a>
+            <a href="core-concepts.html">Core concepts</a>
+            <a href="authentication.html">Authentication</a>
+            <a href="organizations.html">Organizations</a>
+            <a href="use-cases.html">Use cases</a>
+            <a href="collaboration.html">Collaboration</a>
+            <a href="alternatives.html">Alternatives</a>
+            <a href="architecture.html">Architecture</a>
+            <a href="topologies.html">Topologies</a>
+            <a href="world-wide-mesh.html">World-wide mesh</a>
+            <a href="budgets-and-allowances.html">Budgets and allowances</a>
+          </div>
+        </details>
+        <details class="sn-sec">
+          <summary>Reference<svg class="sn-chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+          <div class="sn-items">
+            <a href="common-agent.html">The Common Agent</a>
+            <a href="https://agentmessaging.ai/spec.html">Specification<span class="sn-ext" aria-hidden="true">&#8599;</span></a>
+            <a href="related-specs.html">Related specifications</a>
+            <a href="standards.html">Standards</a>
+            <a href="sdk-reference.html">SDK reference</a>
+            <a href="cli.html">CLI</a>
+            <a href="console.html">Console</a>
+            <a href="adapter-cli.html">Adapter CLI</a>
+            <a href="what-it-sends.html">What it sends</a>
+            <a href="implementation-status.html">Implementation status</a>
+            <a href="wire-api.html">Wire API</a>
+            <a href="agent-credential.html">Agent credential</a>
+            <a href="job-credential.html">Job credential</a>
+            <a href="node-credential.html">Node credential</a>
+            <a href="faq.html">FAQ</a>
+          </div>
+        </details>
       </nav>
-      <div class="foot"><a href="standards.html">The family of standards</a><br><br>
-      the signed interconnect<br>dev.agentmesh.ai</div>
+      <div class="sn-foot"><a href="standards.html">The family of standards</a><br>The signed interconnect<br>dev.agentmesh.ai</div>
     </aside>
+    <!-- END menu -->
 
     <main class="main">
       <!-- GENERATED by node platform-services/gen.mjs --site in the AgentMesh repository from platform-services/names.json. Do not edit. -->

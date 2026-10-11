@@ -15,6 +15,43 @@ and an uncommitted edit to an existing file will not ship either. And after
 deploying, fetch the live URL and check your change is actually on it: a clean
 push and a green script are not evidence about what the CDN is handing out.
 
+## Readable colours, and the gate that keeps them
+
+The site is light by default (dark text on white, a warm off-white menu) and
+dark only when the reader presses the Dark switch at the top of the menu. The
+palette lives in one file, `theme.css`, which every page loads after its own
+`<style>`: it defines the tokens for both themes, maps the names the pages'
+own CSS was written with (`--ink`, `--panel`, `--paper`, `--dim`, `--faint`,
+`--signal`, `--verify`, `--address`, `--broadcast`) onto them, and styles the
+menu. `theme.js` does the switch and the phone Menu button. Each token's
+measured contrast is in a comment beside it.
+
+The floor is **4.5:1 for every piece of text at any size** (body text sits at
+7:1 or more), in both themes. In a page's CSS use the tokens, never a
+hard-coded colour, an `rgba()` text colour or `opacity` on text; a hard-coded
+dark background (`#0b1220` and the like) is how text went unreadable before.
+
+`deploy.sh` runs the contrast gate, `node tools/contrast-gate.mjs`, before it
+uploads anything. It opens every tracked page, served locally, in light and
+dark at 1440 and 390 px wide, with every menu section, the phone menu and the
+analytics consent bar open, and measures every piece of text against what is
+actually behind it. **One element below 4.5:1 and the deploy is refused**,
+with each failure listed as page, theme and width, element, text and colours.
+Run it yourself before committing a page; `--pages a.html,b.html` checks only
+those, and `--base https://dev.agentmesh.ai/` checks the live site. It needs
+playwright (`cd tools && npm ci`); text inside an image (`ref-arch.svg`) is
+the one thing it cannot see.
+
+## The menu is generated
+
+The left menu is written into every page by `node tools/build-menu.mjs`, from
+`tools/menu.mjs`: human titles, one collapsible section per group, the page's
+own entry highlighted. To add, rename or move a page in the menu, edit
+`tools/menu.mjs` and run the script; never edit a page's menu by hand (it sits
+between `<!-- BEGIN menu ... -->` and `<!-- END menu -->`). The script skips
+the pages the platform-services generator writes: they copy the menu from
+`platform-map.html`, so regenerate them after a menu change.
+
 ## No em dashes
 
 **Do not use em dashes (`—`, U+2014) anywhere in the site's prose.** This

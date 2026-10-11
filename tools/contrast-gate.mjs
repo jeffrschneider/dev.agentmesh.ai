@@ -11,11 +11,15 @@
 //   node tools/contrast-gate.mjs --pages a.html,b.html              only these
 //
 // deploy.sh runs it before publishing and refuses on a failure.
-import { chromium } from "playwright";
+import { createRequire } from "node:module";
 import { createServer } from "node:http";
 import { readFileSync, existsSync, statSync, readdirSync } from "node:fs";
 import { execSync } from "node:child_process";
 import { join, extname, resolve } from "node:path";
+
+// playwright from this tools folder (npm ci), or from the folder named in
+// PLAYWRIGHT_FROM (a repository that already has it installed).
+const { chromium } = createRequire(join(process.env.PLAYWRIGHT_FROM || import.meta.dirname, "x.js"))("playwright");
 
 const FLOOR = 4.5;
 const args = process.argv.slice(2);
@@ -28,7 +32,15 @@ const listPages = () => {
     if (execSync("git rev-parse --show-toplevel", { cwd: root, encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim().replace(/\\/g, "/").toLowerCase() === root.replace(/\\/g, "/").toLowerCase())
       return execSync("git ls-files *.html", { cwd: root, encoding: "utf8" }).split("\n").filter(Boolean);
   } catch {}
-  return readdirSync(root).filter((f) => f.endsWith(".html")).sort();
+  const out = [];
+  (function walk(dir, rel) {
+    for (const f of readdirSync(dir)) {
+      if (["node_modules", ".git", "tools"].includes(f)) continue;
+      const p = join(dir, f), r = rel ? rel + "/" + f : f;
+      if (statSync(p).isDirectory()) walk(p, r); else if (f.endsWith(".html")) out.push(r);
+    }
+  })(root, "");
+  return out.sort();
 };
 let pages = opt("--pages") ? opt("--pages").split(",") : listPages();
 // Pages with no visible body of their own: the search-console token and redirect stubs.
@@ -131,6 +143,12 @@ async function check(page, theme, w, ctx) {
   try {
     await p.goto(base + page, { waitUntil: "load", timeout: 60000 });
     await p.evaluate(() => document.fonts && document.fonts.ready);
+    // Text drawn after load (diagrams rendered by a script) is measured too.
+    await p.waitForLoadState("networkidle", { timeout: 15000 }).catch(() => {});
+    await p.waitForFunction(() => [...document.querySelectorAll("pre.mermaid, div.mermaid")]
+      .every((e) => e.querySelector("svg")), null, { timeout: 20000 }).catch(() => {});
+    // Measure what a reader sees once things settle, not a fade halfway through.
+    await p.addStyleTag({ content: "*,*::before,*::after{transition-duration:0s!important;transition-delay:0s!important;animation-duration:1ms!important;animation-delay:0s!important;animation-iteration-count:1!important}" });
     await p.evaluate((theme) => {
       if (theme === "dark") document.documentElement.setAttribute("data-theme", "dark");
       else document.documentElement.removeAttribute("data-theme");

@@ -155,7 +155,7 @@ for (const { theme, w } of runs) {
 await browser.close();
 if (server) server.close();
 
-const where = base.startsWith("http://127.0.0.1") ? "working tree" : base;
+const where = base.startsWith("http://127.0.0.1") ? root : base;
 if (failures.length) {
   failures.sort((a, b) => a.ratio - b.ratio);
   console.error(`CONTRAST GATE: ${failures.length} text element(s) below ${FLOOR}:1 (${where}). Not publishing.`);

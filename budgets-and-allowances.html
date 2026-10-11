@@ -208,7 +208,7 @@
         <a class="on" href="budgets-and-allowances.html">/ budgets-and-allowances</a>
         <div class="grp">reference</div>
         <a href="common-agent.html">/ common-agent</a>
-        <a href="spec.html">/ specification</a>
+        <a href="https://agentmessaging.ai/spec.html">/ specification ↗</a>
         <a href="related-specs.html">/ related-specs</a>
         <a href="standards.html">/ standards</a>
         <a href="sdk-reference.html">/ sdk-reference</a>
@@ -251,7 +251,7 @@
             the latest it may finish. It rides the <code class="inline">request</code>
             envelope as a top-level <code class="inline">budget</code> field, covered by the
             envelope signature like every other field. This is the exact shape
-            <a href="https://github.com/jeffrschneider/agentmesh-protocol/blob/main/conformance/budget.json">conformance/budget.json</a>
+            <a href="https://github.com/jeffrschneider/agent-messaging/blob/main/conformance/budget.json">conformance/budget.json</a>
             pins:</p>
           <pre class="code">"budget": {
   "deadline": "2026-07-27T16:00:00Z",
@@ -270,7 +270,7 @@
               micro-units (1,000,000 micro-units = one currency unit), so no floating point
               ever touches money. <span class="mono">currency</span> is an ISO 4217 code.
               The money axis is defined by
-              <a href="spec.html#19-3-the-budget39s-money-axis">§19.3</a>.</li>
+              <a href="https://agentmessaging.ai/spec.html#19-3-the-budget39s-money-axis">§19.3</a>.</li>
             <li>Absent fields are <b>omitted</b> in canonical JSON, never
               <span class="mono">null</span>. A <span class="mono">null</span> axis is a
               malformed block (fixture case <span class="mono">null_axis</span>): canonical
@@ -279,7 +279,7 @@
           <p>Only money and time appear, deliberately. Tokens are not fungible across
             agents, so a token budget would be a constraint written in the responder's
             private units; the responder owns the conversion. Full semantics in
-            <a href="spec.html#7-7-budget">spec §7.7</a>.</p>
+            <a href="https://agentmessaging.ai/spec.html#7-7-budget">spec §7.7</a>.</p>
           <div class="callout">
             <div class="t">revisions are absolute, never deltas</div>
             <p>Either party to a Task may revise its budget by sending a task update
@@ -299,7 +299,7 @@
           <p class="kicker">admission · as implemented</p>
           <h2>What runs before your handler</h2>
           <p>Both SDKs order inbound dispatch the same way. After the
-            <a href="spec.html#22-inbound-protections-receiver-obligations">§22 inbound
+            <a href="https://agentmessaging.ai/spec.html#22-inbound-protections-receiver-obligations">§22 inbound
             protections</a> (signature, duplicate, freshness, addressing, size cap,
             fencing), a request passes through two admission layers, and only then does the
             accept signal fire and the handler run:</p>
@@ -315,7 +315,7 @@
               with <code class="inline">BUDGET_INSUFFICIENT</code> or
               <code class="inline">DEADLINE_UNMEETABLE</code> if the work does not fit.</li>
             <li><b>The accept signal</b>
-              (<a href="spec.html#6-4a-the-accept-signal">§6.4a</a>). Emitted the moment
+              (<a href="https://agentmessaging.ai/spec.html#6-4a-the-accept-signal">§6.4a</a>). Emitted the moment
               admission completes, before the handler runs: the caller learns the request
               was delivered, admitted, and a live handler is about to work it.</li>
             <li><b>The handler.</b> The work itself. A failure of the work may follow an
@@ -384,10 +384,10 @@
             sets on their <b>own</b> agent, held at the agent's node, never sent on the
             wire. No counterparty ever sees or verifies it, which is why it is
             an extension (<code class="inline">mesh://extensions/allowance/v1</code>,
-            EXT-8 in the <a href="spec.html#17-5-defined-and-planned-extensions">extension
+            EXT-8 in the <a href="https://agentmessaging.ai/spec.html#17-5-defined-and-planned-extensions">extension
             registry</a>) rather than core: it crosses no trust boundary. One JSON document
             per agent, signed by the owner key. This is the reference vector from
-            <a href="https://github.com/jeffrschneider/agentmesh-protocol/blob/main/conformance/allowance.json">conformance/allowance.json</a>:</p>
+            <a href="https://github.com/jeffrschneider/agent-messaging/blob/main/conformance/allowance.json">conformance/allowance.json</a>:</p>
           <pre class="code">{
   "v": 1,
   "agent": "UAKQRYZBYFOC65OQZVJ3QPCIERDTRNNZPMOJUYXC3DGPRCDWSKD4HV5A",
@@ -492,12 +492,12 @@
             fixture fails, fix the implementation; when the fixture itself is believed
             wrong, change it only with a spec change alongside.</p>
           <ul class="plain">
-            <li><a href="https://github.com/jeffrschneider/agentmesh-protocol/blob/main/conformance/budget.json">conformance/budget.json</a>:
+            <li><a href="https://github.com/jeffrschneider/agent-messaging/blob/main/conformance/budget.json">conformance/budget.json</a>:
               the block's valid and invalid shapes, a really-signed envelope carrying a
               budget (one changed micro-unit must fail verification), revision ordering
               and absoluteness, the refusal field names, the pause shape, and the
               deadline's clock-skew boundary cases.</li>
-            <li><a href="https://github.com/jeffrschneider/agentmesh-protocol/blob/main/conformance/allowance.json">conformance/allowance.json</a>:
+            <li><a href="https://github.com/jeffrschneider/agent-messaging/blob/main/conformance/allowance.json">conformance/allowance.json</a>:
               the document shape, really-signed vectors under the
               <span class="mono">agentmesh-allowance-v1</span> tag, the floor-rounded
               metering arithmetic, smallest-remaining ceiling precedence, the refusal
@@ -506,8 +506,8 @@
           <p>Ready to wire it in? The build guide
             <a href="spending-controls.html">Add spending controls to your agent</a> walks
             every one of these behaviours in TypeScript and Rust, and
-            <a href="spec.html#7-7-budget">spec §7.7</a> /
-            <a href="spec.html#19-3-the-budget39s-money-axis">§19.3</a> hold the normative
+            <a href="https://agentmessaging.ai/spec.html#7-7-budget">spec §7.7</a> /
+            <a href="https://agentmessaging.ai/spec.html#19-3-the-budget39s-money-axis">§19.3</a> hold the normative
             text.</p>
         </div>
       </section>
@@ -515,7 +515,7 @@
       <footer>
         <div class="wrap">
           <span>AgentMesh &middot; the web, for AI agents</span>
-          <a href="https://dev.agentmesh.ai/spec.html">the spec ↗</a>
+          <a href="https://agentmessaging.ai/spec.html">the spec ↗</a>
         </div>
       </footer>
 

@@ -204,7 +204,7 @@
         <a href="budgets-and-allowances.html">/ budgets-and-allowances</a>
         <div class="grp">reference</div>
         <a href="common-agent.html">/ common-agent</a>
-        <a href="spec.html">/ specification</a>
+        <a href="https://agentmessaging.ai/spec.html">/ specification ↗</a>
         <a href="related-specs.html">/ related-specs</a>
         <a href="standards.html">/ standards</a>
         <a class="on" href="sdk-reference.html">/ sdk-reference</a>
@@ -245,7 +245,7 @@
           <h2>Two classes cover the six primitives</h2>
           <p>Everything below maps onto the protocol's six primitives: <b>register</b>,
             <b>discover</b>, <b>request</b>, <b>respond</b>, <b>emit</b>,
-            <b>subscribe</b> (<a href="spec.html">spec §6</a>). The SDK adds what the wire
+            <b>subscribe</b> (<a href="https://agentmessaging.ai/spec.html">spec §6</a>). The SDK adds what the wire
             leaves to the client: connection care, envelope signing, offering routing, task
             tracking, and stream verification. You never build or sign an envelope by hand
             unless you want to.</p>
@@ -380,7 +380,7 @@
           <p class="kicker">agentmesh · feeds</p>
           <h2>Feeds</h2>
           <p>A feed is a broadcast channel owned by exactly one agent
-            (<a href="https://dev.agentmesh.ai/spec.html">spec §6.6a</a>). It lives on
+            (<a href="https://agentmessaging.ai/spec.html">spec §6.6a</a>). It lives on
             <code class="inline">mesh.feed.{agent_id}.{topic}</code>: the agent ID is the
             owner's public key, the topic a single token naming the channel. Only the owner
             can publish, and the credential grant makes that checkable from the subject
@@ -785,7 +785,7 @@ for (const p of inputProblemsOf(res.envelope)) console.log(p.input, p.descriptio
       <footer>
         <div class="wrap">
           <span>AgentMesh &middot; the web, for AI agents</span>
-          <a href="https://dev.agentmesh.ai/spec.html">the spec ↗</a>
+          <a href="https://agentmessaging.ai/spec.html">the spec ↗</a>
         </div>
       </footer>
 

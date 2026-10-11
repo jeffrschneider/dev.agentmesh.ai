@@ -528,7 +528,7 @@
         <a href="budgets-and-allowances.html">/ budgets-and-allowances</a>
         <div class="grp">reference</div>
         <a href="common-agent.html">/ common-agent</a>
-        <a href="spec.html">/ specification</a>
+        <a href="https://agentmessaging.ai/spec.html">/ specification ↗</a>
         <a href="related-specs.html">/ related-specs</a>
         <a class="on" href="standards.html">/ standards</a>
         <a href="standards.html">/ standards</a>
@@ -589,7 +589,7 @@
           <div class="items">
             <a class="chip s-name" href="https://agentnaming.ai">Agent Naming</a>
             <a class="chip s-desc" href="https://agentdoc.net">The Common Agent</a>
-            <a class="chip s-proto" href="https://dev.agentmesh.ai/spec.html">AgentMesh protocol</a>
+            <a class="chip s-proto" href="https://agentmessaging.ai/">Agent Messaging</a>
           </div>
         </div>
         </div>
@@ -619,11 +619,11 @@
 
       <div class="std s-proto">
         <div class="top">
-          <h3>The AgentMesh protocol</h3>
-          <a class="dom" href="https://dev.agentmesh.ai/spec.html">dev.agentmesh.ai/spec.html &rarr;</a>
+          <h3>Agent Messaging</h3>
+          <a class="dom" href="https://agentmessaging.ai/">agentmessaging.ai &rarr;</a>
         </div>
         <p class="role">the wire underneath</p>
-        <p>The specification describes how agents reach each other at all. It defines the shape of a message, how identity is carried and checked, how a piece of work is tracked from request to result, and how an agent registers so that others can find it.</p>
+        <p>Agent Messaging was formerly called the AgentMesh Protocol, and AgentMesh is its reference implementation. The specification describes how agents reach each other at all. It defines the shape of a message, how identity is carried and checked, how a piece of work is tracked from request to result, and how an agent registers so that others can find it.</p>
         <p>An extension tier covers the parts not every deployment needs, including rooms, admission, sealed conversations, allowances, deliverables and screening, and each is versioned separately so the core stays small. <b>This is the one standard here that is a network rather than a document.</b></p>
       </div>
 
@@ -683,7 +683,7 @@
           <a class="dom" href="https://agentdoc.net">agentdoc.net &rarr;</a>
         </div>
         <p class="role">what calling it an agent obliges</p>
-        <p>The Common Agent Specification defines the agent itself, as a testable claim: an identity that signs, five exchanges any stranger may ask, a mechanical refusal outside its declared offerings, and signed records of what others have checked. The AgentMesh protocol is one network binding of this agent; the definition does not require it.</p>
+        <p>The Common Agent Specification defines the agent itself, as a testable claim: an identity that signs, five exchanges any stranger may ask, a mechanical refusal outside its declared offerings, and signed records of what others have checked. Agent Messaging is one network binding of this agent; the definition does not require it.</p>
         <p>Two documents describe one agent under it, and both are chapters of the specification. <b>The Agent Descriptor is the one an operator writes</b>, with one authored spelling per fact, referenced at a digest by anything that binds; <b>the AgentDoc is the one assembled from every source</b>, provenance shown, with what was never stated printed rather than hidden.</p>
         <p>A third chapter says how an agent travels before it exists. <b>The Agent Package</b> carries the Descriptor as a draft inside a portable plugin, together with what a host must have to run it, and defines how a package is published to a depot and installed into a running agent with an identity, so a verifier can check that what is running is what was built. <a href="https://agentdoc.net/package.html">How it fits &rarr;</a></p>
       </div>

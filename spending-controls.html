@@ -201,7 +201,7 @@
         <a href="budgets-and-allowances.html">/ budgets-and-allowances</a>
         <div class="grp">reference</div>
         <a href="common-agent.html">/ common-agent</a>
-        <a href="spec.html">/ specification</a>
+        <a href="https://agentmessaging.ai/spec.html">/ specification ↗</a>
         <a href="related-specs.html">/ related-specs</a>
         <a href="standards.html">/ standards</a>
         <a href="sdk-reference.html">/ sdk-reference</a>
@@ -301,7 +301,7 @@ let result = mesh.request_with_options(&amp;agent_id, <span class="s">"caselaw-s
 <span class="c">// DEADLINE_UNMEETABLE and the counter-offer in error.details</span></pre>
 
           <p class="pin">Pinned by
-            <a href="https://github.com/jeffrschneider/agentmesh-protocol/blob/main/conformance/budget.json">budget.json</a>:
+            <a href="https://github.com/jeffrschneider/agent-messaging/blob/main/conformance/budget.json">budget.json</a>:
             <span class="mono">block.valid</span> / <span class="mono">block.invalid</span>
             (the shape rules) and <span class="mono">envelope</span> (a really-signed
             request carrying this exact block; one changed micro-unit must fail
@@ -316,7 +316,7 @@ let result = mesh.request_with_options(&amp;agent_id, <span class="s">"caselaw-s
           <h2>Refuse at admission, with an estimate</h2>
           <p>Admission decisions belong <b>before</b> the accept signal, never in the
             handler body: a refusal thrown from the handler would arrive after the accept,
-            which <a href="spec.html#6-4a-the-accept-signal">§6.4a</a> forbids. Both SDKs
+            which <a href="https://agentmessaging.ai/spec.html#6-4a-the-accept-signal">§6.4a</a> forbids. Both SDKs
             give admission its own hook. Always include an estimate: a refusal without
             one gives the requester nothing to resubmit against.</p>
 
@@ -355,7 +355,7 @@ mesh.on_admission(<span class="s">"caselaw-summary"</span>, |_input, ctx| {
 });</pre>
 
           <p class="pin">Pinned by
-            <a href="https://github.com/jeffrschneider/agentmesh-protocol/blob/main/conformance/budget.json">budget.json</a>:
+            <a href="https://github.com/jeffrschneider/agent-messaging/blob/main/conformance/budget.json">budget.json</a>:
             <span class="mono">refusals.budget_insufficient</span>
             (<span class="mono">details.estimate</span>, cost_ceiling-shaped) and
             <span class="mono">refusals.deadline_unmeetable</span>
@@ -407,7 +407,7 @@ mesh.revise_budget(&amp;task_id, Some(responder_id.as_str()), raised).await?;
 <span class="c">// fails with TASK_INVALID_TRANSITION, the same refusal the task manager gives</span></pre>
 
           <p class="pin">Pinned by
-            <a href="https://github.com/jeffrschneider/agentmesh-protocol/blob/main/conformance/budget.json">budget.json</a>:
+            <a href="https://github.com/jeffrschneider/agent-messaging/blob/main/conformance/budget.json">budget.json</a>:
             <span class="mono">revisions.ordering_case</span> (strictly-greater wins;
             equal revisions are first-writer-wins),
             <span class="mono">revisions.absolute_case</span> (an omitted axis is GONE,
@@ -479,7 +479,7 @@ mesh.on_request_ctx(<span class="s">"caselaw-summary"</span>, move |input, _ctx|
 <span class="c">// outside a handler: mesh.report_task_usage(&amp;task_id, context_id, usage)</span></pre>
 
           <p class="pin">Pinned by
-            <a href="https://github.com/jeffrschneider/agentmesh-protocol/blob/main/conformance/allowance.json">allowance.json</a>:
+            <a href="https://github.com/jeffrschneider/agent-messaging/blob/main/conformance/allowance.json">allowance.json</a>:
             <span class="mono">document.valid</span> (really-signed vectors under the
             <span class="mono">agentmesh-allowance-v1</span> tag, including the
             three-scope reference vector), <span class="mono">metering.cases</span>
@@ -520,7 +520,7 @@ println!(<span class="s">"context: {}"</span>, ledger.context_spend(<span class=
 println!(<span class="s">"today:   {}"</span>, ledger.day_spend(&amp;today_utc()));  <span class="c">// micro-units</span></pre>
 
           <p class="pin">Pinned by
-            <a href="https://github.com/jeffrschneider/agentmesh-protocol/blob/main/conformance/allowance.json">allowance.json</a>:
+            <a href="https://github.com/jeffrschneider/agent-messaging/blob/main/conformance/allowance.json">allowance.json</a>:
             <span class="mono">precedence.cases</span> (smallest-remaining binds: a day
             ceiling with $0.10 left binds before a task ceiling with $0.50 left, and an
             estimate exactly equal to the remaining balance admits).</p>
@@ -538,7 +538,7 @@ println!(<span class="s">"today:   {}"</span>, ledger.day_spend(&amp;today_utc()
       <footer>
         <div class="wrap">
           <span>AgentMesh &middot; the web, for AI agents</span>
-          <a href="https://dev.agentmesh.ai/spec.html">the spec ↗</a>
+          <a href="https://agentmessaging.ai/spec.html">the spec ↗</a>
         </div>
       </footer>
 

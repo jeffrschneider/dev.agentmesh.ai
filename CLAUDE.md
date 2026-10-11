@@ -40,19 +40,17 @@ grep -rnoE '&mdash;|&#8212;|&#x2014;|—' *.html
 ```
 Any hit outside a `<pre>`/`<code>` block should be reworded away.
 
-## spec.html is generated — never hand-edit it
+## The specifications are not published here
 
-`spec.html` is rendered from the canonical spec at
-`C:\Users\jeffr\Desktop\AgentMesh\SPEC.md` by `tools/build-spec.mjs`. To fix
-spec content, edit the source spec in the AgentMesh repo, then regenerate:
-
-```bash
-node tools/build-spec.mjs          # from the repo root
-```
-
-Commit the regenerated page. It reproduces the spec verbatim, so the
-no-em-dash rule does not apply to it (a spec is a quoted document, not site
-prose). The em-dash grep above should skip `spec.html`.
+The protocol specification was renamed **Agent Messaging** on 2026-10-11
+(formerly the AgentMesh Protocol; AgentMesh is the reference implementation)
+and moved to its own site, https://agentmessaging.ai/spec.html. It is rendered
+from `C:\Users\jeffr\Desktop\AgentMesh\SPEC.md` by `tools/build-spec.mjs` in
+the agentmessaging.ai repo (`C:\Users\jeffr\Desktop\agentmessaging.ai`), which
+owns that builder now. `spec.html` here is a redirect stub that keeps the
+section fragment, and pages here link to https://agentmessaging.ai/spec.html
+directly. Say "Agent Messaging" for the protocol or the specification and
+"AgentMesh" for the platform. Do not add a second builder.
 
 The naming specification is not published here. It lives on its own site at
 https://agentnaming.ai/spec.html, rendered from
@@ -104,5 +102,5 @@ regeneration.
 
 This repo is the DEVELOPER site (build, run-your-own, concepts, reference).
 The simple-user site lives in the separate agentmesh.ai repo; pages here link
-to it with absolute https://agentmesh.ai/ URLs. spec.html is generated from
-the AgentMesh repo's SPEC.md by tools/build-spec.mjs.
+to it with absolute https://agentmesh.ai/ URLs. The protocol specification
+lives at https://agentmessaging.ai.

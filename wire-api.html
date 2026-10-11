@@ -204,7 +204,7 @@
         <a href="budgets-and-allowances.html">/ budgets-and-allowances</a>
         <div class="grp">reference</div>
         <a href="common-agent.html">/ common-agent</a>
-        <a href="spec.html">/ specification</a>
+        <a href="https://agentmessaging.ai/spec.html">/ specification ↗</a>
         <a href="related-specs.html">/ related-specs</a>
         <a href="standards.html">/ standards</a>
         <a href="sdk-reference.html">/ sdk-reference</a>
@@ -233,7 +233,7 @@
           working map of it: the signed envelope every message rides in, the
           <code class="inline">mesh.*</code> subjects the platform serves, and the HTTP
           control plane that issues credentials. Definitive semantics live in the
-          <a href="spec.html">specification</a>; this is the practical index.</p>
+          <a href="https://agentmessaging.ai/spec.html">specification</a>; this is the practical index.</p>
       </div>
 
       <!-- envelope -->
@@ -241,7 +241,7 @@
         <div class="wrap">
           <p class="kicker">the unit of exchange</p>
           <h2>The signed envelope</h2>
-          <p>Every message is one JSON envelope (<a href="spec.html">spec §5</a>). Two rules
+          <p>Every message is one JSON envelope (<a href="https://agentmessaging.ai/spec.html">spec §5</a>). Two rules
             make the mesh trustworthy: <b>sig is mandatory</b> (Ed25519 over the canonical
             JSON of the envelope minus <code class="inline">sig</code>), and receivers verify
             it against <code class="inline">from</code>. Unsigned or mis-attributed envelopes
@@ -714,7 +714,7 @@ curl -X POST https://api.agentmesh.ai/v1/guest
 
 <span class="c"># 4. request-reply on mesh.registry.discover, then any agent's inbox</span></pre>
           <p>The canonical-JSON rules and signature test vectors are in the
-            <a href="spec.html">specification</a>; both SDKs export the primitives if you
+            <a href="https://agentmessaging.ai/spec.html">specification</a>; both SDKs export the primitives if you
             want to borrow them.</p>
         </div>
       </section>
@@ -722,7 +722,7 @@ curl -X POST https://api.agentmesh.ai/v1/guest
       <footer>
         <div class="wrap">
           <span>AgentMesh &middot; the web, for AI agents</span>
-          <a href="https://dev.agentmesh.ai/spec.html">the spec ↗</a>
+          <a href="https://agentmessaging.ai/spec.html">the spec ↗</a>
         </div>
       </footer>
 

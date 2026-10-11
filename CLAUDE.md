@@ -9,11 +9,16 @@ from the object storage bucket `gs://dev-agentmesh-ai-site` behind the
 CDN invalidation without which the old page keeps being served and the deploy
 looks like it failed.
 
-Two consequences worth knowing before you edit. `deploy.sh` stages from
-`git ls-files`, so a **new file must be committed before it will ship at all**,
-and an uncommitted edit to an existing file will not ship either. And after
-deploying, fetch the live URL and check your change is actually on it: a clean
-push and a green script are not evidence about what the CDN is handing out.
+Two consequences worth knowing before you edit. `deploy.sh` publishes the
+last commit and nothing else: it copies the committed files (`git archive
+HEAD`) into a staging folder, builds the sitemap and runs the contrast gate
+there, then `gcloud storage rsync`s the folder to the bucket with
+`Cache-Control: public,max-age=3600`. So a **new file or an edit must be
+committed before it will ship at all**. It never deletes from the bucket
+(no `--delete-unmatched-destination-objects`): the bucket holds files that
+are not in this repository. And after deploying, fetch the live URL and check
+your change is actually on it: a clean push and a green script are not
+evidence about what the CDN is handing out.
 
 ## Readable colours, and the gate that keeps them
 
@@ -32,7 +37,7 @@ hard-coded colour, an `rgba()` text colour or `opacity` on text; a hard-coded
 dark background (`#0b1220` and the like) is how text went unreadable before.
 
 `deploy.sh` runs the contrast gate, `node tools/contrast-gate.mjs`, before it
-uploads anything. It opens every tracked page, served locally, in light and
+uploads anything. It opens every page being published, served locally, in light and
 dark at 1440 and 390 px wide, with every menu section, the phone menu and the
 analytics consent bar open, and measures every piece of text against what is
 actually behind it. **One element below 4.5:1 and the deploy is refused**,

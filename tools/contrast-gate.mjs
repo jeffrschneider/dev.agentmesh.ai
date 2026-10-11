@@ -6,13 +6,14 @@
 // names page, element and ratio when anything is below 4.5:1.
 //
 //   node tools/contrast-gate.mjs                 the working tree (git ls-files *.html), served locally
+//   node tools/contrast-gate.mjs --root <folder> a folder of pages (deploy.sh's staging folder)
 //   node tools/contrast-gate.mjs --base https://dev.agentmesh.ai/   the live site, same page list
 //   node tools/contrast-gate.mjs --pages a.html,b.html              only these
 //
 // deploy.sh runs it before publishing and refuses on a failure.
 import { chromium } from "playwright";
 import { createServer } from "node:http";
-import { readFileSync, existsSync, statSync } from "node:fs";
+import { readFileSync, existsSync, statSync, readdirSync } from "node:fs";
 import { execSync } from "node:child_process";
 import { join, extname, resolve } from "node:path";
 
@@ -20,8 +21,16 @@ const FLOOR = 4.5;
 const args = process.argv.slice(2);
 const opt = (k) => { const i = args.indexOf(k); return i >= 0 ? args[i + 1] : null; };
 const root = resolve(opt("--root") || ".");
-let pages = opt("--pages") ? opt("--pages").split(",") :
-  execSync("git ls-files *.html", { cwd: root, encoding: "utf8" }).split("\n").filter(Boolean);
+// The tracked pages, or every page in the folder when it is not a git
+// repository (deploy.sh's staging folder, which holds only committed files).
+const listPages = () => {
+  try {
+    if (execSync("git rev-parse --show-toplevel", { cwd: root, encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim().replace(/\\/g, "/").toLowerCase() === root.replace(/\\/g, "/").toLowerCase())
+      return execSync("git ls-files *.html", { cwd: root, encoding: "utf8" }).split("\n").filter(Boolean);
+  } catch {}
+  return readdirSync(root).filter((f) => f.endsWith(".html")).sort();
+};
+let pages = opt("--pages") ? opt("--pages").split(",") : listPages();
 // Pages with no visible body of their own: the search-console token and redirect stubs.
 pages = pages.filter((p) => {
   if (!existsSync(join(root, p))) return true;

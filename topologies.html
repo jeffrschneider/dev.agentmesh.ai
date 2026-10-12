@@ -95,6 +95,9 @@
     /* Mermaid diagrams keep their own look; the panel frames them. */
     .mermaid{ display:flex; justify-content:center; margin:22px 0; background:var(--panel);
       border:1px solid var(--line); border-radius:12px; padding:18px; overflow-x:auto; }
+    /* Edge labels sit on the panel in the site's text colour, in both themes. */
+    .mermaid .labelBkg, .mermaid .edgeLabel, .mermaid .edgeLabel p{
+      background-color:var(--panel) !important; color:var(--paper) !important; opacity:1 !important; }
 
     .callout{ border:1px solid var(--line); border-left:3px solid var(--signal); border-radius:10px;
       background:var(--panel); padding:14px 18px; margin:22px 0; max-width:72ch; }

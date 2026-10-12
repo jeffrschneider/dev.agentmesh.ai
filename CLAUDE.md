@@ -84,9 +84,9 @@ Any hit outside a `<pre>`/`<code>` block should be reworded away.
 
 ## The specifications are not published here
 
-The protocol specification was renamed **Agent Messaging** on 2026-10-11
-(formerly the AgentMesh Protocol; AgentMesh is the reference implementation)
-and moved to its own site, https://agentmessaging.ai/spec.html. It is rendered
+The protocol specification is **Agent Messaging** (since 2026-10-11;
+AgentMesh is the reference implementation, and published pages never mention
+the old name) and lives on its own site, https://agentmessaging.ai/spec.html. It is rendered
 from `C:\Users\jeffr\Desktop\AgentMesh\SPEC.md` by `tools/build-spec.mjs` in
 the agentmessaging.ai repo (`C:\Users\jeffr\Desktop\agentmessaging.ai`), which
 owns that builder now. `spec.html` here is a redirect stub that keeps the

@@ -305,8 +305,8 @@
           <table class="tbl">
             <thead><tr><th>System</th><th>House product</th><th>Why</th><th>You can choose instead</th></tr></thead>
             <tbody>
-              <tr><td>Text reasoning</td><td class="ok">Google Gemini</td><td>Every harness AgentMesh deploys runs on Gemini unless its owner names another model, and the key sits on the machine that deploys it.</td><td>Anthropic, Google (your own key), OpenRouter</td></tr>
-              <tr><td>Image reading</td><td class="ok">Google Gemini</td><td>The same Gemini models read images, so one provider covers text and pictures.</td><td>Anthropic, Google (your own key), OpenRouter</td></tr>
+              <tr><td>Text reasoning</td><td class="ok">Google Gemini</td><td>Every harness AgentMesh deploys runs on Gemini unless its owner names another model, and the key sits on the machine that deploys it.</td><td>Anthropic, Google (your own key)</td></tr>
+              <tr><td>Image reading</td><td class="ok">Google Gemini</td><td>The same Gemini models read images, so one provider covers text and pictures.</td><td>Anthropic, Google (your own key)</td></tr>
               <tr><td>Speech to text</td><td class="ok">Google Cloud Speech-to-Text</td><td>The transcript step in AgentMesh's own agents already calls it, under the same Google account as the models.</td><td>Google (your own key)</td></tr>
               <tr><td>Text to speech</td><td class="ok">Google Gemini speech</td><td>AgentMesh's narration uses Gemini's voices, so recordings sound the same across agents.</td><td>Google (your own key), ElevenLabs</td></tr>
               <tr><td>Draft host</td><td class="ok">Google Cloud Storage</td><td>Drafts are written to AgentMesh's own bucket and served under agentmesh.ai/draft, so a reviewer opens them with a plain link.</td><td>Google Cloud Storage, Amazon S3 (recorded; the shared file script cannot sign S3 requests yet)</td></tr>

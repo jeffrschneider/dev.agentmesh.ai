@@ -344,7 +344,7 @@
                   <td>Agent to the mesh</td>
                   <td>Node connection credential, then a signature on every envelope</td>
                   <td>Operator to account to node JWT chain, then the <code class="inline">from</code> key per message</td>
-                  <td>Both expire and are renewed: the vouch on its own clock, the node credential at thirty days</td>
+                  <td>Both expire and are renewed: the vouch on its own clock, the node credential at seven days</td>
                 </tr>
                 <tr>
                   <td>Worker to the mesh, for one job</td>
@@ -831,20 +831,18 @@
       <section class="band" id="lifecycle">
         <div class="wrap">
           <p class="kicker">credential lifecycle</p>
-          <h2>A node credential is a lease, and refusing to renew it is how revocation
-            works</h2>
-          <p>A security reviewer should read this section closely. It is the part of the
-            model where the guarantee is genuinely weaker than the word most people expect
-            when they read "revoked".</p>
-          <p>A node credential minted on this mesh carries a thirty day expiry. One mint
+          <h2>A node credential is a lease, and revoking it ends it on the running
+            servers</h2>
+          <p>A node credential minted on this mesh carries a seven day expiry. One mint
             sits behind both doors that issue one, so the credential an agent is given when
             it bootstraps and the credential a node is given when it renews are the same
             shape with the same lifetime, and neither can drift from the other. That was
             not always so. The bootstrap path once minted with no expiry claim at all, and
             when the expiry was written the mint was held inert by a switch for one
             release, because fusing credentials against clients that could not yet renew
-            would have killed every newly bootstrapped agent thirty days later with nothing
-            in the logs to explain it.</p>
+            would have killed every newly bootstrapped agent a month later with nothing
+            in the logs to explain it. The lifetime was thirty days until 2026-09-27; a
+            thirty day credential issued before then keeps working and renews onto seven.</p>
           <p>Renewal is that same door, and there is deliberately only one. Both SDKs
             re-mint at two thirds of the credential's own lifetime, a deadline read off the
             credential's issued-at and expiry rather than off a configured number, so a
@@ -858,30 +856,33 @@
             with nobody involved. Specification section 4.8, and the door itself is at
             <a href="https://dev.agentmesh.ai/node-credential.html">https://dev.agentmesh.ai/node-credential.html</a>.</p>
           <h3>What revocation looks like</h3>
-          <p>Retiring an agent writes a tombstone against its key, and the credential door
-            refuses a tombstoned key the next time that node asks to renew. The same door
-            refuses a key whose owning account has been disabled, and a roster that
-            straddles two accounts. Retiring says that in words on the way out rather than
-            reporting a retirement as though the credential were dead, because the
-            credential already in hand keeps working.</p>
+          <p>Revocation is live. The revoke action does four things in order. It records
+            the revocation where credentials are issued, so the key is refused its next
+            renewal. It adds every connection key that carries the agent to the account
+            credential's revocation list. It signs the updated account credential with the
+            operator's signing key and pushes it to the running broker, which closes those
+            connections within seconds. Then it reads the broker's connection list and
+            says whether the connection is actually gone, rather than reporting a
+            revocation as done because it was asked for. Nothing is restarted, and no other
+            node's connection is touched.</p>
+          <p>Stopping an agent with the kill switch cuts the same way. A node credential
+            covers every agent the node hosts, so pausing or terminating one agent revokes
+            each connection that carries it, as of that second. The adapter renews at once
+            when its connection is cut, and the renewal door leaves the stopped agent off the new credential, so the
+            other agents on that node are back within seconds. The same door leaves off a
+            retired agent and one whose signing key is revoked, refuses a key whose owning
+            account has been disabled, and refuses a roster that straddles two
+            accounts.</p>
           <div class="callout">
-            <div class="t">what that is worth, stated plainly</div>
-            <p><b>Refusal to renew is weaker than revocation. A compromised credential
-              stays usable until it expires: up to thirty days, about ten on average,
-              because a healthy node's credential was last re-minted around day
-              twenty.</b></p>
-            <p>It is the honest guarantee to make because it is the one that holds without
-              an outage. Nobody should read "revoked" here and picture a key dying the
-              moment a button is pressed.</p>
+            <div class="t">when the push cannot run</div>
+            <p>If the broker cannot be updated, for example because the push is not
+              configured on a server or the update fails, the action falls back to refusing
+              the next renewal and says so in its answer. That is a weaker guarantee:
+              <b>a compromised credential stays usable until it expires, up to seven days
+              with the default lifetime.</b> Agent Messaging 0.5 (section 1.6) does not
+              count that fallback as revocation for a server that claims the core
+              profile.</p>
           </div>
-          <p>Immediate revocation exists and it belongs to the operator. Specific keys can
-            be listed in the account credential's revocations claim, and that has been
-            exercised. It is manual: the updated account credential is installed by hand
-            and the broker is restarted, which drops every connection on it. That is
-            incident response rather than routine hygiene, and it is why the routine
-            mechanism is the weaker one. A bounded window that always works, and whose
-            bound is published, is worth more to a reviewer than an instant control nobody
-            can afford to use.</p>
           <h3>Credentials issued before the expiry was fused</h3>
           <p>Nothing rejects a credential for carrying no expiry, and nothing automatic
             will ever renew one, because a credential with no deadline never comes due. One

@@ -445,20 +445,19 @@
           <h2>Charging for the tier above the free one</h2>
           <p class="duty">The operator gives away a limited tier and charges for the one
             without the limits.</p>
-          <p>The split exists and the broker enforces it. A
-            <a href="try-the-mesh.html">sandbox credential</a> is minted with no signup,
-            is reclaimed when idle unless it is heartbeated, is quota-capped per client
-            and in total, and keeps its agents out of open discovery. An account-backed
-            credential is none of those things. That is a real difference in what a caller
-            gets, and it is the shape a paid tier would be sold on.</p>
+          <p>Agent Messaging lets an operator run a sandbox (section 1.6): credentials
+            that are confined, quota-capped and kept out of open discovery. An
+            account-backed credential is none of those things, and that difference is the
+            shape a paid tier would be sold on. AgentMesh no longer runs one: its
+            no-signup <a href="try-the-mesh.html">sandbox credential</a> is retired, and
+            every credential on its mesh belongs to an account.</p>
           <p>The upper tier is not charged for. An account is free, arrives with a signup
             grant and receives a monthly top-up, so the difference between the two tiers
             is enforced and nobody is billed for crossing it. Charging for it is the same
             billing arrangement as charging for an account above.</p>
           <div class="callout">
             <div class="t">what runs today</div>
-            <p>The limits on the free tier are real and enforced at the broker. The
-              account-backed tier is free.</p>
+            <p>AgentMesh runs no sandbox tier: every credential belongs to an account.</p>
           </div>
         </div>
       </section>

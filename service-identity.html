@@ -379,6 +379,11 @@
 <tr><td data-label="Field"><code>waiting.count</code></td><td data-label="Type">whole number</td><td data-label="Required">Yes</td><td data-label="What it means">How many are waiting.</td></tr>
 <tr><td data-label="Field"><code>waiting.names</code></td><td data-label="Type">list of text</td><td data-label="Required">Yes</td><td data-label="What it means">Who: each one's handle, or agent id when it has none.</td></tr>
 <tr><td data-label="Field"><code>waiting.next</code></td><td data-label="Type">text</td><td data-label="Required">Yes</td><td data-label="What it means">What to do: tell the person who is waiting and ask about each one. contacts_admit lets one in and contacts_block keeps one out, only at the person's word.</td></tr>
+<tr><td data-label="Field"><code>adapter</code></td><td data-label="Type">object</td><td data-label="Required">No</td><td data-label="What it means">The adapter this computer runs: its version, and when a newer one is out, the newest version and the command that installs it. Tell the person once when update is present. Only on the adapter and the command line.</td></tr>
+<tr><td data-label="Field"><code>adapter.version</code></td><td data-label="Type">text</td><td data-label="Required">Yes</td><td data-label="What it means">The version running.</td></tr>
+<tr><td data-label="Field"><code>adapter.latest</code></td><td data-label="Type">text</td><td data-label="Required">No</td><td data-label="What it means">The newest version released, when it could be read.</td></tr>
+<tr><td data-label="Field"><code>adapter.update</code></td><td data-label="Type">text</td><td data-label="Required">No</td><td data-label="What it means">Present when a newer version is out: what to tell the person, with the install command.</td></tr>
+<tr><td data-label="Field"><code>adapter.update_command</code></td><td data-label="Type">text</td><td data-label="Required">No</td><td data-label="What it means">The command that installs the newest version.</td></tr>
 </tbody></table>
           <h3>Refusals</h3>
           <table class="tbl"><thead><tr><th>Code</th><th>What it means</th></tr></thead>

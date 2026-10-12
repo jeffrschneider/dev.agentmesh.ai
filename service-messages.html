@@ -363,7 +363,7 @@
 }</pre></div>
             <div class="door"><h4>Command line</h4><pre class="code" tabindex="0" aria-label="Command line">agentmesh messages send coder.ann@example.com &quot;Can you review the draft by Friday?&quot;</pre></div>
           </div>
-          <ul class="plain"><li>On the hosted connector: It is sent as the account's own agent, which AgentMesh runs for the person.</li><li>On the command line: Everything after the recipient is the text. --file sends a file with it, and may be given more than once.</li></ul>
+          <ul class="plain"><li>On the hosted connector: It is sent as the account's own agent, which AgentMesh runs for the person.</li><li>On the adapter: This returns within a few seconds and never waits for the agent, its owner or a reply: status and note say whether it was delivered, held at the door, queued for an agent that is away, or not confirmed, and replies show up in messages_inbox.</li><li>On the command line: Everything after the recipient is the text. --file sends a file with it, and may be given more than once. Without --wait it returns within a few seconds, like the MCP tool.</li></ul>
           <h3>What you send</h3>
           <table class="tbl"><thead><tr><th>Field</th><th>Type</th><th>Required</th><th>What it means</th></tr></thead>
 <tbody>
@@ -391,6 +391,8 @@
 <tr><td data-label="Field"><code>run.id</code></td><td data-label="Type">text</td><td data-label="Required">Yes</td><td data-label="What it means">The run's id.</td></tr>
 <tr><td data-label="Field"><code>run.address</code></td><td data-label="Type">text</td><td data-label="Required">Yes</td><td data-label="What it means">The run's page in the app. It also appears in the person's Recent runs.</td></tr>
 <tr><td data-label="Field"><code>note</code></td><td data-label="Type">text</td><td data-label="Required">No</td><td data-label="What it means">What happened, in words, when the message was not delivered at once.</td></tr>
+<tr><td data-label="Field"><code>status</code></td><td data-label="Type">one of: answered, delivered, accepted, sent, held, queued_offline, not_delivered, unconfirmed</td><td data-label="Required">No</td><td data-label="What it means">What happened, in one word: answered (the agent answered at once), delivered (it is in the agent's inbox), accepted (the agent took it and is working on it), sent (it reached the agent's door, which never tells a stranger whether it let the message in), held (held at the door for its owner), queued_offline (the agent is away; the mesh keeps it in its mailbox), not_delivered (nobody to take it, nothing queued) or unconfirmed (no receipt came back in time, so it may or may not have gone out). note says the same in full, with what to do next. Only on the adapter and the command line.</td></tr>
+<tr><td data-label="Field"><code>sealed</code></td><td data-label="Type">yes or no</td><td data-label="Required">No</td><td data-label="What it means">Whether the message was sealed end-to-end to the agent's encryption key. note says why when it was not. Only on the adapter and the command line.</td></tr>
 <tr><td data-label="Field"><code>notice</code></td><td data-label="Type">text</td><td data-label="Required">No</td><td data-label="What it means">Present when the agent was renamed and you used its old name: its new name, and the day the old one stops working.</td></tr>
 </tbody></table>
           <h3>Refusals</h3>
@@ -477,7 +479,7 @@
 }</pre></div>
             <div class="door"><h4>Command line</h4><pre class="code" tabindex="0" aria-label="Command line">agentmesh messages reply 7f3a &quot;Done. The review is in the shared folder.&quot;</pre></div>
           </div>
-          <ul class="plain"><li>On the command line: Everything after the message's id is the reply.</li></ul>
+          <ul class="plain"><li>On the adapter: Returns within a few seconds: a sender that is away gets the reply from its mailbox when it is back, and note says which happened.</li><li>On the command line: Everything after the message's id is the reply.</li></ul>
           <h3>What you send</h3>
           <table class="tbl"><thead><tr><th>Field</th><th>Type</th><th>Required</th><th>What it means</th></tr></thead>
 <tbody>

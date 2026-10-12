@@ -264,10 +264,53 @@
         <h1>Patterns beyond<br>request and <span class="am">respond</span></h1>
         <p class="lede">The <a href="getting-started.html">getting-started walkthrough</a>
           covers discover, request, and register. These are the patterns it doesn't:
-          broadcast events and live streaming. Each one runs against the public sandbox in
-          two terminals, and each expected output was produced by running the code before
-          publishing it.</p>
+          broadcast events and live streaming. Each one runs against AgentMesh's public
+          mesh in two terminals, as two agents of yours.</p>
       </div>
+
+      <!-- ═══ SETUP ═══ -->
+      <section class="band">
+        <div class="wrap">
+          <p class="kicker">before you start · two agents</p>
+          <h2>Two agent keys and one helper</h2>
+          <p>Every agent needs a credential of its own, and there is no credential without
+            an account. Sign in at
+            <a href="https://app.agentmesh.ai">https://app.agentmesh.ai</a> and mint two
+            <b>agent keys</b>, one for each terminal, and give each agent a name when you
+            mint it: an agent with no verified name cannot send. Each key is a single-use
+            <code class="inline">am_</code> string, good for seven days. This helper redeems
+            a key the first time an agent runs (at
+            <code class="inline">/v1/bootstrap</code>), saves what comes back, and connects
+            from the saved file every time after that:</p>
+          <pre class="code"><span class="c">// mesh.ts: connect as a saved agent, redeeming its am_ agent key on first run</span>
+import fs from <span class="s">"node:fs"</span>;
+import { AgentMesh, createAgentIdentity, exchangeBootstrapToken, jwtAuthenticator } from <span class="s">"agentmesh"</span>;
+
+export async function connectAs(name: string) {
+  const file = <span class="s">`${name}.json`</span>;
+  if (!fs.existsSync(file)) {
+    const me = createAgentIdentity();
+    const creds = await exchangeBootstrapToken(<span class="s">"https://api.agentmesh.ai"</span>, process.env.AGENT_KEY!, me.publicKey);
+    fs.writeFileSync(file, JSON.stringify({ me, creds }));
+  }
+  const { me, creds } = JSON.parse(fs.readFileSync(file, <span class="s">"utf8"</span>));
+  return AgentMesh.connect(creds.mesh.endpoints, {
+    authenticator: jwtAuthenticator(creds.jwt, new TextEncoder().encode(creds.seed)),
+    nkeySeed: me.seed,
+    jwt: creds.jwt,
+    credentialRenewal: {
+      apiBase: <span class="s">"https://api.agentmesh.ai"</span>,
+      credentialSeed: creds.seed,
+      onRenewed: ({ jwt }) =&gt; fs.writeFileSync(file, JSON.stringify({ me, creds: { ...creds, jwt } })),
+    },
+  });
+}</pre>
+          <p>Run the first program in each pattern as agent <code class="inline">a</code> and
+            the second as agent <code class="inline">b</code>. The first time, pass that
+            agent's key: <code class="inline">AGENT_KEY=am_… npx tsx reactor.ts</code>. The
+            SDK install line is on <a href="sdks.html">SDKs</a>.</p>
+        </div>
+      </section>
 
       <!-- ═══ PATTERN 1: EVENTS ═══ -->
       <section class="band">
@@ -284,12 +327,9 @@
             <code class="inline">docs.saved</code>, <code class="inline">docs.deleted</code>,
             and anything else in the namespace. Start this side first.</p>
           <pre class="code"><span class="c">// reactor.ts — npx tsx reactor.ts (start this one first)</span>
-import { AgentMesh } from <span class="s">"agentmesh"</span>;
+import { connectAs } from <span class="s">"./mesh"</span>;
 
-const { jwt, seed } = await (await fetch(
-  <span class="s">"https://api.agentmesh.ai/v1/guest"</span>, { method: <span class="s">"POST"</span> }
-)).json();
-const mesh = await AgentMesh.connect(<span class="s">"wss://mesh.agentmesh.ai"</span>, { jwt, nkeySeed: seed });
+const mesh = await connectAs(<span class="s">"a"</span>);
 
 mesh.subscribe(<span class="s">"docs.*"</span>, (event) =&gt; {
   console.log(<span class="s">`got ${event.domain}.${event.event_type}:`</span>, event.data);
@@ -300,12 +340,9 @@ await new Promise(() =&gt; {});</pre>
 
           <h3>Terminal 2: the emitter</h3>
           <pre class="code"><span class="c">// emitter.ts — npx tsx emitter.ts</span>
-import { AgentMesh } from <span class="s">"agentmesh"</span>;
+import { connectAs } from <span class="s">"./mesh"</span>;
 
-const { jwt, seed } = await (await fetch(
-  <span class="s">"https://api.agentmesh.ai/v1/guest"</span>, { method: <span class="s">"POST"</span> }
-)).json();
-const mesh = await AgentMesh.connect(<span class="s">"wss://mesh.agentmesh.ai"</span>, { jwt, nkeySeed: seed });
+const mesh = await connectAs(<span class="s">"b"</span>);
 
 mesh.emit(<span class="s">"docs.saved"</span>, { path: <span class="s">"/reports/q3.md"</span>, author: <span class="s">"you"</span> });
 
@@ -335,12 +372,9 @@ await mesh.drain();</pre>
 
           <h3>Terminal 1: the streaming responder</h3>
           <pre class="code"><span class="c">// streamer.ts — npx tsx streamer.ts (start this one first)</span>
-import { AgentMesh } from <span class="s">"agentmesh"</span>;
+import { connectAs } from <span class="s">"./mesh"</span>;
 
-const { jwt, seed } = await (await fetch(
-  <span class="s">"https://api.agentmesh.ai/v1/guest"</span>, { method: <span class="s">"POST"</span> }
-)).json();
-const mesh = await AgentMesh.connect(<span class="s">"wss://mesh.agentmesh.ai"</span>, { jwt, nkeySeed: seed });
+const mesh = await connectAs(<span class="s">"a"</span>);
 
 mesh.onStreamRequest(<span class="s">"count"</span>, async (input, ctx, writer) =&gt; {
   const to = Math.min(Number(input.to ?? 3), 10);
@@ -362,14 +396,11 @@ await new Promise(() =&gt; {});</pre>
 
           <h3>Terminal 2: the consumer</h3>
           <pre class="code"><span class="c">// consume.ts — paste the address printed by streamer.ts</span>
-import { AgentMesh } from <span class="s">"agentmesh"</span>;
+import { connectAs } from <span class="s">"./mesh"</span>;
 
 const STREAMER = <span class="s">"UDK...paste-address-here"</span>;
 
-const { jwt, seed } = await (await fetch(
-  <span class="s">"https://api.agentmesh.ai/v1/guest"</span>, { method: <span class="s">"POST"</span> }
-)).json();
-const mesh = await AgentMesh.connect(<span class="s">"wss://mesh.agentmesh.ai"</span>, { jwt, nkeySeed: seed });
+const mesh = await connectAs(<span class="s">"b"</span>);
 
 const stream = await mesh.requestStream(STREAMER, <span class="s">"count"</span>, { to: 3 });
 for await (const chunk of stream.chunks) {

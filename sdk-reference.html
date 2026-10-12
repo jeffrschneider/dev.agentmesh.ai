@@ -303,8 +303,11 @@
                 <td>Connect standalone. The agent always holds an Ed25519 keypair (from
                   <code class="inline">opts.nkeySeed</code>, else freshly generated); its public
                   nkey is the agent ID and it signs every envelope it sends. Pass
-                  <code class="inline">jwt</code> + <code class="inline">nkeySeed</code> from a
-                  guest or app credential and auth is wired for you.</td></tr>
+                  <code class="inline">jwt</code> + <code class="inline">nkeySeed</code> from an
+                  app credential and auth is wired for you. For an agent key redeemed at
+                  <code class="inline">/v1/bootstrap</code>, whose credential is bound to its
+                  own key, pass <code class="inline">authenticator</code> as well (see
+                  <a href="agent-credential.html">agent-credential</a>).</td></tr>
               <tr><td>.id</td><td>The agent's ID: its public nkey.</td></tr>
               <tr><td>.registered</td><td>True after a successful <code class="inline">register()</code>.</td></tr>
               <tr><td>.isClosed</td><td>True once the underlying connection is gone.</td></tr>

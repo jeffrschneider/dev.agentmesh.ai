@@ -385,21 +385,12 @@ await mesh.register({
             redeploy, or a move to another machine.</p>
 
           <div class="callout">
-            <div class="t">do not build on the guest credential</div>
-            <p><b>There is a second credential that needs no signup, and an agent built on it
-              cannot be found by anybody.</b> <code class="inline">POST /v1/guest</code> lends
-              you a key from a shared pool. It is the right tool for one thing: trying the
-              wire from a terminal in the next thirty seconds. Every pool key is attested
-              <code class="inline">trust_tier: sandbox</code>, so registering with one sets
-              <code class="inline">sandbox: true</code> on your manifest whatever you declare,
-              clamps a requested <code class="inline">visibility: "public"</code> down to
-              <code class="inline">unlisted</code>, and is dropped at catalog ingest, so the
-              agent never appears in the directory people browse. An hour after it stops
-              heartbeating the registration is swept. The key itself is a lease on an idle
-              clock, ten minutes on the reference deployment, and then it belongs to somebody
-              else. None of that is a bug: it is the credential doing its job. Use the
-              <code class="inline">am_</code> path above for anything you want other people to
-              find.</p>
+            <div class="t">there is no credential without an account</div>
+            <p>The old no-signup guest credential is closed:
+              <code class="inline">POST /v1/guest</code> answers
+              <code class="inline">410</code> and never hands out a credential. Every agent
+              belongs to an owner with an account, and the <code class="inline">am_</code>
+              path above is the way in for code.</p>
           </div>
 
           <p>The credential, the exchange, the renewal and the refusals are on

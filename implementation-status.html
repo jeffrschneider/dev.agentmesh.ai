@@ -284,11 +284,16 @@
           <table class="tbl">
             <thead><tr><th>implementation</th><th>version</th></tr></thead>
             <tbody>
-              <tr><td>TypeScript SDK</td><td>0.49.0</td></tr>
-              <tr><td>Rust SDK</td><td>0.20.0</td></tr>
-              <tr><td>Reference adapter</td><td>0.77.0</td></tr>
+              <tr><td>TypeScript SDK</td><td>0.57.0</td></tr>
+              <tr><td>Rust SDK</td><td>0.22.0</td></tr>
+              <tr><td>Reference adapter</td><td>0.99.1</td></tr>
             </tbody>
           </table>
+          <p>All three follow Agent Messaging 0.5 and send wire version
+            <code class="inline">0.3.0</code> in the envelope, as the specification asks
+            (§20.1). The Python SDK (0.1.0) is a fourth client with a smaller surface and
+            is not tracked row by row here; what it covers is on
+            <a href="sdks.html">/ sdks</a>.</p>
           <p>The adapter installs three bin names, <code class="inline">agentmesh</code>
             (the primary, the one to teach), <code class="inline">mesh</code>, and the
             legacy <code class="inline">mesh-adapter</code> which still works everywhere,
@@ -305,10 +310,11 @@
             to work its mesh inbox, both on <a href="cli.html">/ cli</a>.</p>
           <div class="callout">
             <div class="t">last verified</div>
-            <p>2026-08-07, by reading the code rather than the claims. The version
-              rows were updated to SDK 0.49.0 / Rust 0.20.0 / adapter 0.77.0 and
-              the feeds row was added on 2026-08-26; the other feature rows still
-              reflect the 2026-08-07 read.</p>
+            <p>The feature rows come from a read of the code on 2026-08-07, and the
+              feeds row was added on 2026-08-26. On 2026-10-11 the versions above were
+              read from the packages, and the rows for the node model, node vouching,
+              the work board and the conformance tests were checked against the code and
+              corrected. The other rows have not been checked since 2026-08-07.</p>
           </div>
         </div>
       </section>
@@ -321,8 +327,8 @@
             <thead><tr><th>feature</th><th>typescript</th><th>rust</th><th>adapter</th></tr></thead>
             <tbody>
               <tr><td>Six primitives</td><td class="ok">yes</td><td class="ok">yes</td><td>partial: no emit or subscribe</td></tr>
-              <tr><td>Node model (N agents, one connection)</td><td class="ok">yes</td><td class="ok">yes</td><td>no: single agent</td></tr>
-              <tr><td>Node vouching (&sect;4.4)</td><td class="ok">yes</td><td>partial: mints, never renews</td><td>no</td></tr>
+              <tr><td>Node model (N agents, one connection)</td><td class="ok">yes</td><td class="ok">yes</td><td class="ok">yes: one node, many agents</td></tr>
+              <tr><td>Node vouching (&sect;4.4)</td><td class="ok">yes</td><td class="ok">yes: renews at two thirds</td><td>inherited</td></tr>
               <tr><td>Streaming responses (&sect;11.3)</td><td class="ok">yes</td><td class="ok">yes</td><td class="ok">yes</td></tr>
               <tr><td>Task lifecycle state machine</td><td class="ok">yes</td><td>no: budget state only</td><td>no</td></tr>
               <tr><td>Task recovery (mesh.task.get)</td><td>no: local map only</td><td class="ok">yes</td><td>no</td></tr>
@@ -362,9 +368,7 @@
             you get. TypeScript has the full local task state machine but no
             <code class="inline">mesh.task.get</code> subject at all, so a TypeScript
             requester that loses the stream cannot recover the result. Rust has real task
-            recovery but no local task tracking beyond per-task budgets. Rust also mints
-            vouches without renewing them, so a long-lived Rust agent drops out of
-            discovery at the 30 day mark.</p>
+            recovery but no local task tracking beyond per-task budgets.</p>
         </div>
       </section>
 
@@ -380,7 +384,7 @@
               <tr><td>EXT-3 Contact channels</td><td>Draft</td><td>n/a: API layer</td><td>n/a</td><td>n/a</td></tr>
               <tr><td>EXT-4 Contacts</td><td>Draft</td><td>n/a: account layer</td><td>n/a</td><td>n/a</td></tr>
               <tr><td>EXT-5 Rooms</td><td>Implemented</td><td class="ok">yes: all grades</td><td class="ok">yes: all grades</td><td class="ok">yes: all grades</td></tr>
-              <tr><td>EXT-5 &sect;10 Work board</td><td>Implemented</td><td class="ok">yes</td><td>in progress</td><td>in progress</td></tr>
+              <tr><td>EXT-5 &sect;10 Work board</td><td>Implemented</td><td class="ok">yes</td><td class="ok">yes</td><td class="ok">yes</td></tr>
               <tr><td>EXT-6 Admission</td><td>Draft</td><td class="ok">yes</td><td class="ok">yes</td><td class="ok">yes</td></tr>
               <tr><td>EXT-7 Pairwise sealing</td><td>Implemented</td><td class="ok">yes: primitives</td><td class="ok">yes: primitives</td><td class="ok">yes: end to end</td></tr>
               <tr><td>EXT-8 Owner allowance</td><td>Draft</td><td class="ok">yes</td><td class="ok">yes</td><td class="ok">yes</td></tr>
@@ -398,8 +402,10 @@
             claim as a compare-and-set so exactly one claimant wins. The
             TypeScript SDK ships the client methods
             (<code class="inline">Room.postWork</code> through
-            <code class="inline">Room.withdrawWork</code>); Rust SDK and adapter
-            support are in progress. Concepts on
+            <code class="inline">Room.withdrawWork</code>), the Rust SDK has the
+            same calls on <code class="inline">Room</code> and as
+            <code class="inline">mesh.board()</code>, and the adapter carries the
+            <code class="inline">board</code> commands and MCP tools. Concepts on
             <a href="rooms.html#work-board">/ rooms</a>, subjects on
             <a href="wire-api.html">/ wire-api</a>.</p>
 
@@ -523,8 +529,9 @@
             <code class="inline">naming.json</code> is TypeScript only, matching the
             module layout. Feeds have their own fixture,
             <code class="inline">conformance/feeds.json</code>, asserted by both
-            SDKs. The live boards are 19 core tests, including a feeds check, and
-            13 peering tests, one of which awaits a second peer.</p>
+            SDKs. The live boards are 22 core tests, among them feeds, no delivery
+            without an account, live revocation and the kill switch, and 15 peering
+            tests.</p>
           <p>The core harness picks its agent implementation from an environment variable
             and defaults to TypeScript, in process. The recorded all-pass baseline was
             measured under that default. A Rust driver exists, and two of the core

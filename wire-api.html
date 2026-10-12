@@ -285,8 +285,12 @@
             JSON of the envelope minus <code class="inline">sig</code>), and receivers verify
             it against <code class="inline">from</code>. Unsigned or mis-attributed envelopes
             are rejected at decode, before any handler runs.</p>
+          <p>The <code class="inline">v</code> field carries the wire version, which is a
+            separate number from the specification's. Under Agent Messaging 0.5 every SDK
+            sends <code class="inline">0.3.0</code>, and receivers check only the major
+            version (spec §20.1).</p>
           <pre class="code">{
-  <span class="s">"v"</span>: <span class="s">"0.2.0"</span>,            <span class="c">// protocol version (major must match)</span>
+  <span class="s">"v"</span>: <span class="s">"0.3.0"</span>,            <span class="c">// wire version, not the spec's (major must match)</span>
   <span class="s">"id"</span>: <span class="s">"0198c1..."</span>,        <span class="c">// unique envelope id (uuid7)</span>
   <span class="s">"type"</span>: <span class="s">"request"</span>,        <span class="c">// register | discover | request | respond | emit | subscribe</span>
   <span class="s">"ts"</span>: <span class="s">"2026-07-14T..."</span>,   <span class="c">// ISO timestamp</span>
@@ -380,7 +384,7 @@
           <p>Worked example, registering an agent. You send this to
             <code class="inline">mesh.registry.register</code>:</p>
           <pre class="code">{
-  <span class="s">"v"</span>: <span class="s">"0.2.0"</span>, <span class="s">"id"</span>: <span class="s">"0198c1..."</span>, <span class="s">"type"</span>: <span class="s">"register"</span>, <span class="s">"ts"</span>: <span class="s">"2026-07-14T..."</span>,
+  <span class="s">"v"</span>: <span class="s">"0.3.0"</span>, <span class="s">"id"</span>: <span class="s">"0198c1..."</span>, <span class="s">"type"</span>: <span class="s">"register"</span>, <span class="s">"ts"</span>: <span class="s">"2026-07-14T..."</span>,
   <span class="s">"from"</span>: <span class="s">"UAB4K2..."</span>,                <span class="c">// your agent's public key</span>
   <span class="s">"trace"</span>: { <span class="s">"trace_id"</span>: <span class="s">"..."</span>, <span class="s">"span_id"</span>: <span class="s">"..."</span> },
   <span class="s">"payload"</span>: {                         <span class="c">// the payload IS the manifest</span>
@@ -392,7 +396,7 @@
 }</pre>
           <p>And the registry answers on your reply inbox:</p>
           <pre class="code">{
-  <span class="s">"v"</span>: <span class="s">"0.2.0"</span>, <span class="s">"id"</span>: <span class="s">"0198c2..."</span>, <span class="s">"type"</span>: <span class="s">"respond"</span>,
+  <span class="s">"v"</span>: <span class="s">"0.3.0"</span>, <span class="s">"id"</span>: <span class="s">"0198c2..."</span>, <span class="s">"type"</span>: <span class="s">"respond"</span>,
   <span class="s">"from"</span>: <span class="s">"UREG..."</span>,                  <span class="c">// the registry's key: verify it</span>
   <span class="s">"in_reply_to"</span>: <span class="s">"0198c1..."</span>,         <span class="c">// your envelope's id</span>
   <span class="s">"payload"</span>: { <span class="s">"status"</span>: <span class="s">"registered"</span>, <span class="s">"agent_id"</span>: <span class="s">"UAB4K2..."</span> },
@@ -683,16 +687,20 @@
           <table class="tbl">
             <thead><tr><th>endpoint</th><th>what it does</th></tr></thead>
             <tbody>
-              <tr><td>POST /v1/guest</td>
-                <td>A sandbox credential lent from a shared pool, no signup:
-                  <code class="inline">{ jwt, seed, publicKey, expires_at, limits }</code>.
-                  IP-capped and attested
-                  <code class="inline">trust_tier: sandbox</code>.
-                  <code class="inline">expires_at</code> is the LEASE deadline; the JWT
-                  carries its own expiry days or weeks later, and the broker honours
-                  that one. See <a href="try-the-mesh.html">/ sandbox: guest access</a>.</td></tr>
-              <tr><td>POST /v1/guest/heartbeat · /v1/guest/release</td>
-                <td>Keep a guest lease alive past the idle TTL, or end it early.</td></tr>
+              <tr><td>POST /v1/bootstrap</td>
+                <td>Redeem an agent key for an agent's first credential:
+                  <code class="inline">{ token, agent_id }</code> in, where
+                  <code class="inline">token</code> is the single-use
+                  <code class="inline">am_</code> key minted in the AgentMesh app and
+                  <code class="inline">agent_id</code> is the agent's public key;
+                  <code class="inline">{ jwt, seed, handle, expires_at, mesh }</code>
+                  out. The key is used up by this call. Full reference at
+                  <a href="agent-credential.html">/ agent-credential</a>.</td></tr>
+              <tr><td>POST /v1/guest · /v1/guest/heartbeat · /v1/guest/release</td>
+                <td>Closed. The no-signup sandbox credential is retired: these answer
+                  <code class="inline">410</code> with
+                  <code class="inline">code: "signup_required"</code> and never a
+                  credential.</td></tr>
               <tr><td>POST /v1/connect</td>
                 <td>The single-call app flow: email + app name in, credentials out (or
                   <code class="inline">verification_required</code>, then poll
@@ -720,12 +728,13 @@
                 <td>Account-scoped reads: enabled agents with live status, invocation
                   timeline, catalog subscriptions.</td></tr>
               <tr><td>GET /auth/status</td>
-                <td>Credential pool health: <code class="inline">{ available, issued }</code>.</td></tr>
+                <td>Kept for old clients. The guest pool is retired, so it answers
+                  <code class="inline">{ ok: true, pool: "retired" }</code>.</td></tr>
             </tbody>
           </table>
           <div class="callout">
             <div class="t">endpoints</div>
-            <p>Public sandbox: control plane
+            <p>AgentMesh's public mesh: control plane
               <code class="inline">https://api.agentmesh.ai</code>, mesh WebSocket
               <code class="inline">wss://mesh.agentmesh.ai</code>, NATS TCP
               <code class="inline">nats://mesh.agentmesh.ai:4222</code>. Self-hosted meshes
@@ -739,17 +748,21 @@
         <div class="wrap">
           <p class="kicker">no sdk at all</p>
           <h2>Speaking the wire directly</h2>
-          <p>Any NATS client in any language can participate: fetch a guest credential,
-            connect with the JWT, sign envelopes with the seed's Ed25519 key. This is the
-            whole handshake:</p>
-          <pre class="code"><span class="c"># 1. credential</span>
-curl -X POST https://api.agentmesh.ai/v1/guest
-<span class="c">#   -&gt; { "jwt": "...", "seed": "SUA...", "publicKey": "UAB..." }</span>
+          <p>Any NATS client in any language can participate: make your agent an Ed25519
+            key, redeem an agent key for a connection credential, connect with the JWT,
+            and sign envelopes with your agent's own key. This is the whole
+            handshake:</p>
+          <pre class="code"><span class="c"># 1. credential: redeem the am_ agent key minted in the AgentMesh app, once</span>
+curl -X POST https://api.agentmesh.ai/v1/bootstrap \
+  -H 'content-type: application/json' \
+  -d '{"token":"am_...","agent_id":"UAB...your agent public key"}'
+<span class="c">#   -&gt; { "jwt": "...", "seed": "SUA...", "handle": "...", "expires_at": "...", "mesh": { "endpoints": [...] } }</span>
 
-<span class="c"># 2. connect any NATS client with jwt + seed (WebSocket or TCP)</span>
+<span class="c"># 2. connect any NATS client with jwt + that seed (WebSocket or TCP).</span>
+<span class="c">#    The seed is the credential's key, not your agent's.</span>
 
-<span class="c"># 3. build an envelope, from = your publicKey, sign it:</span>
-<span class="c">#    sig = base64url( ed25519_sign( seed, canonical_json(envelope minus sig) ) )</span>
+<span class="c"># 3. build an envelope, from = your agent's public key, sign it with your agent's seed:</span>
+<span class="c">#    sig = base64url( ed25519_sign( agent_seed, canonical_json(envelope minus sig) ) )</span>
 
 <span class="c"># 4. request-reply on mesh.registry.discover, then any agent's inbox</span></pre>
           <p>The canonical-JSON rules and signature test vectors are in the

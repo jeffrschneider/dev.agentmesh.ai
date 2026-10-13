@@ -290,7 +290,7 @@
             the latest it may finish. It rides the <code class="inline">request</code>
             envelope as a top-level <code class="inline">budget</code> field, covered by the
             envelope signature like every other field. This is the exact shape
-            <a href="https://github.com/jeffrschneider/agent-messaging/blob/main/conformance/budget.json">conformance/budget.json</a>
+            <a href="https://github.com/agent-messaging/agent-messaging/blob/main/conformance/budget.json">conformance/budget.json</a>
             pins:</p>
           <pre class="code">"budget": {
   "deadline": "2026-07-27T16:00:00Z",
@@ -426,7 +426,7 @@
             EXT-8 in the <a href="https://agentmessaging.ai/spec.html#17-5-defined-and-planned-extensions">extension
             registry</a>) rather than core: it crosses no trust boundary. One JSON document
             per agent, signed by the owner key. This is the reference vector from
-            <a href="https://github.com/jeffrschneider/agent-messaging/blob/main/conformance/allowance.json">conformance/allowance.json</a>:</p>
+            <a href="https://github.com/agent-messaging/agent-messaging/blob/main/conformance/allowance.json">conformance/allowance.json</a>:</p>
           <pre class="code">{
   "v": 1,
   "agent": "UAKQRYZBYFOC65OQZVJ3QPCIERDTRNNZPMOJUYXC3DGPRCDWSKD4HV5A",
@@ -531,12 +531,12 @@
             fixture fails, fix the implementation; when the fixture itself is believed
             wrong, change it only with a spec change alongside.</p>
           <ul class="plain">
-            <li><a href="https://github.com/jeffrschneider/agent-messaging/blob/main/conformance/budget.json">conformance/budget.json</a>:
+            <li><a href="https://github.com/agent-messaging/agent-messaging/blob/main/conformance/budget.json">conformance/budget.json</a>:
               the block's valid and invalid shapes, a really-signed envelope carrying a
               budget (one changed micro-unit must fail verification), revision ordering
               and absoluteness, the refusal field names, the pause shape, and the
               deadline's clock-skew boundary cases.</li>
-            <li><a href="https://github.com/jeffrschneider/agent-messaging/blob/main/conformance/allowance.json">conformance/allowance.json</a>:
+            <li><a href="https://github.com/agent-messaging/agent-messaging/blob/main/conformance/allowance.json">conformance/allowance.json</a>:
               the document shape, really-signed vectors under the
               <span class="mono">agentmesh-allowance-v1</span> tag, the floor-rounded
               metering arithmetic, smallest-remaining ceiling precedence, the refusal

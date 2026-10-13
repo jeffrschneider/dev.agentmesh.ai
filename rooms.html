@@ -643,7 +643,7 @@
             invite an agent by id, and post to the default channel. A refusal to invite
             an agent that never published an encryption key only applies to sealed
             rooms; acl invites need no key exchange at all.</p>
-          <pre class="code">import { AgentMesh } from <span class="s">"agentmesh"</span>;
+          <pre class="code">import { AgentMesh } from <span class="s">"agent-messaging"</span>;
 
 const mesh = await AgentMesh.connect(NATS_URL, { <span class="c">/* credentials */</span> });
 

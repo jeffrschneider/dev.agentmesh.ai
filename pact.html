@@ -411,7 +411,7 @@ agentmesh pact business_login &lt;your-agent&gt; https://id.example.com &lt;clie
             permission it also carries a permission token. Check the token before doing anything
             on their account. Then report which permission you used, and AgentMesh puts it on
             the receipt. The TypeScript, Rust and Python SDKs have the same helpers:</p>
-          <pre class="code">import { pact } from <span class="s">"agentmesh"</span>;
+          <pre class="code">import { pact } from <span class="s">"agent-messaging"</span>;
 
 const turn = pact.pactTurnFromMeta(envelope.meta);
 const who = await pact.checkDelegation(turn?.delegation?.token, { paIssuer: turn?.pa ?? <span class="s">""</span> });

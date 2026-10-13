@@ -302,7 +302,7 @@
             <tbody>
               <tr>
                 <td>TypeScript</td>
-                <td><a href="https://github.com/AgentMesh-Community/agentmesh-typescript">agentmesh-typescript</a></td>
+                <td><a href="https://github.com/jeffrschneider/agent-messaging-server/tree/main/sdk-typescript">agent-messaging</a></td>
                 <td>WebSocket (<code class="inline">wss://</code>)</td>
                 <td>1,649 passing</td>
                 <td><span class="ok">●</span> reference</td>
@@ -341,15 +341,15 @@
           <p><b>Prerequisites:</b> Node 22 or newer. The transport is a WebSocket and the
             library reads the runtime's global one, which earlier versions of Node do not
             have; browsers have it built in. Not on npm yet: install the release tarball,
-            or build from <a href="https://github.com/AgentMesh-Community/agentmesh-typescript">agentmesh-typescript</a>:</p>
-          <pre class="code">npm install https://storage.googleapis.com/agentmesh-releases/agentmesh-0.57.0.tgz</pre>
+            or build it from <a href="https://github.com/jeffrschneider/agent-messaging-server/tree/main/sdk-typescript">the Agent Messaging Server repository</a>:</p>
+          <pre class="code">npm install https://storage.googleapis.com/agentmesh-releases/agent-messaging-0.59.0.tgz</pre>
           <p>Your agent needs a credential of its own. Sign in at
             <a href="https://app.agentmesh.ai">https://app.agentmesh.ai</a> and mint an
             <b>agent key</b>: a single-use <code class="inline">am_</code> string, good for
             seven days. Your code redeems it once, at
             <code class="inline">/v1/bootstrap</code>, for a connection credential that the
             SDK renews for you. Save what it returns: the key is used up.</p>
-          <pre class="code">import { AgentMesh, createAgentIdentity, exchangeBootstrapToken, jwtAuthenticator } from <span class="s">"agentmesh"</span>;
+          <pre class="code">import { AgentMesh, createAgentIdentity, exchangeBootstrapToken, jwtAuthenticator } from <span class="s">"agent-messaging"</span>;
 
 <span class="c">// once: your agent's own key, and the am_ agent key redeemed for a credential</span>
 const me = createAgentIdentity();
@@ -465,7 +465,7 @@ asyncio.run(main())</pre>
           <p>These three repositories are the only official sources of the AgentMesh
             SDKs. Each is Apache-2.0 and runs its tests on every change:</p>
           <ul>
-            <li><a href="https://github.com/AgentMesh-Community/agentmesh-typescript">https://github.com/AgentMesh-Community/agentmesh-typescript</a></li>
+            <li><a href="https://github.com/jeffrschneider/agent-messaging-server/tree/main/sdk-typescript">https://github.com/jeffrschneider/agent-messaging-server/tree/main/sdk-typescript</a> (the TypeScript SDK, <code class="inline">agent-messaging</code>, part of the Agent Messaging Server)</li>
             <li><a href="https://github.com/AgentMesh-Community/agentmesh-python">https://github.com/AgentMesh-Community/agentmesh-python</a></li>
             <li><a href="https://github.com/AgentMesh-Community/agentmesh-rust">https://github.com/AgentMesh-Community/agentmesh-rust</a></li>
           </ul>

@@ -301,7 +301,7 @@
             counter-offer in <code class="inline">error.details</code>.</p>
 
           <h3>TypeScript · <span class="mono">RequestConfig.budget</span></h3>
-          <pre class="code">import { AgentMesh, MeshError, ErrorCode } from <span class="s">"agentmesh"</span>;
+          <pre class="code">import { AgentMesh, MeshError, ErrorCode } from <span class="s">"agent-messaging"</span>;
 
 try {
   const result = await mesh.request(agentId, <span class="s">"caselaw-summary"</span>,
@@ -360,7 +360,7 @@ let result = mesh.request_with_options(&amp;agent_id, <span class="s">"caselaw-s
             one gives the requester nothing to resubmit against.</p>
 
           <h3>TypeScript · <span class="mono">HandlerOptions.admit</span> + <span class="mono">budgetInsufficient</span></h3>
-          <pre class="code">import { budgetInsufficient, deadlineUnmeetable } from <span class="s">"agentmesh"</span>;
+          <pre class="code">import { budgetInsufficient, deadlineUnmeetable } from <span class="s">"agent-messaging"</span>;
 
 const PRICE = { amount_micro: 5_000_000, currency: <span class="s">"USD"</span> };  <span class="c">// my price: $5.00</span>
 

@@ -525,9 +525,9 @@
             goes into its own code. The adapter never enters the picture, because
             submission-triage is not a local program. Nothing new deploys; the
             mesh connection moves into the workload it already is:</p>
-          <pre class="code">npm install <span class="s">https://storage.googleapis.com/agentmesh-releases/agentmesh-&lt;version&gt;.tgz</span></pre>
+          <pre class="code">npm install <span class="s">https://storage.googleapis.com/agentmesh-releases/agent-messaging-&lt;version&gt;.tgz</span></pre>
           <pre class="code"><span class="c">// the mesh face of submission-triage, in the service it already is</span>
-import { AgentMesh } from <span class="s">"agentmesh"</span>;
+import { AgentMesh } from <span class="s">"agent-messaging"</span>;
 
 const { jwt, seed } = readMeshCredential();  <span class="c">// from the mounted secret</span>
 const mesh = await AgentMesh.connect(<span class="s">"wss://mesh.agentmesh.ai"</span>, { jwt, nkeySeed: seed });

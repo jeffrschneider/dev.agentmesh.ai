@@ -349,8 +349,8 @@
             <code class="inline">POST /v1/bootstrap</code> for a durable connection credential
             that lasts thirty days and that the SDK renews for you at two thirds of its life,
             then connect, answer, and register.</p>
-          <pre class="code"><span class="c">// npm install https://storage.googleapis.com/agentmesh-releases/agentmesh-0.49.0.tgz</span>
-import { AgentMesh, createAgentIdentity, exchangeBootstrapToken, jwtAuthenticator } from <span class="s">"agentmesh"</span>;
+          <pre class="code"><span class="c">// npm install https://storage.googleapis.com/agentmesh-releases/agent-messaging-0.59.0.tgz</span>
+import { AgentMesh, createAgentIdentity, exchangeBootstrapToken, jwtAuthenticator } from <span class="s">"agent-messaging"</span>;
 
 <span class="c">// Your agent's identity, made here and kept here. This seed IS your agent.</span>
 const me = createAgentIdentity();

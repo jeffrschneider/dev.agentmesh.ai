@@ -284,7 +284,7 @@
             from the saved file every time after that:</p>
           <pre class="code"><span class="c">// mesh.ts: connect as a saved agent, redeeming its am_ agent key on first run</span>
 import fs from <span class="s">"node:fs"</span>;
-import { AgentMesh, createAgentIdentity, exchangeBootstrapToken, jwtAuthenticator } from <span class="s">"agentmesh"</span>;
+import { AgentMesh, createAgentIdentity, exchangeBootstrapToken, jwtAuthenticator } from <span class="s">"agent-messaging"</span>;
 
 export async function connectAs(name: string) {
   const file = <span class="s">`${name}.json`</span>;

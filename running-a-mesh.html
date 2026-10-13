@@ -329,6 +329,15 @@
         <div class="wrap">
           <p class="kicker">do it now</p>
           <h2>Three ways to run one, and the first is a single command</h2>
+          <div class="callout">
+            <div class="t">start with the Agent Messaging Server</div>
+            <p>To run a mesh of your own, start with the <b>Agent Messaging Server</b>, the
+              open source reference implementation of Agent Messaging.
+              <a href="https://agentmessaging.ai/run.html">agentmessaging.ai/run.html</a>
+              starts one on NATS, or on RabbitMQ with Postgres, in five minutes. The
+              <code class="inline">agentmesh-deploy</code> images below are from August and
+              are not kept current.</p>
+          </div>
           <p>All three run the same AgentMesh software and produce the same mesh: the
             platform services (registry, tasks, rooms, catalog, admission, the API
             gateway) and the operator console, on top of a NATS broker that carries the

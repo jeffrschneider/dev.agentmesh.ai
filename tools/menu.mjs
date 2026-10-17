@@ -85,7 +85,7 @@ export const MENU = [
     ["budgets-and-allowances.html", "Budgets and allowances"],
   ]],
   ["Reference", [
-    ["common-agent.html", "The Common Agent"],
+    ["https://commonagent.net/", "The Common Agent Specification"],
     ["https://agentmessaging.ai/spec.html", "Specification"],
     ["related-specs.html", "Related specifications"],
     ["standards.html", "Standards"],

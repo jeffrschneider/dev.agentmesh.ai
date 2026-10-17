@@ -392,6 +392,11 @@
     .std p{ margin:0 0 10px; color:var(--dim); font-size:.99rem; max-width:68ch; }
     .std p:last-child{ margin-bottom:0; }
     .std b{ color:var(--paper); font-weight:500; }
+    .std .ver{ font-family:var(--wire); font-size:.78rem; color:var(--dim); }
+    /* a standard's extensions and bindings, each with its own version */
+    .std .parts{ list-style:none; margin:4px 0 0; padding:0; display:flex; flex-wrap:wrap;
+      gap:6px 18px; max-width:68ch; font-family:var(--wire); font-size:.76rem; color:var(--dim); }
+    .std .parts .pv{ color:var(--paper); }
     .s-proto,.s-name{ --mk:var(--address); }
     .s-rfp{ --mk:var(--signal); }
     .s-sow{ --mk:var(--paper); }
@@ -589,10 +594,12 @@
 
 
   <div class="wrap phero">
-    <h1>The standards</h1>
-    <p class="lede">Seven standards we publish, three companions beside them for
-      jobs, processes and playbooks, and the outside standards we complement.
-      Every one is linked to its own site, where the full text lives.</p>
+    <!-- BEGIN standards:hero, written by tools/build-standards.mjs from standards.json in CommonAgent/common-agent-standards -->
+    <h1>The Common Agent Standards</h1>
+    <p class="lede">The Common Agent Standards are the Common Agent Specification, nine standards built on it and one guide, and AgentMesh sponsors them.
+      Every entry links to its own site, where the full text lives, and the outside
+      standards they work alongside are at the end of this page.</p>
+    <!-- END standards:hero -->
   </div>
 
   <section class="band">
@@ -604,31 +611,33 @@
         middle is worth reading without the authority to back it.</p>
 
       <div class="arch">
+        <!-- BEGIN standards:stack, written by tools/build-standards.mjs from standards.json in CommonAgent/common-agent-standards -->
         <div class="stack">
-          <div class="cap">The AgentMesh Family of Standards</div>
+          <div class="cap">The Common Agent Standards</div>
         <div class="layer">
           <div class="lab">the agreement</div>
           <div class="items">
-            <a class="chip s-rfp" href="https://agentrfp.net">Agent RFP</a>
-            <a class="chip s-sow" href="https://agentsow.com">Agent SoW</a>
-            <a class="chip s-rep" href="https://agentreputations.com">Agent Reputations</a>
+            <a class="chip s-rfp" href="https://agentrfp.net/">Agent RFP</a>
+            <a class="chip s-sow" href="https://agentsow.com/">Agent SoW</a>
+            <a class="chip s-rep" href="https://agentreputations.com/">Agent Reputations</a>
           </div>
         </div>
         <div class="layer">
           <div class="lab">authority</div>
           <div class="items">
-            <a class="chip s-man" href="https://agentmandate.net">Agent Mandate</a>
+            <a class="chip s-man" href="https://agentmandate.net/">Agent Mandate</a>
           </div>
         </div>
         <div class="layer">
           <div class="lab">foundation</div>
           <div class="items">
-            <a class="chip s-name" href="https://agentnaming.ai">Agent Naming</a>
-            <a class="chip s-desc" href="https://commonagent.net/">Common Agent Specification</a>
+            <a class="chip s-name" href="https://agentnaming.ai/">Personal Agent Naming</a>
+            <a class="chip s-desc" href="https://commonagent.net/spec.html">The Common Agent Specification</a>
             <a class="chip s-proto" href="https://agentmessaging.ai/">Agent Messaging</a>
           </div>
         </div>
         </div>
+        <!-- END standards:stack -->
         <div class="side">
           <div class="bundle">
             <h3>standards we complement</h3>
@@ -640,88 +649,119 @@
         </div>
       </div>
 
-      <p style="margin-top:26px;">The layers are dependencies rather than steps,
-        so all three are true at once during any piece of work. The one sequence
-        worth knowing is that <b>what Agent Reputations records at the end of an
-        engagement is what the next one reads first</b>, which is what makes the
-        family a loop rather than a pipeline.</p>
+      <p style="margin-top:26px;">The layers are dependencies, so all three hold
+        at once during any piece of work. The one sequence worth knowing is that
+        <b>what Agent Reputations records at the end of an engagement is what the
+        next one reads first</b>, and that is what makes the suite a loop.</p>
     </div>
   </section>
 
+  <!-- BEGIN standards:entries, written by tools/build-standards.mjs from standards.json in CommonAgent/common-agent-standards -->
   <section class="band">
     <div class="wrap">
-      <p class="kicker">what we publish</p>
-      <h2>The seven standards</h2>
+      <p class="kicker">the specification and the standards on it</p>
+      <h2>The Common Agent Specification and six standards</h2>
 
-      <div class="std s-proto">
+      <div class="std s-desc" id="common-agent">
+        <div class="top">
+          <h3>The Common Agent Specification</h3>
+          <span class="ver" title="version">0.27.0-draft</span>
+          <a class="dom" href="https://commonagent.net/spec.html">commonagent.net &rarr;</a>
+        </div>
+        <p class="role">what calling it an agent obliges</p>
+        <p>The Common Agent Specification defines what an agent is, in terms anyone can check. An agent holds a key that signs, answers five questions for anyone who asks, declares its standing facts in one signed document, refuses what it does not do with a typed answer, and collects signed records of what others have checked about it.</p>
+        <p>Two documents describe one agent under it, and both are chapters of the specification. <b>The <a href="https://commonagent.net/descriptor.html">Agent Descriptor</a> is the one an operator writes</b>, with one authored spelling per fact, referenced at a digest by anything that binds. <b>The <a href="https://agentdoc.net/">AgentDoc</a> is the one assembled from it</b> and from the records others sign, with every source shown and anything never stated marked as such. The AgentDoc keeps its own site at agentdoc.net, with its tools and examples.</p>
+        <p>A third chapter says how an agent travels before it exists. <b>The <a href="https://commonagent.net/package.html">Agent Package</a></b> carries the Descriptor as a draft inside a portable plugin, together with what a host must have to run it, and defines how a package is published to a depot and installed into a running agent with an identity, so a verifier can check that what is running is what was built.</p>
+      </div>
+
+      <div class="std s-proto" id="messaging">
         <div class="top">
           <h3>Agent Messaging</h3>
+          <span class="ver" title="version">0.9.0-draft</span>
           <a class="dom" href="https://agentmessaging.ai/">agentmessaging.ai &rarr;</a>
         </div>
         <p class="role">the wire underneath</p>
-        <p>Agent Messaging was formerly called the AgentMesh Protocol, and AgentMesh is its reference implementation. The specification describes how agents reach each other at all. It defines the shape of a message, how identity is carried and checked, how a piece of work is tracked from request to result, and how an agent registers so that others can find it.</p>
-        <p>An extension tier covers the parts not every deployment needs, including rooms, admission, sealed conversations, allowances, deliverables and screening, and each is versioned separately so the core stays small. <b>This is the one standard here that is a network rather than a document.</b></p>
+        <p>Agent Messaging describes how agents reach each other over reliable messaging: signed messages that wait in an inbox, events published to every subscriber, and presence. It is a network binding of the agent the Common Agent Specification defines.</p>
+        <p>An extension tier covers what not every deployment needs, including rooms, admission, sealed conversations, allowances, deliverables and screening. Each extension has a version of its own, so the core stays small. <b>It is the one entry here that defines a network, where every other entry defines a document.</b></p>
+        <ul class="parts" aria-label="Parts of Agent Messaging">
+          <li>EXT-1 Device profile <span class="pv">0.1.0</span></li>
+          <li>EXT-2 Usage <span class="pv">0.3.0</span></li>
+          <li>EXT-3 Contact <span class="pv">0.1.0</span></li>
+          <li>EXT-4 Contacts <span class="pv">0.2.0-draft</span></li>
+          <li>EXT-5 Rooms <span class="pv">1.11.0</span></li>
+          <li>EXT-6 Admission <span class="pv">0.6.0-draft</span></li>
+          <li>EXT-7 Pairwise sealing <span class="pv">0.1.0-draft</span></li>
+          <li>EXT-8 Allowance <span class="pv">0.1.0</span></li>
+          <li>EXT-9 Deliverables <span class="pv">0.1.0</span></li>
+          <li>EXT-10 Screening <span class="pv">0.4.0-draft</span></li>
+          <li>EXT-11 Site agents <span class="pv">0.1.0</span></li>
+          <li>EXT-12 Systems health <span class="pv">0.1.0-draft</span></li>
+          <li>EXT-13 Guest standing <span class="pv">0.1.0-draft</span></li>
+          <li>The A2A Bridge <span class="pv">0.4.0-draft</span></li>
+          <li>The RabbitMQ binding <span class="pv">0.1</span></li>
+        </ul>
       </div>
 
-      <div class="std s-name">
+      <div class="std s-name" id="naming">
         <div class="top">
-          <h3>Agent Naming</h3>
-          <a class="dom" href="https://agentnaming.ai">agentnaming.ai &rarr;</a>
+          <h3>Personal Agent Naming</h3>
+          <span class="ver" title="version">0.10</span>
+          <a class="dom" href="https://agentnaming.ai/">agentnaming.ai &rarr;</a>
         </div>
         <p class="role">identity and addressing</p>
-        <p>A handle is a name anchored to something you already own, bound to a real agent. Everything above it depends on that, because a document signed by nobody in particular is not evidence of anything.</p>
-        <p>The name is anchored to a domain or an address rather than to a platform account, so it survives moving between networks. <b>Leaving does not cost you your name.</b></p>
+        <p>Personal Agent Naming names a personal agent on an email address its owner already has. The name is bound to the agent's own key, resolves to the addresses where the agent can be reached, and moves from one registrar to another without changing.</p>
+        <p>Everything above it depends on a name, because a document signed by nobody in particular is not evidence of anything. <b>Leaving a network does not cost an agent its name.</b></p>
       </div>
 
-      <div class="std s-man">
+      <div class="std s-man" id="mandate">
         <div class="top">
           <h3>Agent Mandate</h3>
-          <a class="dom" href="https://agentmandate.net">agentmandate.net &rarr;</a>
+          <span class="ver" title="version">0.4.0-draft</span>
+          <a class="dom" href="https://agentmandate.net/">agentmandate.net &rarr;</a>
         </div>
         <p class="role">delegated authority</p>
-        <p>A mandate is a signed delegation of authority that is bounded and can be revoked. It states which powers are granted, up to what ceiling, within what scope, and until when.</p>
+        <p>A mandate is a signed delegation of authority that is bounded and can be revoked. It states which powers are granted, up to what ceiling, within what scope and until when, so the other side can check it before acting.</p>
         <p>It has a layer to itself because it is the hinge. <b>A signed document from an agent that may not bind anyone is not worth reading</b>, so the other side checks the mandate before acting on anything above it.</p>
       </div>
 
-      <div class="std s-rfp">
+      <div class="std s-rfp" id="rfp">
         <div class="top">
           <h3>Agent RFP</h3>
-          <a class="dom" href="https://agentrfp.net">agentrfp.net &rarr;</a>
+          <span class="ver" title="version">0.8.0-draft</span>
+          <a class="dom" href="https://agentrfp.net/">agentrfp.net &rarr;</a>
         </div>
         <p class="role">asking for what you need</p>
-        <p>An RFP is a signed, structured request for proposal. It carries what you want delivered, what you will hand over, the rights you need in the result, how acceptance will be measured, what you will pay, and the date by which you will decide.</p>
-        <p>It exists for the case a catalog cannot serve. <b>When nothing on offer fits, you publish the need itself</b> and let anyone who can do the work answer it.</p>
+        <p>An Agent RFP is a signed, structured request for proposal. It carries what the buyer wants delivered, what it will hand over, the rights it needs in the result, how acceptance will be measured, what it will pay and the date by which it will decide.</p>
+        <p>It exists for the case a catalog cannot serve. <b>When nothing on offer fits, the buyer publishes the need itself</b>, and anyone who can do the work may answer it.</p>
       </div>
 
-      <div class="std s-sow">
+      <div class="std s-sow" id="sow">
         <div class="top">
           <h3>Agent SoW</h3>
-          <a class="dom" href="https://agentsow.com">agentsow.com &rarr;</a>
+          <span class="ver" title="version">0.23.0-draft</span>
+          <a class="dom" href="https://agentsow.com/">agentsow.com &rarr;</a>
         </div>
         <p class="role">the agreement</p>
-        <p>A statement of work sets out an arrangement between two parties whose agents do recurring work together. It is written so that clauses can be graded by software rather than argued over afterwards by people.</p>
-        <p>It records what was agreed, what arrived, what it cost and what happens when the work is contested. <b>Its disputes clause is what an arbiter binds into</b>, and its record of what did and did not arrive is the spine of any evidence bundle.</p>
+        <p>An Agent SoW is a statement of work between two parties whose agents do recurring work together, written so that software can grade its clauses. It records what was agreed, what arrived, what it cost and what happens when the work is contested.</p>
+        <p><b>Its disputes clause is what an arbiter binds into</b>, and its record of what did and did not arrive is the spine of any evidence bundle.</p>
+        <ul class="parts" aria-label="Parts of Agent SoW">
+          <li>A2A Terms extension <span class="pv">0.1.0-draft</span></li>
+          <li>A2A Interview extension <span class="pv">0.1.0-draft</span></li>
+        </ul>
       </div>
 
-      <div class="std s-rep">
+      <div class="std s-rep" id="reputations">
         <div class="top">
           <h3>Agent Reputations</h3>
-          <a class="dom" href="https://agentreputations.com">agentreputations.com &rarr;</a>
+          <span class="ver" title="version">0.3-draft</span>
+          <a class="dom" href="https://agentreputations.com/">agentreputations.com &rarr;</a>
         </div>
         <p class="role">evidence, afterwards</p>
-        <p>The bureau holds evidence about how agent interactions actually went, in a ledger that cannot be quietly edited afterwards.</p>
-        <p>It is what closes the loop. <b>What is recorded at the end of one engagement is what the next one reads first</b>, and it is read hardest for the roles that judge or recommend.</p>
-      </div>
-
-      <div class="std s-desc">
-        <div class="top">
-          <h3>The Common Agent Specification</h3>
-          <a class="dom" href="https://commonagent.net/">commonagent.net &rarr;</a>
-        </div>
-        <p class="role">what calling it an agent obliges</p>
-        <p>The Common Agent Specification defines the agent itself, as a testable claim: an identity that signs, five exchanges any stranger may ask, a mechanical refusal outside its declared offerings, and signed records of what others have checked. Agent Messaging is one network binding of this agent; the definition does not require it.</p>
-        <p>Two documents describe one agent under it, and both are chapters of the specification. <b>The <a href="https://commonagent.net/descriptor.html">Agent Descriptor</a> is the one an operator writes</b>, with one authored spelling per fact, referenced at a digest by anything that binds. <b>The <a href="https://agentdoc.net/">AgentDoc</a> is the one assembled from it</b> and from the records others sign, with every source shown and what was never stated printed rather than hidden. The AgentDoc keeps its own site at agentdoc.net, with its tools and examples.</p>
-        <p>A third chapter says how an agent travels before it exists. <b>The <a href="https://commonagent.net/package.html">Agent Package</a></b> carries the Descriptor as a draft inside a portable plugin, together with what a host must have to run it, and defines how a package is published to a depot and installed into a running agent with an identity, so a verifier can check that what is running is what was built.</p>
+        <p>Agent Reputations holds evidence about how agent interactions went, in a bureau's ledger that cannot be quietly edited afterwards. What one engagement records is what the next one reads first.</p>
+        <p>It closes the loop, and <b>it is read hardest for the roles that judge or recommend</b>.</p>
+        <ul class="parts" aria-label="Parts of Agent Reputations">
+          <li>A2A Reputation extension <span class="pv">0.1.0-draft</span></li>
+        </ul>
       </div>
 
     </div>
@@ -731,43 +771,59 @@
     <div class="wrap">
       <p class="kicker">the support stack</p>
       <h2>Jobs, processes and playbooks</h2>
-      <p>None of these is a document two parties exchange. The first describes
-        what a participant is for, the second how a piece of work moves from
-        start to finish, and the third how a group works through one step of that
-        work together.</p>
+      <p>These entries describe the work itself, and none of them is a document two
+        parties exchange. Agent Roles says what a participant is for, Agent Processes and
+        Agent Work Patterns say how a piece of work moves from start to finish, and
+        Agent Collab says how a group works through one step of that work together.</p>
 
-      <div class="std s-rol">
+      <div class="std s-rol" id="roles">
         <div class="top">
           <h3>Agent Roles</h3>
-          <a class="dom" href="https://agentroles.ai">agentroles.ai &rarr;</a>
+          <span class="ver" title="version">0.14.0-draft</span>
+          <a class="dom" href="https://agentroles.ai/">agentroles.ai &rarr;</a>
         </div>
         <p class="role">recurring jobs</p>
-        <p>The registry publishes jobs that come up again and again, and each one is a contract with a defined scope, the access it needs, and the refusals that define it. There are eighteen so far, in three families: jobs on the mesh, such as bookkeeper, front desk and arbiter; the jobs that make and look after agents, from spec writer to incident recorder; and the process runner.</p>
-        <p><b>Conformance is judged by what an agent refuses</b> as much as by what it produces, because taste cannot be recomputed and the registry does not pretend otherwise.</p>
+        <p>Agent Roles is a registry of jobs that recur on every mesh. Each role is a contract with a defined scope, the access it needs and the refusals that define it, and any agent that meets the contract can hold the role.</p>
+        <p>The registry defines twenty-three roles in three families: roles on the mesh, such as bookkeeper, front desk and arbiter; roles that make and look after agents, from spec writer to incident recorder; and the process runner, which carries work across agents.</p>
+        <p><b>Conformance is judged by what an agent refuses</b> as much as by what it produces, because taste cannot be recomputed.</p>
       </div>
 
-      <div class="std s-proc">
+      <div class="std s-proc" id="processes">
         <div class="top">
           <h3>Agent Processes</h3>
-          <a class="dom" href="https://agentprocesses.ai">agentprocesses.ai &rarr;</a>
+          <span class="ver" title="version">0.4.0-draft</span>
+          <a class="dom" href="https://agentprocesses.ai/">agentprocesses.ai &rarr;</a>
         </div>
         <p class="role">how a piece of work runs</p>
-        <p>A process document is plain text that says how a piece of work gets done: what starts it, the phases it moves through and who holds each one, what has to cross each handoff, and how much of each phase an agent may run on its own. A person reads it, and a process runner carries it out.</p>
-        <p>Agent Processes is the language those documents are written in, and it has a <a href="https://agentcatalog.com/spec/agent-processes">specification</a>. A phase runs a whole sub-job from <a href="https://agentworkpatterns.com">Agent Work Patterns</a>, convenes a room to run an Agent Collab playbook, or is done directly by a person or a system. <b>Whatever belongs to one organization is left blank</b>, so a process one organization publishes is one that another organization can adopt and fill in.</p>
+        <p>Agent Processes is a plain-text language for writing down how a piece of work runs: what starts it, the phases it moves through and who holds each one, what crosses each handoff, and how much of each phase an agent may run on its own.</p>
+        <p>A person reads a process document, and a process runner carries it out. A phase runs a whole sub-job shaped by Agent Work Patterns, convenes a room to run an Agent Collab playbook, or is done directly by a person or a system. <b>Whatever belongs to one organization is left blank</b>, so a process one organization publishes is one another organization can adopt and fill in.</p>
       </div>
 
-      <div class="std s-col">
+      <div class="std s-proc" id="work-patterns">
+        <div class="top">
+          <h3>Agent Work Patterns</h3>
+          <span class="ver" title="version">v1</span>
+          <a class="dom" href="https://agentworkpatterns.com/">agentworkpatterns.com &rarr;</a>
+        </div>
+        <p class="role">the shape of a whole job</p>
+        <p>Agent Work Patterns gives reusable shapes for a whole job. Each pattern names its phases, what crosses between them, what happens when a phase fails and who is on the roster across the whole job.</p>
+        <p>A phase of an Agent Processes document that runs a whole sub-job names one of these patterns.</p>
+      </div>
+
+      <div class="std s-col" id="collab">
         <div class="top">
           <h3>Agent Collab</h3>
-          <a class="dom" href="https://agentcollab.dev">agentcollab.dev &rarr;</a>
+          <span class="ver" title="version">v1</span>
+          <a class="dom" href="https://agentcollab.dev/">agentcollab.dev &rarr;</a>
         </div>
-        <p class="role">playbooks, not a specification</p>
-        <p>Agent Collab is a library of collaboration playbooks written for agents themselves, as prose documents an agent fetches, reads and enacts. Someone opens a room and names the playbook, and every participant reads the same page before speaking.</p>
-        <p><b>Shared reading is the interop.</b> There is no schema to conform to, which is what makes it different from everything else here. Eleven patterns exist so far, including briefing, roll call, relay, work board and critique circle, and each is marked untested until it survives a real multi-agent run.</p>
+        <p class="role">playbooks for a shared room</p>
+        <p>Agent Collab is a library of collaboration playbooks written for agents to fetch, read and enact in a shared room. It is a guide with no schema to conform to, and every participant reads the same page before speaking.</p>
+        <p>Someone opens a room and names the playbook. <b>Shared reading is the interop</b>, which sets it apart from every other entry here. The library holds fourteen playbooks, including briefing, roll call, relay, work board and critique circle.</p>
       </div>
 
     </div>
   </section>
+  <!-- END standards:entries -->
 
   <section class="band">
     <div class="wrap">

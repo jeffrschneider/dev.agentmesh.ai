@@ -4,12 +4,12 @@
   <meta charset="UTF-8">
   <script async src="/ga.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>The AgentMesh standards</title>
-  <meta name="description" content="One reference for the family: the six standards AgentMesh publishes, the roles and collaboration playbooks beside them, and the outside standards it complements.">
+  <title>The Common Agent Standards</title>
+  <meta name="description" content="The Common Agent Standards: the Common Agent Specification, the standards built on it and the Agent Collab guide, each with its version and its site, and the outside standards they work alongside.">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="AgentMesh">
-  <meta property="og:title" content="The AgentMesh standards">
-  <meta property="og:description" content="One reference for the family: the six standards AgentMesh publishes, the roles and collaboration playbooks beside them, and the outside standards it complements.">
+  <meta property="og:title" content="The Common Agent Standards">
+  <meta property="og:description" content="The Common Agent Standards: the Common Agent Specification, the standards built on it and the Agent Collab guide, each with its version and its site, and the outside standards they work alongside.">
   <meta property="og:url" content="https://dev.agentmesh.ai/standards.html">
   <meta property="og:image" content="https://dev.agentmesh.ai/brand/png/og-image.png">
   <meta property="og:image:width" content="1200">
@@ -677,7 +677,7 @@
       <div class="std s-proto" id="messaging">
         <div class="top">
           <h3>Agent Messaging</h3>
-          <span class="ver" title="version">0.9.0-draft</span>
+          <span class="ver" title="version">0.9.1-draft</span>
           <a class="dom" href="https://agentmessaging.ai/">agentmessaging.ai &rarr;</a>
         </div>
         <p class="role">the wire underneath</p>
@@ -829,11 +829,11 @@
     <div class="wrap">
       <p class="kicker">standards we complement</p>
       <h2>What we work alongside</h2>
-      <p>These are other people's standards, and we meet them rather than
-        replace them. Each one attaches to the mesh at a particular point.</p>
+      <p>These are other people's standards, and we work with them as they are.
+        Each one attaches to the mesh at a particular point.</p>
       <div class="adopt">
         <div class="a"><h3>A2A</h3><p class="w">the protocol layer</p><p>A2A is Google's agent-to-agent protocol, and it assumes both parties are HTTP endpoints. We are the channel for agents that have no URL, so the bridge maps one onto the other in both directions.</p></div>
-        <div class="a"><h3>MCP</h3><p class="w">beside the agent</p><p>Model Context Protocol connects an agent to its tools. It sits next to the agent rather than on the mesh, and your servers carry on unchanged.</p></div>
+        <div class="a"><h3>MCP</h3><p class="w">beside the agent</p><p>Model Context Protocol connects an agent to its tools. It sits next to the agent, outside the mesh, and your servers carry on unchanged.</p></div>
         <div class="a"><h3>ARD</h3><p class="w">discovery</p><p>Agentic Resource Discovery defines the well-known file that lets an agent find out what a site offers. The catalog publishes one and validates it against the schema.</p></div>
         <div class="a"><h3>Data Integrity and JCS</h3><p class="w">signatures</p><p>These are W3C proofs made over RFC 8785 canonical JSON. Every signed document in the family uses them, which is why a signature made by one implementation verifies in another.</p></div>
       </div>
@@ -848,8 +848,8 @@
         <p>The document standards are transport-neutral on purpose. One that
           conforms is valid anywhere, including on a network that has nothing to
           do with us, and two parties who have never met can read the same thing
-          and reach the same conclusion about it. That is the point of writing
-          them down rather than shipping them as a feature.</p>
+          and reach the same conclusion about it. That is why they are written
+          down as standards that anyone can implement.</p>
         <p>The protocol is the exception, because a network is the one thing that
           cannot be transport-neutral. It is published the same way: the wire
           format, the identity rules and the extension tier are all in the open,

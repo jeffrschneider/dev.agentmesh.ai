@@ -22,7 +22,20 @@ fi
 STAGE=$(mktemp -d)
 trap 'rm -rf "$STAGE"' EXIT
 git archive HEAD | tar -x -C "$STAGE"
-rm -f "$STAGE/CNAME" "$STAGE/deploy.sh"
+# Only the site ships. Files that serve the repository and not the reader stay
+# out of the bucket: dotfiles, the build tools, scripts, crash dumps, and
+# Markdown, apart from the documents a page links to (SITE_MD). The check after
+# the cleanup refuses the deploy if any such file is still in the staging folder.
+SITE_MD=(SPEC-A2A-UI-LINKS.md)
+rm -rf "$STAGE/CNAME" "$STAGE/tools"
+find "$STAGE" -mindepth 1 -name '.*' -prune -exec rm -rf {} +
+find "$STAGE" -type f \( -name '*.sh' -o -name '*.ps1' -o -name '*.mjs' -o -name '*.cjs' -o -name '*.stackdump' -o -name 'package.json' -o -name 'package-lock.json' \) -delete
+while IFS= read -r md; do
+  keep=no; for k in "${SITE_MD[@]}"; do [ "$md" = "./$k" ] && keep=yes; done
+  [ "$keep" = yes ] || rm -f "$STAGE/$md"
+done < <(cd "$STAGE" && find . -type f -name '*.md')
+LEFT=$(cd "$STAGE" && find . -mindepth 1 \( -name '.*' -o -name '*.sh' -o -name '*.mjs' -o -name '*.stackdump' -o -path './tools*' \) -print)
+if [ -n "$LEFT" ]; then echo "deploy refused: repository files in the staging folder:" >&2; echo "$LEFT" >&2; exit 1; fi
 # Windows programs (gcloud, and node given a path) need the Windows spelling.
 WSTAGE=$(cygpath -w "$STAGE" 2>/dev/null || echo "$STAGE")
 

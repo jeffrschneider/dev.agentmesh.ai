@@ -143,13 +143,8 @@ const NOTES = {
     cls: "s-proc",
     line: "how a piece of work runs",
     more: (c) => [
-      `A person reads a process document, and a process runner carries it out. A phase runs a whole sub-job shaped by ${c.name("work-patterns")}, convenes a room to run an ${c.name("collab")} playbook, or is done directly by a person or a system. <b>Whatever belongs to one organization is left blank</b>, so a process one organization publishes is one another organization can adopt and fill in.`,
+      `A person reads a process document, and a process runner carries it out. A phase can go to one agent that runs its own loop until the output the phase names exists. That is written as a <code>harness:</code> phase, and the process names the output and leaves the working out to the agent. A phase can also convene a room to run an ${c.name("collab")} playbook, or be done directly by a person or a system. <b>Whatever belongs to one organization is left blank</b>, so a process one organization publishes is one another organization can adopt and fill in.`,
     ],
-  },
-  "work-patterns": {
-    cls: "s-proc",
-    line: "the shape of a whole job",
-    more: (c) => [`A phase of an ${c.name("processes")} document that runs a whole sub-job names one of these patterns.`],
   },
   collab: {
     cls: "s-col",
@@ -168,7 +163,7 @@ const LAYERS = [
   { label: "authority", ids: ["mandate"] },
   { label: "foundation", ids: ["naming", "common-agent", "messaging"] },
 ];
-const SUPPORT = ["roles", "processes", "work-patterns", "collab"];
+const SUPPORT = ["roles", "processes", "collab"];
 
 // ── helpers ─────────────────────────────────────────────────────────────
 const NUM = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten",
@@ -282,8 +277,8 @@ const entries = [
   `      <p class="kicker">the support stack</p>`,
   `      <h2>Jobs, processes and playbooks</h2>`,
   `      <p>These entries describe the work itself, and none of them is a document two`,
-  `        parties exchange. ${counts.name("roles")} says what a participant is for, ${counts.name("processes")} and`,
-  `        ${counts.name("work-patterns")} say how a piece of work moves from start to finish, and`,
+  `        parties exchange. ${counts.name("roles")} says what a participant is for, ${counts.name("processes")}`,
+  `        says how a piece of work moves from start to finish, and`,
   `        ${counts.name("collab")} says how a group works through one step of that work together.</p>`,
   ``,
   ...support.map((s) => card(s) + "\n"),

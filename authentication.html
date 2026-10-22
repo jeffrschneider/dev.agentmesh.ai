@@ -879,9 +879,7 @@
               configured on a server or the update fails, the action falls back to refusing
               the next renewal and says so in its answer. That is a weaker guarantee:
               <b>a compromised credential stays usable until it expires, up to seven days
-              with the default lifetime.</b> Agent Messaging 0.5 (section 1.6) does not
-              count that fallback as revocation for a server that claims the core
-              profile.</p>
+              with the default lifetime.</b> Agent Messaging 0.9 (section 4.8) calls that fallback a weaker guarantee than ending the credential on the running servers, and requires its window to be stated.</p>
           </div>
           <h3>Credentials issued before the expiry was fused</h3>
           <p>Nothing rejects a credential for carrying no expiry, and nothing automatic

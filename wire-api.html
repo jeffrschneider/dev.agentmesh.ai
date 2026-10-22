@@ -286,8 +286,7 @@
             it against <code class="inline">from</code>. Unsigned or mis-attributed envelopes
             are rejected at decode, before any handler runs.</p>
           <p>The <code class="inline">v</code> field carries the wire version, which is a
-            separate number from the specification's. Under Agent Messaging 0.5 every SDK
-            sends <code class="inline">0.3.0</code>, and receivers check only the major
+            separate number from the specification's. Every SDK sends <code class="inline">0.3.0</code>, and receivers check only the major
             version (spec §20.1).</p>
           <pre class="code">{
   <span class="s">"v"</span>: <span class="s">"0.3.0"</span>,            <span class="c">// wire version, not the spec's (major must match)</span>

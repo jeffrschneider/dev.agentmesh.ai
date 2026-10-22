@@ -10,6 +10,7 @@ export const MENU = [
   ]],
   ["Build", [
     ["getting-started.html", "Getting started"],
+    ["build-an-agent.html", "Build an agent"],
     ["platform-map.html", "Platform map"],
     ["platform-services.html", "Platform services"],
     ["house-stack.html", "House stack", { only: "current" }],

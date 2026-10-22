@@ -55,6 +55,16 @@ fi
 # sitemap.xml and robots.txt, from the pages being published.
 node tools/build-sitemap.mjs "$WSTAGE" https://dev.agentmesh.ai
 
+# The version check: a page that names an older version than the current one
+# (a standard, the adapter, an SDK) stops the deploy here. The current versions
+# are read from main of jeffrschneider/AgentMesh (needs gh auth login or
+# GH_TOKEN) and from the standards repository; if they cannot be read the
+# deploy stops as well.
+if ! node tools/check-versions.mjs --root "$WSTAGE"; then
+  echo "deploy refused: a page names an older version than the current one (listed above). Update the page, then deploy again." >&2
+  exit 1
+fi
+
 # The contrast gate: every page, light and dark, 1440 and 390 px wide, every
 # menu section open. Any text below 4.5:1 stops the deploy here, before
 # anything is uploaded, and the failures are listed by page, element and ratio.

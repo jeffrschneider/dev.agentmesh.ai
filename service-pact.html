@@ -188,7 +188,7 @@
           <summary>AgentMesh<svg class="sn-chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
           <div class="sn-items">
             <a href="https://agentmesh.ai/">Back to agentmesh.ai</a>
-            <a href="https://personal.agentmesh.ai">Sign in</a>
+            <a href="https://app.agentmesh.ai">Sign in</a>
             <a href="https://agentmesh.ai/waitlist.html">Join the waitlist</a>
           </div>
         </details>
@@ -196,6 +196,7 @@
           <summary>Build<svg class="sn-chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
           <div class="sn-items">
             <a href="getting-started.html">Getting started</a>
+            <a href="build-an-agent.html">Build an agent</a>
             <a href="platform-map.html">Platform map</a>
             <a class="on" href="platform-services.html">Platform services</a>
             <a href="walking-the-lifecycle.html">Walking the lifecycle</a>
@@ -288,7 +289,7 @@
         <details class="sn-sec">
           <summary>Reference<svg class="sn-chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
           <div class="sn-items">
-            <a href="https://commonagent.net/">The Common Agent Specification</a>
+            <a href="https://commonagent.net/">The Common Agent Specification<span class="sn-ext" aria-hidden="true">&#8599;</span></a>
             <a href="https://agentmessaging.ai/spec.html">Specification<span class="sn-ext" aria-hidden="true">&#8599;</span></a>
             <a href="related-specs.html">Related specifications</a>
             <a href="standards.html">Standards</a>
@@ -318,6 +319,7 @@
         <span class="eyebrow"><span class="tag">agentmesh</span> · platform service · pact</span>
         <h1>PACT</h1>
         <p class="lede">Your agent talks to a business's agent for you, the way PACT 1.0 says: AgentMesh signs each message as the platform your agent runs on, for you, with an id that names nobody and is different at every business's provider. Where a business offers it, you sign in at the business itself and approve what your agent may do on your account there; your agent never sees that sign-in. AgentMesh also hosts businesses' agents for other people's personal agents, through its A2A gateway.</p>
+        <p class="lede"><b>Where it works:</b> it needs the AgentMesh platform. On a mesh without it, every door answers with <code>NOT_AVAILABLE</code>: "pact.send is not available on this mesh: https://mesh.example.com does not offer it. It needs the AgentMesh platform."</p>
         <p class="lede"><b>Who can call it:</b> Send, connect and the person's own grants and receipts are made for an account: by one of its agents signing with its own key, with the account's API token, or on the hosted connector or in the app, where the person is signed in. The business sees the platform's signature and an id for the person that names nobody. The business requests are made by the owner of the business's agent, for that agent only. The platform requests (which personal-agent platforms AgentMesh's gateway accepts) take an operator key with the pact scope.</p>
         <p class="lede"><b>What a call costs:</b> No model is called by PACT itself. A send reads the business's card (kept five minutes), signs one token and makes one request to the business's provider; whatever the business's agent does is the business's.</p>
       </div>

@@ -164,7 +164,7 @@
           <summary>AgentMesh<svg class="sn-chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
           <div class="sn-items">
             <a href="https://agentmesh.ai/">Back to agentmesh.ai</a>
-            <a href="https://personal.agentmesh.ai">Sign in</a>
+            <a href="https://app.agentmesh.ai">Sign in</a>
             <a href="https://agentmesh.ai/waitlist.html">Join the waitlist</a>
           </div>
         </details>
@@ -172,6 +172,7 @@
           <summary>Build<svg class="sn-chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
           <div class="sn-items">
             <a href="getting-started.html">Getting started</a>
+            <a href="build-an-agent.html">Build an agent</a>
             <a href="platform-map.html">Platform map</a>
             <a href="platform-services.html">Platform services</a>
             <a href="walking-the-lifecycle.html">Walking the lifecycle</a>
@@ -879,9 +880,7 @@
               configured on a server or the update fails, the action falls back to refusing
               the next renewal and says so in its answer. That is a weaker guarantee:
               <b>a compromised credential stays usable until it expires, up to seven days
-              with the default lifetime.</b> Agent Messaging 0.5 (section 1.6) does not
-              count that fallback as revocation for a server that claims the core
-              profile.</p>
+              with the default lifetime.</b> Agent Messaging 0.9 (section 4.8) calls that fallback a weaker guarantee than ending the credential on the running servers, and requires its window to be stated.</p>
           </div>
           <h3>Credentials issued before the expiry was fused</h3>
           <p>Nothing rejects a credential for carrying no expiry, and nothing automatic

@@ -5,11 +5,12 @@
 export const MENU = [
   ["AgentMesh", [
     ["https://agentmesh.ai/", "Back to agentmesh.ai"],
-    ["https://personal.agentmesh.ai", "Sign in"],
+    ["https://app.agentmesh.ai", "Sign in"],
     ["https://agentmesh.ai/waitlist.html", "Join the waitlist"],
   ]],
   ["Build", [
     ["getting-started.html", "Getting started"],
+    ["build-an-agent.html", "Build an agent"],
     ["platform-map.html", "Platform map"],
     ["platform-services.html", "Platform services"],
     ["house-stack.html", "House stack", { only: "current" }],

@@ -148,7 +148,7 @@
           <summary>AgentMesh<svg class="sn-chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
           <div class="sn-items">
             <a href="https://agentmesh.ai/">Back to agentmesh.ai</a>
-            <a href="https://personal.agentmesh.ai">Sign in</a>
+            <a href="https://app.agentmesh.ai">Sign in</a>
             <a href="https://agentmesh.ai/waitlist.html">Join the waitlist</a>
           </div>
         </details>
@@ -156,6 +156,7 @@
           <summary>Build<svg class="sn-chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
           <div class="sn-items">
             <a href="getting-started.html">Getting started</a>
+            <a href="build-an-agent.html">Build an agent</a>
             <a href="platform-map.html">Platform map</a>
             <a href="platform-services.html">Platform services</a>
             <a href="walking-the-lifecycle.html">Walking the lifecycle</a>
@@ -347,9 +348,9 @@
           <p>The path is four steps. Sign up, mint a single-use <code class="inline">am_</code>
             key in the console, exchange it once at
             <code class="inline">POST /v1/bootstrap</code> for a durable connection credential
-            that lasts thirty days and that the SDK renews for you at two thirds of its life,
+            that lasts seven days and that the SDK renews for you at two thirds of its life,
             then connect, answer, and register.</p>
-          <pre class="code"><span class="c">// npm install https://storage.googleapis.com/agentmesh-releases/agent-messaging-0.59.0.tgz</span>
+          <pre class="code"><span class="c">// npm install https://storage.googleapis.com/agentmesh-releases/agent-messaging-0.63.0.tgz</span>
 import { AgentMesh, createAgentIdentity, exchangeBootstrapToken, jwtAuthenticator } from <span class="s">"agent-messaging"</span>;
 
 <span class="c">// Your agent's identity, made here and kept here. This seed IS your agent.</span>

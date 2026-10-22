@@ -5,11 +5,11 @@
   <script async src="/ga.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Runs: platform service</title>
-  <meta name="description" content="Read the record of every run for your account: who asked, by which door, how it ended and what it cost.">
+  <meta name="description" content="Start a run of one of your solutions now, and read the record of every run for your account: who asked, by which door, how it ended and what it cost.">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="AgentMesh">
   <meta property="og:title" content="Runs: platform service">
-  <meta property="og:description" content="Read the record of every run for your account: who asked, by which door, how it ended and what it cost.">
+  <meta property="og:description" content="Start a run of one of your solutions now, and read the record of every run for your account: who asked, by which door, how it ended and what it cost.">
   <meta property="og:url" content="https://dev.agentmesh.ai/service-runs.html">
   <meta property="og:image" content="https://dev.agentmesh.ai/brand/png/og-image.png">
   <meta property="og:image:width" content="1200">
@@ -188,7 +188,7 @@
           <summary>AgentMesh<svg class="sn-chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
           <div class="sn-items">
             <a href="https://agentmesh.ai/">Back to agentmesh.ai</a>
-            <a href="https://personal.agentmesh.ai">Sign in</a>
+            <a href="https://app.agentmesh.ai">Sign in</a>
             <a href="https://agentmesh.ai/waitlist.html">Join the waitlist</a>
           </div>
         </details>
@@ -196,6 +196,7 @@
           <summary>Build<svg class="sn-chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
           <div class="sn-items">
             <a href="getting-started.html">Getting started</a>
+            <a href="build-an-agent.html">Build an agent</a>
             <a href="platform-map.html">Platform map</a>
             <a class="on" href="platform-services.html">Platform services</a>
             <a href="walking-the-lifecycle.html">Walking the lifecycle</a>
@@ -288,7 +289,7 @@
         <details class="sn-sec">
           <summary>Reference<svg class="sn-chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
           <div class="sn-items">
-            <a href="https://commonagent.net/">The Common Agent Specification</a>
+            <a href="https://commonagent.net/">The Common Agent Specification<span class="sn-ext" aria-hidden="true">&#8599;</span></a>
             <a href="https://agentmessaging.ai/spec.html">Specification<span class="sn-ext" aria-hidden="true">&#8599;</span></a>
             <a href="related-specs.html">Related specifications</a>
             <a href="standards.html">Standards</a>
@@ -317,9 +318,10 @@
         <p class="crumbs"><a href="platform-services.html">Platform services</a> / runs</p>
         <span class="eyebrow"><span class="tag">agentmesh</span> · platform service · runs</span>
         <h1>Runs</h1>
-        <p class="lede">The record of every piece of work that ran for an account: a solution run, a job sent to an agent, a Try, a build or a deploy. Each says who asked, on whose behalf, by which door, and what it cost.</p>
-        <p class="lede"><b>Who can call it:</b> The account the runs belong to: the account each one ran for and paid for, whoever asked for it. Nobody else's runs come back.</p>
-        <p class="lede"><b>What a call costs:</b> No model is called. A call is one read of the run accounting records, which are kept for 90 days.</p>
+        <p class="lede">The record of every piece of work that ran for an account: a solution run, a job sent to an agent, a Try, a build or a deploy. Each says who asked, on whose behalf, by which door, and what it cost. A run of one of the account's own solutions can be started here too, now, with its answers.</p>
+        <p class="lede"><b>Where it works:</b> it needs the AgentMesh platform. On a mesh without it, every door answers with <code>NOT_AVAILABLE</code>: "runs.list is not available on this mesh: https://mesh.example.com does not offer it. It needs the AgentMesh platform."</p>
+        <p class="lede"><b>Who can call it:</b> The account the runs belong to: the account each one ran for and paid for, whoever asked for it. Nobody else's runs come back. A run is started only of a solution in an organization the account is in, as that account and on its account, the way Run in the app starts one.</p>
+        <p class="lede"><b>What a call costs:</b> Listing runs or solutions and showing a run call no model: each is one read of the run accounting records, which are kept for 90 days, or of the solutions. A run that runs.start begins costs what the solution's steps cost, on your account. A solution that charges for its runs is started only by the person signed in, in the app or through the hosted connector.</p>
       </div>
 
       <section class="band"><div class="wrap">
@@ -331,6 +333,8 @@
 <tr><td data-label="Request"><a href="#list"><code>runs.list</code></a></td><td data-label="What it does">List your runs</td><td data-label="Doors">Every door</td></tr>
 <tr><td data-label="Request"><a href="#show"><code>runs.show</code></a></td><td data-label="What it does">Show a run</td><td data-label="Doors">Every door</td></tr>
 <tr><td data-label="Request"><a href="#step"><code>runs.step</code></a></td><td data-label="What it does">Show one step of a run</td><td data-label="Doors">Every door</td></tr>
+<tr><td data-label="Request"><a href="#solutions"><code>runs.solutions</code></a></td><td data-label="What it does">List the solutions you can run</td><td data-label="Doors">Every door</td></tr>
+<tr><td data-label="Request"><a href="#start"><code>runs.start</code></a></td><td data-label="What it does">Start a run of a solution</td><td data-label="Doors">Every door</td></tr>
 </tbody></table>
           
           
@@ -522,6 +526,119 @@
           
         </div></section>
 
+      <section class="band" id="solutions"><div class="wrap">
+          <p class="kicker">runs.solutions</p>
+          <h2>List the solutions you can run</h2>
+          <p>The solutions in your organization that you can start a run of with runs_start, each with the inputs its Start form asks for. Give solution for one solution's inputs alone.</p>
+          <p>Here is the same request on each door.</p>
+          <div class="doors">
+            <div class="door"><h4>TypeScript SDK</h4><pre class="code" tabindex="0" aria-label="TypeScript SDK">const answer = await mesh.runs.solutions();</pre></div>
+            <div class="door"><h4>Rust SDK</h4><pre class="code" tabindex="0" aria-label="Rust SDK">let answer = mesh
+    .runs()
+    .solutions(RunsSolutionsInput {
+        ..Default::default()
+    })
+    .await?;</pre></div>
+            <div class="door"><h4>MCP tool</h4><pre class="code" tabindex="0" aria-label="MCP tool">runs_solutions
+{}</pre></div>
+            <div class="door"><h4>Command line</h4><pre class="code" tabindex="0" aria-label="Command line">agentmesh runs solutions</pre></div>
+          </div>
+          
+          <h3>What you send</h3>
+          <table class="tbl"><thead><tr><th>Field</th><th>Type</th><th>Required</th><th>What it means</th></tr></thead>
+<tbody>
+<tr><td data-label="Field"><code>solution</code></td><td data-label="Type">text</td><td data-label="Required">No</td><td data-label="What it means">Only this solution, by its id.</td></tr>
+<tr><td data-label="Field"><code>org</code></td><td data-label="Type">text</td><td data-label="Required">No</td><td data-label="What it means">The organization. Your own when left out, and not used when solution is given.</td></tr>
+</tbody></table>
+          <h3>What comes back</h3>
+          <table class="tbl"><thead><tr><th>Field</th><th>Type</th><th>Always there</th><th>What it means</th></tr></thead>
+<tbody>
+<tr><td data-label="Field"><code>solutions</code></td><td data-label="Type">list of objects</td><td data-label="Required">Yes</td><td data-label="What it means">The solutions you can run.</td></tr>
+<tr><td data-label="Field"><code>solutions[].id</code></td><td data-label="Type">text</td><td data-label="Required">Yes</td><td data-label="What it means">The solution's id, for runs_start.</td></tr>
+<tr><td data-label="Field"><code>solutions[].name</code></td><td data-label="Type">text</td><td data-label="Required">Yes</td><td data-label="What it means">What it is called.</td></tr>
+<tr><td data-label="Field"><code>solutions[].org</code></td><td data-label="Type">text</td><td data-label="Required">Yes</td><td data-label="What it means">The organization it belongs to.</td></tr>
+<tr><td data-label="Field"><code>solutions[].last_run_at</code></td><td data-label="Type">date and time</td><td data-label="Required">No</td><td data-label="What it means">When it last ran, when it has.</td></tr>
+<tr><td data-label="Field"><code>solutions[].inputs</code></td><td data-label="Type">list of objects</td><td data-label="Required">Yes</td><td data-label="What it means">What its Start form asks for, in order.</td></tr>
+<tr><td data-label="Field"><code>solutions[].inputs[].key</code></td><td data-label="Type">text</td><td data-label="Required">Yes</td><td data-label="What it means">What to answer it under in runs_start's answers.</td></tr>
+<tr><td data-label="Field"><code>solutions[].inputs[].label</code></td><td data-label="Type">text</td><td data-label="Required">Yes</td><td data-label="What it means">What the Start form calls it.</td></tr>
+<tr><td data-label="Field"><code>solutions[].inputs[].says</code></td><td data-label="Type">text</td><td data-label="Required">Yes</td><td data-label="What it means">What to hand in, in a sentence.</td></tr>
+<tr><td data-label="Field"><code>solutions[].inputs[].required</code></td><td data-label="Type">yes or no</td><td data-label="Required">Yes</td><td data-label="What it means">Whether a run needs it. A source of the run says false, because any one source will do.</td></tr>
+<tr><td data-label="Field"><code>solutions[].inputs[].source</code></td><td data-label="Type">yes or no</td><td data-label="Required">No</td><td data-label="What it means">True on a source of the run: a run needs at least one of its sources, any one of them.</td></tr>
+<tr><td data-label="Field"><code>solutions[].inputs[].takes</code></td><td data-label="Type">list of text</td><td data-label="Required">Yes</td><td data-label="What it means">The forms it takes, the first the one the form offers: text, url (a web address), file, or fields (a document asked for in parts).</td></tr>
+<tr><td data-label="Field"><code>solutions[].inputs[].choices</code></td><td data-label="Type">list of text</td><td data-label="Required">No</td><td data-label="What it means">The answers it takes, when it takes only a few.</td></tr>
+<tr><td data-label="Field"><code>solutions[].inputs[].example</code></td><td data-label="Type">text</td><td data-label="Required">No</td><td data-label="What it means">An example answer.</td></tr>
+<tr><td data-label="Field"><code>solutions[].inputs[].many</code></td><td data-label="Type">yes or no</td><td data-label="Required">No</td><td data-label="What it means">True when it takes several files at once, as a list.</td></tr>
+<tr><td data-label="Field"><code>solutions[].inputs[].parts</code></td><td data-label="Type">list of objects</td><td data-label="Required">No</td><td data-label="What it means">The parts to answer when it takes fields, sent as { &quot;as&quot;: &quot;fields&quot;, &quot;parts&quot;: { &lt;name&gt;: text } }.</td></tr>
+<tr><td data-label="Field"><code>solutions[].inputs[].parts[].name</code></td><td data-label="Type">text</td><td data-label="Required">Yes</td><td data-label="What it means">The part's name, as parts carries it.</td></tr>
+<tr><td data-label="Field"><code>solutions[].inputs[].parts[].label</code></td><td data-label="Type">text</td><td data-label="Required">Yes</td><td data-label="What it means">What the form calls it.</td></tr>
+<tr><td data-label="Field"><code>solutions[].inputs[].parts[].example</code></td><td data-label="Type">text</td><td data-label="Required">No</td><td data-label="What it means">An example answer.</td></tr>
+</tbody></table>
+          <h3>Refusals</h3>
+          <table class="tbl"><thead><tr><th>Code</th><th>What it means</th></tr></thead>
+<tbody>
+<tr><td data-label="Code"><code>INPUT_INVALID</code></td><td data-label="What it means">A field is wrong. The words say which.</td></tr>
+<tr><td data-label="Code"><code>NOT_FOUND</code></td><td data-label="What it means">No solution you can run by that id. A solution in an organization you are not in answers the same as one that does not exist.</td></tr>
+<tr><td data-label="Code"><code>NO_ORG</code></td><td data-label="What it means">You are not in that organization.</td></tr>
+<tr><td data-label="Code"><code>NO_ACCOUNT</code></td><td data-label="What it means">This agent belongs to no account, so it has no solutions.</td></tr>
+</tbody></table>
+          
+        </div></section>
+
+      <section class="band" id="start"><div class="wrap">
+          <p class="kicker">runs.start</p>
+          <h2>Start a run of a solution</h2>
+          <p>Start one run of one of your solutions now, as you and on your account, with its Start form's answers, the way Run in the app starts one. runs_solutions says what each solution asks for. Its approval steps stop and wait for a person in the app. It answers with the run's id and its page as soon as the run starts; runs_show says where it stands after that.</p>
+          <p>Here is the same request on each door.</p>
+          <div class="doors">
+            <div class="door"><h4>TypeScript SDK</h4><pre class="code" tabindex="0" aria-label="TypeScript SDK">const answer = await mesh.runs.start({
+  solution: &quot;sol_0b8c2f&quot;,
+  answers: { topic: &quot;How tides work&quot; }
+});</pre></div>
+            <div class="door"><h4>Rust SDK</h4><pre class="code" tabindex="0" aria-label="Rust SDK">let answer = mesh
+    .runs()
+    .start(RunsStartInput {
+        solution: &quot;sol_0b8c2f&quot;.into(),
+        answers: Some(serde_json::json!({&quot;topic&quot;:&quot;How tides work&quot;}).as_object().cloned().unwrap_or_default()),
+    })
+    .await?;</pre></div>
+            <div class="door"><h4>MCP tool</h4><pre class="code" tabindex="0" aria-label="MCP tool">runs_start
+{
+  &quot;solution&quot;: &quot;sol_0b8c2f&quot;,
+  &quot;answers&quot;: {
+    &quot;topic&quot;: &quot;How tides work&quot;
+  }
+}</pre></div>
+            <div class="door"><h4>Command line</h4><pre class="code" tabindex="0" aria-label="Command line">agentmesh runs start sol_0b8c2f --answers &quot;{\&quot;topic\&quot;:\&quot;How tides work\&quot;}&quot;</pre></div>
+          </div>
+          
+          <h3>What you send</h3>
+          <table class="tbl"><thead><tr><th>Field</th><th>Type</th><th>Required</th><th>What it means</th></tr></thead>
+<tbody>
+<tr><td data-label="Field"><code>solution</code></td><td data-label="Type">text</td><td data-label="Required">Yes</td><td data-label="What it means">The solution's id, from runs_solutions.</td></tr>
+<tr><td data-label="Field"><code>answers</code></td><td data-label="Type">object</td><td data-label="Required">No</td><td data-label="What it means">Its Start form's answers, by each input's key: words or a web address as text; a file as { &quot;name&quot;, &quot;media_type&quot;, &quot;data_b64&quot; } with its bytes in base64, or a list of them for an input that takes many; a document asked for in parts as { &quot;as&quot;: &quot;fields&quot;, &quot;parts&quot;: { &lt;name&gt;: text } }. These are the answers schedules_create takes and Run in the app sends. The whole request is at most 1 MB, so a larger file is added in the app.</td></tr>
+</tbody></table>
+          <h3>What comes back</h3>
+          <table class="tbl"><thead><tr><th>Field</th><th>Type</th><th>Always there</th><th>What it means</th></tr></thead>
+<tbody>
+<tr><td data-label="Field"><code>run</code></td><td data-label="Type">text</td><td data-label="Required">Yes</td><td data-label="What it means">The run's id.</td></tr>
+<tr><td data-label="Field"><code>address</code></td><td data-label="Type">text</td><td data-label="Required">Yes</td><td data-label="What it means">The run's page, from the moment it starts. Give it to the person; runs_show says where it stands.</td></tr>
+<tr><td data-label="Field"><code>solution</code></td><td data-label="Type">text</td><td data-label="Required">Yes</td><td data-label="What it means">The solution it is a run of.</td></tr>
+<tr><td data-label="Field"><code>state</code></td><td data-label="Type">text</td><td data-label="Required">Yes</td><td data-label="What it means">Where it stands now: running, waiting, done, failed or stopped.</td></tr>
+</tbody></table>
+          <h3>Refusals</h3>
+          <table class="tbl"><thead><tr><th>Code</th><th>What it means</th></tr></thead>
+<tbody>
+<tr><td data-label="Code"><code>INPUT_INVALID</code></td><td data-label="What it means">A field is wrong, or an answer is one its input does not take, such as a file of the wrong kind or one too large. The words say which.</td></tr>
+<tr><td data-label="Code"><code>NOT_FOUND</code></td><td data-label="What it means">No solution you can run by that id. A solution in an organization you are not in answers the same as one that does not exist.</td></tr>
+<tr><td data-label="Code"><code>MISSING_INPUTS</code></td><td data-label="What it means">An input the run needs was left out. The words name each one; runs_solutions says what each takes.</td></tr>
+<tr><td data-label="Code"><code>CHARGES</code></td><td data-label="What it means">It charges for each run, so only the person signed in starts one, in the app or through the hosted connector.</td></tr>
+<tr><td data-label="Code"><code>NOT_STARTED</code></td><td data-label="What it means">The run could not be started: a run of it is already going and it runs one at a time, an agent on it is out of service, or an agent on it has an update waiting for approval. The words say which.</td></tr>
+<tr><td data-label="Code"><code>PAUSED</code></td><td data-label="What it means">Everything this account owns is paused with the Kill Switch, so nothing new starts. Resume on the Kill Switch page first.</td></tr>
+<tr><td data-label="Code"><code>NO_ACCOUNT</code></td><td data-label="What it means">This agent belongs to no account, so it cannot start a run.</td></tr>
+</tbody></table>
+          
+        </div></section>
+
       <section class="band" id="example"><div class="wrap">
           <h2>A real example</h2>
           <p>This request, <a href="#list"><code>runs.list</code></a>, was sent on 2026-10-05 to the AgentMesh development system, by a test agent through the adapter's MCP tools.</p>
@@ -566,6 +683,7 @@
 <tbody>
 <tr><td data-label="Version">1</td><td data-label="Date">2026-10-05</td><td data-label="What changed">Version 1 put runs.list on the SDKs, MCP and the command line.</td></tr>
 <tr><td data-label="Version">2</td><td data-label="Date">2026-10-05</td><td data-label="What changed">runs.show and runs.step were added, so an assistant can say where a run stands and what a step delivered.</td></tr>
+<tr><td data-label="Version">3</td><td data-label="Date">2026-10-16</td><td data-label="What changed">runs.start starts a run of one of your solutions now, with its answers, and answers with the run's id and address. runs.solutions lists the solutions you can run, with the inputs each one asks for.</td></tr>
 </tbody></table>
           <p>None of its requests had another name before, so there are no old names to stop.</p>
         </div></section>

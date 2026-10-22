@@ -144,7 +144,7 @@
           <summary>AgentMesh<svg class="sn-chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
           <div class="sn-items">
             <a href="https://agentmesh.ai/">Back to agentmesh.ai</a>
-            <a href="https://personal.agentmesh.ai">Sign in</a>
+            <a href="https://app.agentmesh.ai">Sign in</a>
             <a href="https://agentmesh.ai/waitlist.html">Join the waitlist</a>
           </div>
         </details>
@@ -152,6 +152,7 @@
           <summary>Build<svg class="sn-chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
           <div class="sn-items">
             <a href="getting-started.html">Getting started</a>
+            <a href="build-an-agent.html">Build an agent</a>
             <a href="platform-map.html">Platform map</a>
             <a href="platform-services.html">Platform services</a>
             <a href="walking-the-lifecycle.html">Walking the lifecycle</a>
@@ -320,7 +321,7 @@
             <p>Capture is <b>two layers</b>. A live tap records exchanges as they happen,
               with full detail. Behind it, a durable witness reads every registered
               agent's mailbox stream, where the 0.3 subject tree (wire version 0.3.0,
-              which the SDKs send under Agent Messaging 0.5) delivers both the request
+              which the SDKs send, spec §20.1) delivers both the request
               and the reply, and appends a row for anything the tap missed, so a recorder
               restart no longer means unwitnessed traffic. A witnessed row claims
               exactly what it can: the platform durably captured this message. The

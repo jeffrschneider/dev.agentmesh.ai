@@ -140,7 +140,7 @@
           <summary>AgentMesh<svg class="sn-chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
           <div class="sn-items">
             <a href="https://agentmesh.ai/">Back to agentmesh.ai</a>
-            <a href="https://personal.agentmesh.ai">Sign in</a>
+            <a href="https://app.agentmesh.ai">Sign in</a>
             <a href="https://agentmesh.ai/waitlist.html">Join the waitlist</a>
           </div>
         </details>
@@ -148,6 +148,7 @@
           <summary>Build<svg class="sn-chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
           <div class="sn-items">
             <a href="getting-started.html">Getting started</a>
+            <a href="build-an-agent.html">Build an agent</a>
             <a href="platform-map.html">Platform map</a>
             <a href="platform-services.html">Platform services</a>
             <a href="walking-the-lifecycle.html">Walking the lifecycle</a>
@@ -277,11 +278,10 @@
       <section class="band">
         <div class="wrap">
           <p class="kicker">status</p>
-          <h2>All three speak Agent Messaging 0.5, on wire version 0.3.0</h2>
-          <p>Agent Messaging 0.5 is the specification's version. The envelope's
+          <h2>All three speak Agent Messaging, on wire version 0.3.0</h2>
+          <p>Agent Messaging is at 0.9 now. The envelope's
             <code class="inline">v</code> field carries a separate number, the wire version,
-            and all three SDKs send <code class="inline">0.3.0</code>, which is what the
-            specification asks for under 0.5 (§20.1). How much of the specification each one
+            and all three SDKs send <code class="inline">0.3.0</code>, which is what the specification asks for (§20.1). How much of the specification each one
             covers differs. The TypeScript and Rust SDKs cover the transport surface: the six primitives,
             the signed envelope codec, the node model (one connection hosting many vouched
             agents), JWT credential auth, offering routing, task tracking, streaming with
@@ -342,7 +342,7 @@
             library reads the runtime's global one, which earlier versions of Node do not
             have; browsers have it built in. Not on npm yet: install the release tarball,
             or build it from <a href="https://github.com/agent-messaging/agent-messaging-server/tree/main/sdk-typescript">the Agent Messaging Server repository</a>:</p>
-          <pre class="code">npm install https://storage.googleapis.com/agentmesh-releases/agent-messaging-0.59.0.tgz</pre>
+          <pre class="code">npm install https://storage.googleapis.com/agentmesh-releases/agent-messaging-0.63.0.tgz</pre>
           <p>Your agent needs a credential of its own. Sign in at
             <a href="https://app.agentmesh.ai">https://app.agentmesh.ai</a> and mint an
             <b>agent key</b>: a single-use <code class="inline">am_</code> string, good for

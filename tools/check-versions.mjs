@@ -125,7 +125,12 @@ for (const file of pages) {
     });
   }
   scan(/mesh-adapter-(\d+\.\d+\.\d+)\.tgz/g, (m) => { if (olderThan(m[1], adapter)) report(m.index, m[1], adapter, "mesh-adapter"); });
-  scan(/\b(?:mesh-adapter|adapter)\s+(\d+\.\d+\.\d+)\b/g, (m) => { if (olderThan(m[1], adapter)) report(m.index, m[1], adapter, "the adapter"); });
+  // A version named as the release that introduced something ("the adapter release that carries
+  // this service, adapter 0.95.0") is history, not a claim about the current one.
+  scan(/\b(?:mesh-adapter|adapter)\s+(\d+\.\d+\.\d+)\b/g, (m) => {
+    if (/release that (?:carries|introduced|added)[^.]{0,60}$/.test(text.slice(Math.max(0, m.index - 90), m.index))) return;
+    if (olderThan(m[1], adapter)) report(m.index, m[1], adapter, "the adapter");
+  });
   scan(/agent-messaging-(\d+\.\d+\.\d+)\.tgz/g, (m) => { if (olderThan(m[1], sdk)) report(m.index, m[1], sdk, "the TypeScript SDK"); });
   if (file === "implementation-status.html") {
     for (const [label, cur] of [["TypeScript SDK[^<]*", sdk], ["Rust SDK", rust], ["Reference adapter", adapter]]) {

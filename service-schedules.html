@@ -188,7 +188,7 @@
           <summary>AgentMesh<svg class="sn-chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
           <div class="sn-items">
             <a href="https://agentmesh.ai/">Back to agentmesh.ai</a>
-            <a href="https://personal.agentmesh.ai">Sign in</a>
+            <a href="https://app.agentmesh.ai">Sign in</a>
             <a href="https://agentmesh.ai/waitlist.html">Join the waitlist</a>
           </div>
         </details>
@@ -288,7 +288,7 @@
         <details class="sn-sec">
           <summary>Reference<svg class="sn-chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
           <div class="sn-items">
-            <a href="https://commonagent.net/">The Common Agent Specification</a>
+            <a href="https://commonagent.net/">The Common Agent Specification<span class="sn-ext" aria-hidden="true">&#8599;</span></a>
             <a href="https://agentmessaging.ai/spec.html">Specification<span class="sn-ext" aria-hidden="true">&#8599;</span></a>
             <a href="related-specs.html">Related specifications</a>
             <a href="standards.html">Standards</a>
@@ -318,6 +318,7 @@
         <span class="eyebrow"><span class="tag">agentmesh</span> · platform service · schedules</span>
         <h1>Schedules</h1>
         <p class="lede">A schedule runs a solution, or sends an agent a job, on a repeating time: every day, every working day, every week or every month, at a time in a time zone. A solution's schedule may also have no time and run only when asked. Each run goes as the person who made the schedule, on their account.</p>
+        <p class="lede"><b>Where it works:</b> it needs the AgentMesh platform. On a mesh without it, every door answers with <code>NOT_AVAILABLE</code>: "schedules.create is not available on this mesh: https://mesh.example.com does not offer it. It needs the AgentMesh platform."</p>
         <p class="lede"><b>Who can call it:</b> People in the solution's organization: its owner and admins see every schedule there; anyone else sees the ones they made and the ones whose solution or agent they can reach. A schedule somebody cannot see answers as if it did not exist.</p>
         <p class="lede"><b>What a call costs:</b> Making, listing and pausing call no model and are plain reads and writes. Each run a schedule starts costs what that solution or job costs, on the maker's account; a schedule cannot run something that charges.</p>
       </div>

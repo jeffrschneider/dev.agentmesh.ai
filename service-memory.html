@@ -188,7 +188,7 @@
           <summary>AgentMesh<svg class="sn-chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
           <div class="sn-items">
             <a href="https://agentmesh.ai/">Back to agentmesh.ai</a>
-            <a href="https://personal.agentmesh.ai">Sign in</a>
+            <a href="https://app.agentmesh.ai">Sign in</a>
             <a href="https://agentmesh.ai/waitlist.html">Join the waitlist</a>
           </div>
         </details>
@@ -288,7 +288,7 @@
         <details class="sn-sec">
           <summary>Reference<svg class="sn-chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
           <div class="sn-items">
-            <a href="https://commonagent.net/">The Common Agent Specification</a>
+            <a href="https://commonagent.net/">The Common Agent Specification<span class="sn-ext" aria-hidden="true">&#8599;</span></a>
             <a href="https://agentmessaging.ai/spec.html">Specification<span class="sn-ext" aria-hidden="true">&#8599;</span></a>
             <a href="related-specs.html">Related specifications</a>
             <a href="standards.html">Standards</a>
@@ -318,6 +318,7 @@
         <span class="eyebrow"><span class="tag">agentmesh</span> · platform service · memory</span>
         <h1>Memory</h1>
         <p class="lede">An agent's own memory across jobs: facts it learned, what people told it, what happened. Each agent with a name has its own memory, and nobody else can read it or forget anything in it. Remembering happens in the background and takes a few seconds.</p>
+        <p class="lede"><b>Where it works:</b> it needs the AgentMesh platform. On a mesh without it, every door answers with <code>NOT_AVAILABLE</code>: "memory.remember is not available on this mesh: https://mesh.example.com does not offer it. It needs the AgentMesh platform."</p>
         <p class="lede"><b>Who can call it:</b> The agent itself, for its own memory: the agent that signs the request, or on the hosted connector the account's own hosted agent. An agent needs a name to have a memory.</p>
         <p class="lede"><b>What a call costs:</b> Free to the caller. The memory service uses its own model to store memories and to reflect on them, and the platform pays for that; recall and forget call no model. Idle, an agent's memory costs only its storage.</p>
       </div>

@@ -13,7 +13,7 @@
 // for the commit main points at now and reads every file at that commit, so a
 // run always reflects main as it stands (a file at a fixed commit is never a
 // stale cached copy). It reads three things there: standards.json for each
-// entry's name, version, site, domain, summary and parts; roles/SPEC.md for
+// entry's name, version, site, domain, summary and parts; the roles file (roles/ROLES.md) for
 // the number of roles (one "## N. Role:" chapter each); and the folder
 // guides/collab/patterns for the number of collaboration playbooks.
 //
@@ -54,13 +54,18 @@ async function get(url, accept) {
   return res.text();
 }
 
+// The file of role descriptions is named by the roles entry in standards.json
+// (its "spec"), not by a path of ours: it was roles/SPEC.md and is roles/ROLES.md.
+const rolesPath = (json) => JSON.parse(json).standards?.find((s) => s.id === "roles")?.spec ?? "roles/ROLES.md";
+
 async function readSource() {
   if (FROM) {
     const dir = resolve(FROM);
+    const json = readFileSync(join(dir, "standards.json"), "utf8");
     return {
       from: dir,
-      json: readFileSync(join(dir, "standards.json"), "utf8"),
-      rolesSpec: readFileSync(join(dir, "roles", "SPEC.md"), "utf8"),
+      json,
+      rolesSpec: readFileSync(join(dir, rolesPath(json)), "utf8"),
       patterns: readdirSync(join(dir, "guides", "collab", "patterns")),
     };
   }
@@ -70,10 +75,11 @@ async function readSource() {
   const listing = JSON.parse(
     await get(`https://api.github.com/repos/${REPO}/contents/guides/collab/patterns?ref=${sha}`, "application/vnd.github+json"),
   );
+  const json = await raw("standards.json");
   return {
     from: `${REPO}@${sha.slice(0, 7)} (${BRANCH})`,
-    json: await raw("standards.json"),
-    rolesSpec: await raw("roles/SPEC.md"),
+    json,
+    rolesSpec: await raw(rolesPath(json)),
     patterns: listing.filter((f) => f.type === "file").map((f) => f.name),
   };
 }
@@ -201,7 +207,7 @@ const counts = {
   patterns: src.patterns.filter((f) => f.endsWith(".md")).length,
   name: (id) => esc(byId[id]?.name ?? id),
 };
-if (counts.roles === 0) throw new Error("roles/SPEC.md has no \"## N. Role:\" chapters: has its shape changed?");
+if (counts.roles === 0) throw new Error("the roles file has no \"## N. Role:\" chapters: has its shape changed?");
 if (counts.patterns === 0) throw new Error("guides/collab/patterns has no playbooks");
 for (const id of [...SUPPORT, ...LAYERS.flatMap((l) => l.ids)]) {
   if (!byId[id]) console.error(`build-standards: ${id} is no longer in standards.json; it is left out`);

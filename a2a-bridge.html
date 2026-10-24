@@ -613,9 +613,9 @@ POST   /v1/accounts/:id/attachments/:aid/approve  <span class="c"># accept a hel
               <code class="inline">auth-required</code> gets
               <code class="inline">DEPENDENCY_FAILED</code> with a message saying multi-turn is
               not bridged in this version.</li>
-            <li><b>It has a key, not a handle.</b> An attachment is addressed by its
-              <code class="inline">U…</code> mesh id. The naming ceremony is not run on its
-              behalf, so there is no <code class="inline">name@domain</code> for it.</li>
+            <li><b>It gets a name people can read.</b> The owner attaches it, and AgentMesh
+              gives it a name and holds its endpoint and sign-in in the registrar card. Under
+              the name, it is addressed by its <code class="inline">U…</code> mesh id.</li>
             <li><b>The card's signature is not verified.</b> Every attached manifest carries
               <code class="inline">meta.a2a_bridge</code> with
               <code class="inline">card_signature_verified: false</code>, and that is the

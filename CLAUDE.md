@@ -121,21 +121,11 @@ Commit the regenerated page, because deploy.sh ships committed files only.
 An agent with a `stage` in the registry (an Agent SDLC stage) is printed
 first, under "Agents that build and run other agents", with its stage.
 
-## The list on standards.html is generated
+## standards.html is a redirect
 
-The heading, the layer diagram and the cards on `standards.html` (the blocks
-between `<!-- BEGIN standards:<name> ... -->` and `<!-- END standards:<name> -->`)
-are written by `node tools/build-standards.mjs` from `standards.json` in the
-public repository CommonAgent/common-agent-standards, read from GitHub at the
-commit `main` points at. Each entry's name, version, site and summary come from
-there, the number of roles from `roles/SPEC.md` and the number of playbooks from
-`guides/collab/patterns/`. The line under each name and the paragraph after the
-summary are in the script's `NOTES`. Do not hand-edit the blocks.
-
-`deploy.sh` runs the script on the folder it publishes, so a version merged in
-that repository goes live with the next `./deploy.sh` and needs no commit here.
-Run it in the clone as well and commit the page, so the repository matches what
-is live. `--from <clone>` reads a local clone of the standards repository instead.
+`standards.html` sends readers to https://commonagent.net/standards.html, where
+the list of the Common Agent Standards is kept. The menu links there directly.
+Do not bring the old list back here.
 
 ## The platform services pages and the map's lists are generated
 

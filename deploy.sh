@@ -4,7 +4,7 @@
 # load balancer; GitHub is source only and does not serve the site.
 #
 # What ships is the last commit, nothing else: the committed files are copied
-# into a staging folder, the sitemap and the standards list are built and the
+# into a staging folder, the sitemap is built and the
 # contrast gate is run there, and the folder is synced to the bucket.
 # Uncommitted edits do not ship.
 set -euo pipefail
@@ -39,18 +39,8 @@ if [ -n "$LEFT" ]; then echo "deploy refused: repository files in the staging fo
 # Windows programs (gcloud, and node given a path) need the Windows spelling.
 WSTAGE=$(cygpath -w "$STAGE" 2>/dev/null || echo "$STAGE")
 
-# standards.html: the list of the Common Agent Standards, rewritten from
-# standards.json at the commit main of CommonAgent/common-agent-standards points
-# at now, so a version merged there ships with the next deploy and needs no
-# commit here. If GitHub cannot be read, the deploy stops before any upload.
-if ! node tools/build-standards.mjs --root "$WSTAGE"; then
-  echo "deploy refused: standards.html could not be rebuilt from standards.json (above)." >&2
-  exit 1
-fi
-if ! diff -q --strip-trailing-cr <(git show HEAD:standards.html) "$STAGE/standards.html" >/dev/null; then
-  echo "note: standards.json has moved on since standards.html was committed; the deploy carries the new list." >&2
-  echo "      To bring the repository level: node tools/build-standards.mjs, then commit standards.html." >&2
-fi
+# standards.html is a redirect to https://commonagent.net/standards.html, the
+# list of the Common Agent Standards; nothing here builds it.
 
 # sitemap.xml and robots.txt, from the pages being published.
 node tools/build-sitemap.mjs "$WSTAGE" https://dev.agentmesh.ai

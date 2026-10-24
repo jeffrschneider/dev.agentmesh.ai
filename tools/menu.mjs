@@ -88,7 +88,7 @@ export const MENU = [
     ["https://commonagent.net/", "The Common Agent Specification"],
     ["https://agentmessaging.ai/spec.html", "Specification"],
     ["related-specs.html", "Related specifications"],
-    ["standards.html", "Standards"],
+    ["https://commonagent.net/standards.html", "Standards"],
     ["sdk-reference.html", "SDK reference"],
     ["cli.html", "CLI"],
     ["console.html", "Console"],
@@ -139,7 +139,7 @@ export function renderMenu(current) {
       <nav class="sn-nav" aria-label="Developer docs">
 ${secs}
       </nav>
-      <div class="sn-foot"><a href="standards.html">The family of standards</a><br>The signed interconnect<br>dev.agentmesh.ai</div>
+      <div class="sn-foot"><a href="https://commonagent.net/standards.html">The family of standards</a><br>The signed interconnect<br>dev.agentmesh.ai</div>
     </aside>
     ${END}`;
 }

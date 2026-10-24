@@ -101,8 +101,9 @@
     .callout p{ margin:0; color:var(--dim); }
     .callout p b{ color:var(--paper); }
 
-    .pair{ display:grid; grid-template-columns:1fr 1fr; gap:16px; margin:26px 0 6px; }
-    .pair .cell{ border:1px solid var(--line); border-radius:12px; background:var(--panel); padding:20px 22px; }
+    .pair{ display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:16px; margin:26px 0 6px; }
+    .pair .cell{ min-width:0; border:1px solid var(--line); border-radius:12px; background:var(--panel); padding:20px 22px; }
+    .pair .cell code{ overflow-wrap:anywhere; }
     .pair .cell .h{ font-family:var(--wire); font-size:.74rem; letter-spacing:.1em; text-transform:uppercase; margin-bottom:10px; }
     .pair .cell:nth-child(1) .h{ color:var(--verify); }
     .pair .cell:nth-child(2) .h{ color:var(--address); }
@@ -123,7 +124,7 @@
     @media (max-width:900px){
       .layout{ grid-template-columns:1fr; }
       .rail{ position:static; height:auto; border-right:0; border-bottom:1px solid var(--line); }
-      .pair{ grid-template-columns:1fr; }
+      .pair{ grid-template-columns:minmax(0,1fr); }
     }
   </style>
   <link rel="stylesheet" href="theme.css">
@@ -613,9 +614,9 @@ POST   /v1/accounts/:id/attachments/:aid/approve  <span class="c"># accept a hel
               <code class="inline">auth-required</code> gets
               <code class="inline">DEPENDENCY_FAILED</code> with a message saying multi-turn is
               not bridged in this version.</li>
-            <li><b>It gets a name people can read.</b> The owner attaches it, and AgentMesh
-              gives it a name and holds its endpoint and sign-in in the registrar card. Under
-              the name, it is addressed by its <code class="inline">U…</code> mesh id.</li>
+            <li><b>It has a key, not a name.</b> An attached agent is reached by its
+              <code class="inline">U…</code> mesh id. AgentMesh does not give it a name people
+              can read, so there is no <code class="inline">name@domain</code> for it.</li>
             <li><b>The card's signature is not verified.</b> Every attached manifest carries
               <code class="inline">meta.a2a_bridge</code> with
               <code class="inline">card_signature_verified: false</code>, and that is the

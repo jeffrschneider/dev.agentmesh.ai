@@ -5,7 +5,6 @@
 export const MENU = [
   ["AgentMesh", [
     ["https://agentmesh.ai/", "Back to agentmesh.ai"],
-    ["https://personal.agentmesh.ai", "Sign in"],
     ["https://agentmesh.ai/talk-to-sales.html?from=dev-header", "Talk to sales"],
   ]],
   ["Build", [

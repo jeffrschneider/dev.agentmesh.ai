@@ -79,6 +79,7 @@ export const MENU = [
     ["collaboration.html", "Collaboration"],
     ["alternatives.html", "Alternatives"],
     ["architecture.html", "Architecture"],
+    ["cards.html", "Cards and descriptors"],
     ["topologies.html", "Topologies"],
     ["world-wide-mesh.html", "World-wide mesh"],
     ["budgets-and-allowances.html", "Budgets and allowances"],
